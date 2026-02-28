@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DODO_API_URLS = ["https://live.dodopayments.com", "https://test.dodopayments.com"];
+const DODO_API_URLS = ["https://test.dodopayments.com", "https://live.dodopayments.com"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -14,8 +14,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const DODO_API_KEY = Deno.env.get("DODO_PAYMENTS_API_KEY");
+    const DODO_API_KEY = Deno.env.get("DODO_PAYMENTS_API_KEY")?.trim();
     if (!DODO_API_KEY) throw new Error("DODO_PAYMENTS_API_KEY not configured");
+    console.log("DODO key length:", DODO_API_KEY.length, "first 4:", DODO_API_KEY.substring(0, 4));
 
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
