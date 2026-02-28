@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor, Tablet, Smartphone, Code, Star, Eye, Lock,
   Copy, Check, Sparkles, LayoutGrid, Rows3, GalleryHorizontalEnd,
-  Timer, Layers3, Wind, Gem, Columns3, Film, Newspaper,
-  Circle, Mountain, Image, Zap, SquareStack,
-  Type, Palette, AlignCenter, Square,
+  Columns3, MessageCircle, Users, Layers3, Quote, Heart,
+  Square, Circle, Type, Palette, AlignCenter, Gem, Wind, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -33,13 +32,13 @@ interface Layout {
 const layouts: Layout[] = [
   { id: "clean", name: "Clean", icon: <LayoutGrid className="h-3.5 w-3.5" />, free: true },
   { id: "minimal", name: "Minimal", icon: <Rows3 className="h-3.5 w-3.5" />, free: true },
-  { id: "spotlight", name: "Spotlight", icon: <Zap className="h-3.5 w-3.5" />, free: false },
-  { id: "editorial", name: "Editorial", icon: <Columns3 className="h-3.5 w-3.5" />, free: false },
-  { id: "mono", name: "Mono", icon: <Square className="h-3.5 w-3.5" />, free: false },
-  { id: "gradient", name: "Gradient", icon: <Gem className="h-3.5 w-3.5" />, free: false },
-  { id: "brutalist", name: "Brutalist", icon: <Layers3 className="h-3.5 w-3.5" />, free: false },
-  { id: "glass", name: "Glass", icon: <Wind className="h-3.5 w-3.5" />, free: false },
-  { id: "outline", name: "Outline", icon: <Circle className="h-3.5 w-3.5" />, free: false },
+  { id: "editorial", name: "Editorial", icon: <Quote className="h-3.5 w-3.5" />, free: false },
+  { id: "bubble", name: "Bubble", icon: <MessageCircle className="h-3.5 w-3.5" />, free: false },
+  { id: "avatar-wall", name: "Avatar Wall", icon: <Users className="h-3.5 w-3.5" />, free: false },
+  { id: "marquee", name: "Marquee", icon: <GalleryHorizontalEnd className="h-3.5 w-3.5" />, free: false },
+  { id: "social", name: "Social Post", icon: <Heart className="h-3.5 w-3.5" />, free: false },
+  { id: "masonry", name: "Masonry", icon: <Layers3 className="h-3.5 w-3.5" />, free: false },
+  { id: "centered", name: "Centered", icon: <AlignCenter className="h-3.5 w-3.5" />, free: false },
 ];
 
 const devices = [
@@ -80,7 +79,7 @@ const shadowMap: Record<string, string> = { none: "", sm: "shadow-sm", md: "shad
 const fontMap: Record<string, string> = { system: "font-sans", inter: "font-sans", georgia: "font-serif", mono: "font-mono" };
 
 function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]; config: CardConfig; index: number }) {
-  const { layout, darkMode, radius, padding, shadow, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany } = config;
+  const { layout, darkMode, radius, padding, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany, shadow } = config;
 
   const stars = showStars && (
     <div className="flex gap-0.5">
@@ -90,79 +89,26 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     </div>
   );
 
-  const avatar = showAvatar && (
+  const avatarSmall = showAvatar && (
     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6" }}>
       <span className="text-2xs font-semibold" style={{ color: companyColor }}>{t.initials}</span>
     </div>
   );
 
-  // Layout-specific card rendering
-  const getLayoutStyles = (): { className: string; style: React.CSSProperties } => {
-    const base = `${fontMap[font]} transition-all duration-200 hover:-translate-y-0.5`;
-    switch (layout) {
-      case "minimal":
-        return { className: `${base} border-b border-border/50`, style: { padding: `${padding}px 0`, backgroundColor: "transparent" } };
-      case "spotlight":
-        return { className: `${base} border-2 ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding + 4}px`, backgroundColor: cardBg, borderColor: starColor + "30" } };
-      case "editorial":
-        return { className: `${base} border-l-[3px] ${shadowMap[shadow]}`, style: { padding: `${padding}px`, backgroundColor: cardBg, borderColor: starColor } };
-      case "mono":
-        return { className: `${base} border ${shadowMap[shadow]}`, style: { borderRadius: "0px", padding: `${padding}px`, backgroundColor: darkMode ? "#111" : "#fafafa", borderColor: darkMode ? "#333" : "#e0e0e0" } };
-      case "gradient":
-        return { className: `${base} border border-transparent ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, background: `linear-gradient(135deg, ${cardBg}, ${starColor}10)` } };
-      case "brutalist":
-        return { className: `${base} border-2 border-foreground/80`, style: { borderRadius: "0px", padding: `${padding}px`, backgroundColor: cardBg, boxShadow: "4px 4px 0 hsl(var(--foreground) / 0.15)" } };
-      case "glass":
-        return { className: `${base} border border-border/30 backdrop-blur-sm ${shadowMap[shadow]}`, style: { borderRadius: `${radius + 4}px`, padding: `${padding}px`, backgroundColor: cardBg + "cc" } };
-      case "outline":
-        return { className: `${base} border-2 border-dashed ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: "transparent", borderColor: darkMode ? "#444" : "#d0d0d0" } };
-      default: // clean
-        return { className: `${base} border ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined } };
-    }
-  };
+  const avatarLarge = showAvatar && (
+    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: starColor + "20" }}>
+      <span className="text-sm font-bold" style={{ color: starColor }}>{t.initials}</span>
+    </div>
+  );
 
-  const { className: layoutClass, style: layoutStyle } = getLayoutStyles();
+  const anim = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { delay: index * 0.05, duration: 0.35 } };
 
-  // Editorial layout — quote-style
-  if (layout === "editorial") {
-    return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
-        <p className="text-[12px] leading-relaxed italic mb-3" style={{ color: bodyColor }}>"{t.content}"</p>
-        <div className="flex items-center gap-2">
-          {avatar}
-          <div>
-            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
-            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
-          </div>
-          <div className="ml-auto">{stars}</div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // Spotlight — centered, large quote
-  if (layout === "spotlight") {
-    return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={`${layoutClass} text-center`} style={layoutStyle}>
-        <div className="flex justify-center mb-2">{stars}</div>
-        <p className="text-[12px] leading-relaxed mb-3" style={{ color: bodyColor }}>"{t.content}"</p>
-        <div className="flex items-center justify-center gap-2">
-          {avatar}
-          <div className="text-left">
-            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
-            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // Minimal — borderless, clean separator
+  // ── Minimal: borderless rows with separator
   if (layout === "minimal") {
     return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
+      <motion.div {...anim} className={`${fontMap[font]} border-b border-border/40 transition-all`} style={{ padding: `${padding}px 0` }}>
         <div className="flex items-start gap-3">
-          {avatar}
+          {avatarSmall}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[12px] font-medium" style={{ color: nameColor }}>{t.name}</span>
@@ -176,11 +122,100 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // Default layout for clean, mono, gradient, brutalist, glass, outline
+  // ── Editorial: quote-first, left accent bar
+  if (layout === "editorial") {
+    return (
+      <motion.div {...anim} className={`${fontMap[font]} border-l-[3px] ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ padding: `${padding}px`, backgroundColor: cardBg, borderColor: starColor }}>
+        <p className="text-[12px] leading-relaxed italic mb-3" style={{ color: bodyColor }}>"{t.content}"</p>
+        <div className="flex items-center gap-2">
+          {avatarSmall}
+          <div>
+            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
+            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
+          </div>
+          <div className="ml-auto">{stars}</div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── Bubble: chat-style with speech tail
+  if (layout === "bubble") {
+    return (
+      <motion.div {...anim} className={`${fontMap[font]} transition-all`}>
+        <div className="relative rounded-2xl rounded-bl-sm border" style={{ padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}>
+          <p className="text-[11.5px] leading-relaxed mb-2" style={{ color: bodyColor }}>{t.content}</p>
+          {stars}
+        </div>
+        <div className="flex items-center gap-2 mt-2 pl-1">
+          {avatarSmall}
+          <div>
+            <div className="text-[11px] font-medium" style={{ color: nameColor }}>{t.name}</div>
+            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── Avatar Wall: large avatar top-center, text below
+  if (layout === "avatar-wall") {
+    return (
+      <motion.div {...anim} className={`${fontMap[font]} text-center ${shadowMap[shadow]} border transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding + 8}px ${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}>
+        <div className="flex justify-center mb-3">{avatarLarge}</div>
+        <div className="text-[12px] font-semibold mb-0.5" style={{ color: nameColor }}>{t.name}</div>
+        {showCompany && <div className="text-[10px] mb-2" style={{ color: companyColor }}>{t.company}</div>}
+        <div className="flex justify-center mb-2">{stars}</div>
+        <p className="text-[11px] leading-relaxed" style={{ color: bodyColor }}>{t.content}</p>
+      </motion.div>
+    );
+  }
+
+  // ── Social Post: Twitter/X-like card
+  if (layout === "social") {
+    return (
+      <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}>
+        <div className="flex items-start gap-2.5">
+          {avatarSmall}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[12px] font-semibold" style={{ color: nameColor }}>{t.name}</span>
+              {showCompany && <span className="text-[10px]" style={{ color: companyColor }}>@{t.company.toLowerCase().replace(/\s/g, '')}</span>}
+            </div>
+            <p className="text-[11.5px] leading-relaxed mt-1.5 mb-2" style={{ color: bodyColor }}>{t.content}</p>
+            <div className="flex items-center gap-4">
+              {stars}
+              <span className="text-[9px] ml-auto" style={{ color: companyColor }}>2h ago</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ── Centered: big centered quote, no card border
+  if (layout === "centered") {
+    return (
+      <motion.div {...anim} className={`${fontMap[font]} text-center transition-all`} style={{ padding: `${padding + 8}px` }}>
+        <div className="text-2xl mb-3" style={{ color: starColor }}>"</div>
+        <p className="text-[13px] leading-relaxed mb-4 max-w-[280px] mx-auto" style={{ color: bodyColor }}>{t.content}</p>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          {avatarSmall}
+          <div className="text-left">
+            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
+            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
+          </div>
+        </div>
+        {stars && <div className="flex justify-center">{stars}</div>}
+      </motion.div>
+    );
+  }
+
+  // ── Default: Clean grid cards
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
+    <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined }}>
       <div className="flex items-center gap-2.5 mb-3">
-        {avatar}
+        {avatarSmall}
         <div>
           <div className="text-[12px] font-medium leading-tight" style={{ color: nameColor }}>{t.name}</div>
           {showCompany && <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>}
@@ -189,6 +224,26 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
       <div className="mb-2">{stars}</div>
       <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>{t.content}</p>
     </motion.div>
+  );
+}
+
+/* ── Marquee row ── */
+function MarqueeRow({ testimonials, config, reverse }: { testimonials: typeof sampleTestimonials; config: CardConfig; reverse?: boolean }) {
+  const items = [...testimonials, ...testimonials]; // double for seamless loop
+  return (
+    <div className="overflow-hidden">
+      <motion.div
+        className="flex gap-3"
+        animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      >
+        {items.map((t, i) => (
+          <div key={i} className="shrink-0 w-[260px]">
+            <TestimonialCard t={t} config={{ ...config, layout: "clean" }} index={0} />
+          </div>
+        ))}
+      </motion.div>
+    </div>
   );
 }
 
@@ -215,6 +270,13 @@ export default function WidgetLabPage() {
   const [cardShadow, setCardShadow] = useState("sm");
   const [headerAlign, setHeaderAlign] = useState("center");
   const { toast } = useToast();
+
+  const cardConfig: CardConfig = {
+    layout: selectedLayout, darkMode, radius: cardRadius[0], padding: cardPadding[0],
+    shadow: cardShadow, font: fontFamily, accent: accentColor,
+    cardBg, nameColor, companyColor, bodyColor, starColor,
+    showStars, showAvatar, showCompany,
+  };
 
   const embedCode = `<script src="https://vouchy.app/embed.js" data-workspace="ws_demo" data-layout="${selectedLayout}"></script>`;
 
@@ -477,22 +539,41 @@ export default function WidgetLabPage() {
                 darkMode ? "bg-[hsl(240_10%_4%)]" : "bg-background"
               }`}
             >
-              <div className="p-6 lg:p-10">
-
-                {/* Testimonial grid */}
-                <div className={`grid gap-3 ${
-                  device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
-                }`}>
-                  {sampleTestimonials.map((t, i) => (
-                    <TestimonialCard key={i} t={t} config={{
-                      layout: selectedLayout,
-                      darkMode, radius: cardRadius[0], padding: cardPadding[0],
-                      shadow: cardShadow, font: fontFamily, accent: accentColor,
-                      cardBg, nameColor, companyColor, bodyColor, starColor,
-                      showStars, showAvatar, showCompany,
-                    }} index={i} />
-                  ))}
-                </div>
+              <div className="p-6 lg:p-8">
+                {selectedLayout === "marquee" ? (
+                  <div className="space-y-3">
+                    <MarqueeRow testimonials={sampleTestimonials.slice(0, 3)} config={cardConfig} />
+                    <MarqueeRow testimonials={sampleTestimonials.slice(3)} config={cardConfig} reverse />
+                  </div>
+                ) : selectedLayout === "masonry" ? (
+                  <div className={`columns-1 ${device === "mobile" ? "" : "sm:columns-2 lg:columns-3"} gap-3 space-y-3`}>
+                    {sampleTestimonials.map((t, i) => (
+                      <div key={i} className="break-inside-avoid">
+                        <TestimonialCard t={t} config={cardConfig} index={i} />
+                      </div>
+                    ))}
+                  </div>
+                ) : selectedLayout === "minimal" ? (
+                  <div className="max-w-lg mx-auto">
+                    {sampleTestimonials.map((t, i) => (
+                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                    ))}
+                  </div>
+                ) : selectedLayout === "centered" ? (
+                  <div className={`grid gap-0 ${device === "mobile" ? "grid-cols-1" : "grid-cols-2"}`}>
+                    {sampleTestimonials.slice(0, 4).map((t, i) => (
+                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`grid gap-3 ${
+                    device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
+                  }`}>
+                    {sampleTestimonials.map((t, i) => (
+                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
