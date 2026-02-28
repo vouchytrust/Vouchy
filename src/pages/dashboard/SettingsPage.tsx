@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ExternalLink, Sparkles } from "lucide-react";
+import { Check, ExternalLink, Sparkles, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,7 @@ export default function SettingsPage() {
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -138,6 +140,73 @@ export default function SettingsPage() {
               </div>
               <Switch checked={weeklyDigest} onCheckedChange={setWeeklyDigest} />
             </div>
+          </div>
+        </section>
+
+        <Separator className="my-6" />
+
+        {/* Billing / Plan */}
+        <section>
+          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Plan & Billing</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Current Plan */}
+            <Card className="border-border">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-[13px] font-semibold text-foreground">Free Plan</span>
+                </div>
+                <ul className="space-y-1 text-[12px] text-muted-foreground">
+                  <li>• 10 testimonials</li>
+                  <li>• 1 space</li>
+                  <li>• 60s video max</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className="border-primary/50 bg-primary/5 relative overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="h-4 w-4 text-primary" />
+                  <span className="text-[13px] font-semibold text-foreground">Pro Plan</span>
+                </div>
+                <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
+                  <li>• 50 testimonials</li>
+                  <li>• 3 spaces</li>
+                  <li>• 180s video, 200 AI/mo</li>
+                </ul>
+                <Button
+                  size="sm"
+                  className="w-full h-8 text-xs"
+                  disabled={upgrading}
+                  onClick={async () => {
+                    setUpgrading(true);
+                    try {
+                      const { data: { session } } = await supabase.auth.getSession();
+                      if (!session) throw new Error("Not logged in");
+
+                      const res = await supabase.functions.invoke("create-checkout", {
+                        body: {
+                          product_id: "iBM6dbPHMsXqlV49.5Gd_LDMOfWCd34jiMSak8zc_d2rbC6zo71Y2tmc17f1HXR3Y",
+                          return_url: `${window.location.origin}/dashboard/settings`,
+                        },
+                      });
+
+                      if (res.error) throw new Error(res.error.message);
+                      const { checkout_url } = res.data;
+                      if (checkout_url) window.location.href = checkout_url;
+                    } catch (err: any) {
+                      toast({ title: "Error", description: err.message, variant: "destructive" });
+                    } finally {
+                      setUpgrading(false);
+                    }
+                  }}
+                >
+                  {upgrading ? "Redirecting..." : "Upgrade to Pro"}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
