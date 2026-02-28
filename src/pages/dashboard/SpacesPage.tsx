@@ -51,7 +51,7 @@ export default function SpacesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-[700px]">
+    <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-end justify-between">
         <div>
           <h1 className="text-[22px] font-semibold text-foreground">Spaces</h1>

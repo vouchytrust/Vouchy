@@ -69,7 +69,7 @@ export default function TestimonialsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-[900px]">
+    <div className="space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[22px] font-semibold text-foreground">Testimonials</h1>
