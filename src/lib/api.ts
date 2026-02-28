@@ -12,14 +12,21 @@ export async function fetchSpaces() {
 }
 
 export async function fetchSpaceBySlug(slug: string) {
-  const { data, error } = await supabase
+  const { data: space, error } = await supabase
     .from("spaces")
-    .select("*, profiles!spaces_user_id_fkey(company_name, brand_color, logo_url)")
+    .select("*")
     .eq("slug", slug)
     .eq("is_active", true)
     .single();
   if (error) throw error;
-  return data;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_name, brand_color, logo_url")
+    .eq("user_id", space.user_id)
+    .single();
+
+  return { ...space, profiles: profile };
 }
 
 export async function createSpace(space: {
