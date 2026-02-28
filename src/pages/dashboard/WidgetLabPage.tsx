@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor, Tablet, Smartphone, Code, Star, Eye, Lock,
   Copy, Check, Sparkles, LayoutGrid, Rows3, GalleryHorizontalEnd,
-  Columns3, MessageCircle, Users, Layers3, Quote, Heart,
-  Square, Circle, Type, Palette, AlignCenter, Gem, Wind, Zap,
+  MessageCircle, Users, Layers3, Quote, Heart, AlignCenter,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { fetchSpaces, fetchTestimonialsBySpace } from "@/lib/api";
 
 /* ── Layout definitions ── */
 interface Layout {
@@ -47,16 +48,15 @@ const devices = [
   { id: "mobile", icon: Smartphone, w: "375px" },
 ];
 
-const sampleTestimonials = [
-  { name: "Sarah K.", company: "TechCo", rating: 5, content: "Absolutely transformed our customer experience! The team was responsive and the results speak for themselves.", initials: "SK" },
-  { name: "James D.", company: "StartupXYZ", rating: 5, content: "The best testimonial platform we've ever used. Setup took minutes.", initials: "JD" },
-  { name: "Aisha M.", company: "DesignHub", rating: 4, content: "Clean, minimal, and powerful. Exactly what we needed.", initials: "AM" },
-  { name: "Luis R.", company: "GrowthCo", rating: 5, content: "Our conversions went up 40% after adding the widget!", initials: "LR" },
-  { name: "Emily C.", company: "MegaCorp", rating: 5, content: "Customers love leaving reviews now. So easy to embed.", initials: "EC" },
-  { name: "Marco P.", company: "AgencyPro", rating: 5, content: "We use this for all our clients. Saves hours every week.", initials: "MP" },
-];
+interface TestimonialItem {
+  name: string;
+  company: string;
+  rating: number;
+  content: string;
+  initials: string;
+}
 
-/* ── Testimonial Card (used in preview) ── */
+/* ── Testimonial Card ── */
 interface CardConfig {
   layout: string;
   darkMode: boolean;
@@ -78,7 +78,7 @@ interface CardConfig {
 const shadowMap: Record<string, string> = { none: "", sm: "shadow-sm", md: "shadow-md", lg: "shadow-lg" };
 const fontMap: Record<string, string> = { system: "font-sans", inter: "font-sans", georgia: "font-serif", mono: "font-mono" };
 
-function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]; config: CardConfig; index: number }) {
+function TestimonialCard({ t, config, index }: { t: TestimonialItem; config: CardConfig; index: number }) {
   const { layout, darkMode, radius, padding, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany, shadow } = config;
 
   const stars = showStars && (
@@ -103,7 +103,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
 
   const anim = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { delay: index * 0.05, duration: 0.35 } };
 
-  // ── Minimal: borderless rows with separator
   if (layout === "minimal") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} border-b border-border/40 transition-all`} style={{ padding: `${padding}px 0` }}>
@@ -122,7 +121,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Editorial: quote-first, left accent bar
   if (layout === "editorial") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} border-l-[3px] ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ padding: `${padding}px`, backgroundColor: cardBg, borderColor: starColor }}>
@@ -139,7 +137,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Bubble: chat-style with speech tail
   if (layout === "bubble") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} transition-all`}>
@@ -158,7 +155,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Avatar Wall: large avatar top-center, text below
   if (layout === "avatar-wall") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} text-center ${shadowMap[shadow]} border transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding + 8}px ${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}>
@@ -171,7 +167,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Social Post: Twitter/X-like card
   if (layout === "social") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}>
@@ -193,7 +188,6 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Centered: big centered quote, no card border
   if (layout === "centered") {
     return (
       <motion.div {...anim} className={`${fontMap[font]} text-center transition-all`} style={{ padding: `${padding + 8}px` }}>
@@ -211,7 +205,7 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
     );
   }
 
-  // ── Default: Clean grid cards
+  // Default: Clean
   return (
     <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined }}>
       <div className="flex items-center gap-2.5 mb-3">
@@ -228,8 +222,8 @@ function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]
 }
 
 /* ── Marquee row ── */
-function MarqueeRow({ testimonials, config, reverse }: { testimonials: typeof sampleTestimonials; config: CardConfig; reverse?: boolean }) {
-  const items = [...testimonials, ...testimonials]; // double for seamless loop
+function MarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
+  const items = [...testimonials, ...testimonials];
   return (
     <div className="overflow-hidden">
       <motion.div
@@ -252,10 +246,16 @@ export default function WidgetLabPage() {
   const [selectedLayout, setSelectedLayout] = useState("clean");
   const [device, setDevice] = useState("desktop");
   const [darkMode, setDarkMode] = useState(false);
-  const [showVideoFirst, setShowVideoFirst] = useState(true);
   const [copied, setCopied] = useState(false);
-  
-   const [cardRadius, setCardRadius] = useState([12]);
+
+  // Space selector
+  const [spaces, setSpaces] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [selectedSpaceId, setSelectedSpaceId] = useState<string>("");
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
+  const [loadingSpaces, setLoadingSpaces] = useState(true);
+  const [loadingTestimonials, setLoadingTestimonials] = useState(false);
+
+  const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
   const [accentColor, setAccentColor] = useState("#3b82f6");
   const [cardBg, setCardBg] = useState("#ffffff");
@@ -268,8 +268,53 @@ export default function WidgetLabPage() {
   const [showCompany, setShowCompany] = useState(true);
   const [fontFamily, setFontFamily] = useState("system");
   const [cardShadow, setCardShadow] = useState("sm");
-  const [headerAlign, setHeaderAlign] = useState("center");
   const { toast } = useToast();
+
+  // Load spaces
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchSpaces();
+        const s = (data as any[]).map(d => ({ id: d.id, name: d.name, slug: d.slug }));
+        setSpaces(s);
+        if (s.length > 0) setSelectedSpaceId(s[0].id);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingSpaces(false);
+      }
+    }
+    load();
+  }, []);
+
+  // Load testimonials for selected space
+  useEffect(() => {
+    if (!selectedSpaceId) {
+      setTestimonials([]);
+      return;
+    }
+    async function load() {
+      setLoadingTestimonials(true);
+      try {
+        const data = await fetchTestimonialsBySpace(selectedSpaceId);
+        const mapped = (data as any[])
+          .filter(t => t.status === "approved")
+          .map(t => ({
+            name: t.author_name,
+            company: t.author_company || "",
+            rating: t.rating,
+            content: t.content,
+            initials: t.author_name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2),
+          }));
+        setTestimonials(mapped);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingTestimonials(false);
+      }
+    }
+    load();
+  }, [selectedSpaceId]);
 
   const cardConfig: CardConfig = {
     layout: selectedLayout, darkMode, radius: cardRadius[0], padding: cardPadding[0],
@@ -278,7 +323,8 @@ export default function WidgetLabPage() {
     showStars, showAvatar, showCompany,
   };
 
-  const embedCode = `<script src="https://vouchy.app/embed.js" data-workspace="ws_demo" data-layout="${selectedLayout}"></script>`;
+  const selectedSpace = spaces.find(s => s.id === selectedSpaceId);
+  const embedCode = `<script src="https://vouchy.app/embed.js" data-workspace="ws_demo" data-space="${selectedSpace?.slug || ""}" data-layout="${selectedLayout}"></script>`;
 
   const copyEmbed = () => {
     navigator.clipboard.writeText(embedCode);
@@ -298,7 +344,6 @@ export default function WidgetLabPage() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full lg:w-72 shrink-0 flex flex-col border-r border-border bg-card/50 overflow-hidden"
       >
-        {/* Header */}
         <div className="px-5 pt-5 pb-4 border-b border-border">
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-7 h-7 rounded-lg vouchy-gradient-bg flex items-center justify-center">
@@ -309,11 +354,36 @@ export default function WidgetLabPage() {
           <p className="text-2xs text-muted-foreground">Design and preview your embed widget.</p>
         </div>
 
-        {/* Layout selector */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Designs</p>
+          {/* Space selector */}
+          <div>
+            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Source Space</p>
+            {loadingSpaces ? (
+              <div className="h-8 flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : spaces.length === 0 ? (
+              <div className="text-center py-3 rounded-lg border border-dashed border-border">
+                <FolderOpen className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <p className="text-[10px] text-muted-foreground">No spaces yet</p>
+                <a href="/dashboard/spaces" className="text-[10px] text-primary hover:underline">Create one</a>
+              </div>
+            ) : (
+              <Select value={selectedSpaceId} onValueChange={setSelectedSpaceId}>
+                <SelectTrigger className="h-8 text-[12px]">
+                  <SelectValue placeholder="Select a space" />
+                </SelectTrigger>
+                <SelectContent>
+                  {spaces.map(s => (
+                    <SelectItem key={s.id} value={s.id} className="text-[12px]">{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
 
-          {/* Layout grid */}
+          {/* Designs */}
+          <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Designs</p>
           <div className="grid grid-cols-3 gap-1">
             {layouts.map(l => (
               <button
@@ -327,27 +397,21 @@ export default function WidgetLabPage() {
               >
                 <span className={selectedLayout === l.id ? "text-primary" : ""}>{l.icon}</span>
                 <span className="text-[10px] font-medium leading-tight">{l.name}</span>
-                {!l.free && (
-                  <Lock className="absolute top-1 right-1 h-2 w-2 text-muted-foreground/40" />
-                )}
+                {!l.free && <Lock className="absolute top-1 right-1 h-2 w-2 text-muted-foreground/40" />}
               </button>
             ))}
           </div>
 
-          {/* Appearance controls */}
+          {/* Appearance */}
           <div className="space-y-3.5 pt-3 border-t border-border">
             <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Appearance</p>
             <div className="flex items-center justify-between">
               <span className="text-[12px] text-foreground">Dark mode</span>
               <Switch checked={darkMode} onCheckedChange={setDarkMode} />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] text-foreground">Video first</span>
-              <Switch checked={showVideoFirst} onCheckedChange={setShowVideoFirst} />
-            </div>
           </div>
 
-          {/* Card style */}
+          {/* Colors */}
           <div className="space-y-3.5 pt-3 border-t border-border">
             <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Colors</p>
             {([
@@ -432,7 +496,7 @@ export default function WidgetLabPage() {
         <div className="p-4 border-t border-border space-y-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="w-full h-9 text-xs gap-1.5">
+              <Button className="w-full h-9 text-xs gap-1.5" disabled={testimonials.length === 0}>
                 <Code className="h-3.5 w-3.5" /> Get Embed Code
               </Button>
             </DialogTrigger>
@@ -469,7 +533,6 @@ export default function WidgetLabPage() {
         {/* Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-3">
-            {/* Device switcher */}
             <div className="flex items-center gap-0.5 rounded-lg bg-muted/60 p-0.5">
               {devices.map(d => (
                 <button
@@ -486,7 +549,6 @@ export default function WidgetLabPage() {
               ))}
             </div>
 
-            {/* Current layout badge */}
             <div className="hidden sm:flex items-center gap-2">
               <Badge variant="secondary" className="text-2xs font-medium gap-1 py-0.5">
                 {currentLayout?.icon}
@@ -499,12 +561,7 @@ export default function WidgetLabPage() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-2xs gap-1 text-muted-foreground"
-              onClick={copyEmbed}
-            >
+            <Button variant="ghost" size="sm" className="h-7 text-2xs gap-1 text-muted-foreground" onClick={copyEmbed} disabled={testimonials.length === 0}>
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
               Copy
             </Button>
@@ -534,47 +591,59 @@ export default function WidgetLabPage() {
             </div>
 
             {/* Content area */}
-            <div
-              className={`flex-1 overflow-y-auto transition-colors duration-300 ${
-                darkMode ? "bg-[hsl(240_10%_4%)]" : "bg-background"
-              }`}
-            >
-              <div className="p-6 lg:p-8">
-                {selectedLayout === "marquee" ? (
-                  <div className="space-y-3">
-                    <MarqueeRow testimonials={sampleTestimonials.slice(0, 3)} config={cardConfig} />
-                    <MarqueeRow testimonials={sampleTestimonials.slice(3)} config={cardConfig} reverse />
-                  </div>
-                ) : selectedLayout === "masonry" ? (
-                  <div className={`columns-1 ${device === "mobile" ? "" : "sm:columns-2 lg:columns-3"} gap-3 space-y-3`}>
-                    {sampleTestimonials.map((t, i) => (
-                      <div key={i} className="break-inside-avoid">
-                        <TestimonialCard t={t} config={cardConfig} index={i} />
-                      </div>
-                    ))}
-                  </div>
-                ) : selectedLayout === "minimal" ? (
-                  <div className="max-w-lg mx-auto">
-                    {sampleTestimonials.map((t, i) => (
-                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
-                    ))}
-                  </div>
-                ) : selectedLayout === "centered" ? (
-                  <div className={`grid gap-0 ${device === "mobile" ? "grid-cols-1" : "grid-cols-2"}`}>
-                    {sampleTestimonials.slice(0, 4).map((t, i) => (
-                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className={`grid gap-3 ${
-                    device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
-                  }`}>
-                    {sampleTestimonials.map((t, i) => (
-                      <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className={`flex-1 overflow-y-auto transition-colors duration-300 ${darkMode ? "bg-[hsl(240_10%_4%)]" : "bg-background"}`}>
+              {loadingTestimonials ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : testimonials.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                  <FolderOpen className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                  <h3 className="text-[14px] font-medium text-muted-foreground mb-1">
+                    {spaces.length === 0 ? "No spaces yet" : "No approved testimonials"}
+                  </h3>
+                  <p className="text-[12px] text-muted-foreground/60 max-w-[240px]">
+                    {spaces.length === 0
+                      ? "Create a space and collect testimonials to preview your widget."
+                      : "Approve testimonials in the Testimonials page to see them here."}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-6 lg:p-8">
+                  {selectedLayout === "marquee" ? (
+                    <div className="space-y-3">
+                      <MarqueeRow testimonials={testimonials.slice(0, Math.ceil(testimonials.length / 2))} config={cardConfig} />
+                      <MarqueeRow testimonials={testimonials.slice(Math.ceil(testimonials.length / 2))} config={cardConfig} reverse />
+                    </div>
+                  ) : selectedLayout === "masonry" ? (
+                    <div className={`columns-1 ${device === "mobile" ? "" : "sm:columns-2 lg:columns-3"} gap-3 space-y-3`}>
+                      {testimonials.map((t, i) => (
+                        <div key={i} className="break-inside-avoid">
+                          <TestimonialCard t={t} config={cardConfig} index={i} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : selectedLayout === "minimal" ? (
+                    <div className="max-w-lg mx-auto">
+                      {testimonials.map((t, i) => (
+                        <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                      ))}
+                    </div>
+                  ) : selectedLayout === "centered" ? (
+                    <div className={`grid gap-0 ${device === "mobile" ? "grid-cols-1" : "grid-cols-2"}`}>
+                      {testimonials.slice(0, 4).map((t, i) => (
+                        <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`grid gap-3 ${device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"}`}>
+                      {testimonials.map((t, i) => (
+                        <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
