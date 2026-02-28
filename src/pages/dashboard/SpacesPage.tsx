@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-
+import SpaceEditorPanel, { type SpaceFormConfig } from "@/components/SpaceEditorPanel";
 interface Space {
   id: string;
   name: string;
@@ -18,6 +18,7 @@ interface Space {
   createdAt: string;
   accentGradient: string;
   initial: string;
+  formConfig?: SpaceFormConfig;
 }
 
 const mockSpaces: Space[] = [
@@ -34,6 +35,8 @@ export default function SpacesPage() {
   const [spaces, setSpaces] = useState(mockSpaces);
   const [newName, setNewName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const { toast } = useToast();
 
   const gradients = ["from-primary to-chart-3", "from-chart-2 to-primary", "from-chart-4 to-chart-5", "from-chart-3 to-chart-5", "from-primary to-chart-2"];
@@ -65,6 +68,21 @@ export default function SpacesPage() {
   const deleteSpace = (id: string) => {
     setSpaces((prev) => prev.filter((s) => s.id !== id));
     toast({ title: "Space deleted" });
+  };
+
+  const openEditor = (space: Space) => {
+    setSelectedSpace(space);
+    setEditorOpen(true);
+  };
+
+  const handleEditorSave = (spaceId: string, updates: { name?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => {
+    setSpaces(prev => prev.map(s => s.id === spaceId ? {
+      ...s,
+      ...(updates.name && { name: updates.name, initial: updates.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) }),
+      ...(updates.isActive !== undefined && { isActive: updates.isActive }),
+      ...(updates.formConfig && { formConfig: updates.formConfig }),
+    } : s));
+    toast({ title: "Space updated" });
   };
 
   return (
@@ -200,6 +218,7 @@ export default function SpacesPage() {
                       size="sm"
                       variant="ghost"
                       className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground"
+                      onClick={() => openEditor(space)}
                     >
                       <Settings2 className="h-3 w-3" /> Edit
                     </Button>
@@ -231,6 +250,13 @@ export default function SpacesPage() {
           </motion.button>
         </motion.div>
       )}
+
+      <SpaceEditorPanel
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        space={selectedSpace}
+        onSave={handleEditorSave}
+      />
     </div>
   );
 }
