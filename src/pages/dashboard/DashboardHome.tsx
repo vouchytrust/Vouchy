@@ -1,22 +1,13 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, MessageSquareText, Video, TrendingUp, ArrowUpRight, Plus, ExternalLink, Copy, Sparkles } from "lucide-react";
+import { Star, ArrowUpRight, Plus, Sparkles, Video, MessageSquareText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import FirstTimeGuide from "@/components/FirstTimeGuide";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
-
-const chartData = [
-  { date: "Mon", count: 4 }, { date: "Tue", count: 7 }, { date: "Wed", count: 5 },
-  { date: "Thu", count: 12 }, { date: "Fri", count: 8 }, { date: "Sat", count: 15 }, { date: "Sun", count: 10 },
-];
-
-const recentTestimonials = [
-  { id: 1, name: "Sarah Kim", company: "TechCo", rating: 5, content: "Absolutely transformed our customer onboarding experience. The team was thrilled!", type: "text" as const, time: "2h ago", initials: "SK", color: "from-blue-500/20 to-blue-600/5" },
-  { id: 2, name: "James Dean", company: "StartupXYZ", rating: 5, content: "The video testimonials are incredibly professional and easy to record.", type: "video" as const, time: "5h ago", initials: "JD", color: "from-violet-500/20 to-violet-600/5" },
-  { id: 3, name: "Aisha Moyo", company: "DesignHub", rating: 4, content: "Clean, minimal, and powerful. Love the embed widgets!", type: "text" as const, time: "1d ago", initials: "AM", color: "from-emerald-500/20 to-emerald-600/5" },
-  { id: 4, name: "Luis Rodriguez", company: "GrowthCo", rating: 5, content: "Our conversions went up 40% after adding Vouchy widgets to our landing page.", type: "text" as const, time: "2d ago", initials: "LR", color: "from-amber-500/20 to-amber-600/5" },
-];
+import { useAuth } from "@/contexts/AuthContext";
+import FirstTimeGuide from "@/components/FirstTimeGuide";
+import { fetchDashboardStats, fetchTestimonials } from "@/lib/api";
+import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
   { label: "New Space", icon: Plus, to: "/dashboard/spaces" },
@@ -32,13 +23,69 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
 };
 
+const gradients = [
+  "from-blue-500/20 to-blue-600/5",
+  "from-violet-500/20 to-violet-600/5",
+  "from-emerald-500/20 to-emerald-600/5",
+  "from-amber-500/20 to-amber-600/5",
+  "from-rose-500/20 to-rose-600/5",
+];
+
 export default function DashboardHome() {
   const { profile } = useAuth();
   const userName = profile?.company_name || "there";
 
+  const [stats, setStats] = useState({ total: 0, avgRating: "0.0", videoRate: 0, testimonials: [] as any[] });
+  const [recentTestimonials, setRecentTestimonials] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [statsData, testimonials] = await Promise.all([
+          fetchDashboardStats(),
+          fetchTestimonials(),
+        ]);
+        setStats(statsData);
+        setRecentTestimonials((testimonials as any[]).slice(0, 4));
+
+        // Build chart data from last 7 days
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const now = new Date();
+        const chart = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+          const dayEnd = new Date(dayStart);
+          dayEnd.setDate(dayEnd.getDate() + 1);
+          const count = statsData.testimonials.filter((t: any) => {
+            const created = new Date(t.created_at);
+            return created >= dayStart && created < dayEnd;
+          }).length;
+          chart.push({ date: days[d.getDay()], count });
+        }
+        setChartData(chart);
+      } catch (err) {
+        console.error("Dashboard load error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
-      {/* First-time guide */}
       <FirstTimeGuide companyName={profile?.company_name || undefined} />
 
       {/* Header */}
@@ -59,16 +106,13 @@ export default function DashboardHome() {
       {/* Stat cards */}
       <motion.div variants={item} className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Testimonials", value: "247", change: "+12%", sub: "from last month" },
-          { label: "Average Rating", value: "4.8", change: "+0.2", sub: "out of 5.0" },
-          { label: "Video Rate", value: "62%", change: "+5%", sub: "of all testimonials" },
+          { label: "Total Testimonials", value: String(stats.total), sub: "all time" },
+          { label: "Average Rating", value: stats.avgRating, sub: "out of 5.0" },
+          { label: "Video Rate", value: `${stats.videoRate}%`, sub: "of all testimonials" },
         ].map((stat) => (
           <div key={stat.label} className="group rounded-xl border border-border bg-card p-5 hover:vouchy-shadow-sm transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</span>
-              <span className="flex items-center text-2xs font-semibold text-vouchy-success">
-                <ArrowUpRight className="h-3 w-3" />{stat.change}
-              </span>
             </div>
             <div className="text-[28px] font-bold text-foreground leading-none tracking-tight">{stat.value}</div>
             <div className="text-2xs text-muted-foreground mt-1.5">{stat.sub}</div>
@@ -121,39 +165,51 @@ export default function DashboardHome() {
             <Link to="/dashboard/testimonials">View all <ArrowUpRight className="h-3 w-3 ml-1" /></Link>
           </Button>
         </div>
-        <div className="grid md:grid-cols-2 gap-3">
-          {recentTestimonials.map((t, i) => (
-            <motion.div
-              key={t.id}
-              variants={item}
-              className="group rounded-xl border border-border bg-card p-4 hover:vouchy-shadow-sm transition-all duration-200 cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.color} border border-border/50 flex items-center justify-center shrink-0`}>
-                  <span className="text-2xs font-semibold text-foreground">{t.initials}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[13px] font-medium text-foreground">{t.name}</span>
-                    <span className="text-2xs text-muted-foreground">{t.company}</span>
-                    {t.type === "video" && (
-                      <span className="flex items-center gap-0.5 text-2xs font-medium text-primary bg-primary/[0.06] px-1.5 py-0.5 rounded-full">
-                        <Video className="h-2.5 w-2.5" /> Video
-                      </span>
-                    )}
+        {recentTestimonials.length === 0 ? (
+          <div className="text-center py-10 rounded-xl border border-border bg-card">
+            <MessageSquareText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No testimonials yet. Share your collection page to get started!</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-3">
+            {recentTestimonials.map((t: any, i: number) => {
+              const initials = t.author_name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+              const gradient = gradients[i % gradients.length];
+              const timeAgo = formatDistanceToNow(new Date(t.created_at), { addSuffix: true });
+              return (
+                <motion.div
+                  key={t.id}
+                  variants={item}
+                  className="group rounded-xl border border-border bg-card p-4 hover:vouchy-shadow-sm transition-all duration-200"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} border border-border/50 flex items-center justify-center shrink-0`}>
+                      <span className="text-2xs font-semibold text-foreground">{initials}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[13px] font-medium text-foreground">{t.author_name}</span>
+                        <span className="text-2xs text-muted-foreground">{t.author_company}</span>
+                        {t.type === "video" && (
+                          <span className="flex items-center gap-0.5 text-2xs font-medium text-primary bg-primary/[0.06] px-1.5 py-0.5 rounded-full">
+                            <Video className="h-2.5 w-2.5" /> Video
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-0.5 mb-1.5">
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <Star key={j} className={`h-3 w-3 ${j < t.rating ? "fill-vouchy-warning text-vouchy-warning" : "text-border"}`} />
+                        ))}
+                      </div>
+                      <p className="text-[12.5px] text-muted-foreground leading-relaxed line-clamp-2">{t.content}</p>
+                      <span className="text-2xs text-muted-foreground/60 mt-2 block">{timeAgo}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-0.5 mb-1.5">
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Star key={j} className={`h-3 w-3 ${j < t.rating ? "fill-vouchy-warning text-vouchy-warning" : "text-border"}`} />
-                    ))}
-                  </div>
-                  <p className="text-[12.5px] text-muted-foreground leading-relaxed line-clamp-2">{t.content}</p>
-                  <span className="text-2xs text-muted-foreground/60 mt-2 block">{t.time}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
