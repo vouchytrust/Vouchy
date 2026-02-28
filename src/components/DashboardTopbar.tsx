@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Home,
@@ -11,6 +11,7 @@ import {
   Search,
   Plus,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home, exact: true },
@@ -31,9 +33,21 @@ const navItems = [
 
 export function DashboardTopbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, user, signOut } = useAuth();
+
+  const companyName = profile?.company_name || "Workspace";
+  const userEmail = user?.email || "";
+  const userName = user?.user_metadata?.full_name || userEmail.split("@")[0] || "User";
+  const initials = userName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
 
   const isActive = (item: (typeof navItems)[0]) =>
     item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card">
@@ -51,11 +65,11 @@ export function DashboardTopbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1.5 text-[13px] font-medium text-foreground hover:text-foreground/80 transition-colors outline-none">
-              Acme Inc.
+              {companyName}
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem className="text-[12px]">Acme Inc.</DropdownMenuItem>
+              <DropdownMenuItem className="text-[12px]">{companyName}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-[12px]">Create workspace</DropdownMenuItem>
             </DropdownMenuContent>
@@ -70,12 +84,11 @@ export function DashboardTopbar() {
 
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground relative">
             <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
           </Button>
 
           <div className="h-5 w-px bg-border/60 mx-1" />
 
-          <Button size="sm" className="h-7 text-[11px] gap-1 px-2.5">
+          <Button size="sm" className="h-7 text-[11px] gap-1 px-2.5" onClick={() => navigate("/dashboard/spaces")}>
             <Plus className="h-3 w-3" />
             <span className="hidden sm:inline">New Space</span>
           </Button>
@@ -85,20 +98,22 @@ export function DashboardTopbar() {
           <DropdownMenu>
             <DropdownMenuTrigger className="outline-none">
               <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border flex items-center justify-center hover:scale-105 transition-transform cursor-pointer">
-                <span className="text-[9px] font-semibold text-primary">JD</span>
+                <span className="text-[9px] font-semibold text-primary">{initials}</span>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
               <div className="px-2 py-1.5">
-                <div className="text-[12px] font-medium text-foreground">Jane Doe</div>
-                <div className="text-[10px] text-muted-foreground">jane@acme.com</div>
+                <div className="text-[12px] font-medium text-foreground">{userName}</div>
+                <div className="text-[10px] text-muted-foreground">{userEmail}</div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-[12px]">
+              <DropdownMenuItem className="text-[12px]" onClick={() => navigate("/dashboard/settings")}>
                 <Settings className="h-3.5 w-3.5 mr-2" /> Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-[12px] text-destructive">Log out</DropdownMenuItem>
+              <DropdownMenuItem className="text-[12px] text-destructive" onClick={handleSignOut}>
+                <LogOut className="h-3.5 w-3.5 mr-2" /> Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -106,19 +121,19 @@ export function DashboardTopbar() {
 
       {/* Bottom row: navigation tabs */}
       <div className="flex items-center gap-0 px-5 -mb-px">
-        {navItems.map((item) => {
-          const active = isActive(item);
+        {navItems.map((navItem) => {
+          const active = isActive(navItem);
           return (
             <Link
-              key={item.title}
-              to={item.url}
+              key={navItem.title}
+              to={navItem.url}
               className={`
                 relative flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium transition-colors duration-150
                 ${active ? "text-foreground" : "text-muted-foreground hover:text-foreground"}
               `}
             >
-              <item.icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.6} />
-              <span className="hidden sm:inline">{item.title}</span>
+              <navItem.icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.6} />
+              <span className="hidden sm:inline">{navItem.title}</span>
 
               {active && (
                 <motion.div
