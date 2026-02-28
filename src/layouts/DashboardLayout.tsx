@@ -1,23 +1,37 @@
+import { useState, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Separator } from "@/components/ui/separator";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+interface LayoutContextType {
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (v: boolean) => void;
+}
+
+const LayoutContext = createContext<LayoutContextType>({ sidebarCollapsed: false, setSidebarCollapsed: () => {} });
+export const useLayout = () => useContext(LayoutContext);
 
 export default function DashboardLayout() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center px-6 sticky top-0 z-30 bg-background/80 backdrop-blur-md">
-            <SidebarTrigger className="h-7 w-7 text-muted-foreground hover:text-foreground" />
-          </header>
-          <Separator className="opacity-50" />
-          <main className="flex-1 px-8 py-8">
+    <LayoutContext.Provider value={{ sidebarCollapsed, setSidebarCollapsed }}>
+      <div className="h-screen flex overflow-hidden bg-background">
+        {/* Desktop sidebar */}
+        {!isMobile && <DashboardSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />}
+
+        {/* Main content */}
+        <main className={`flex-1 overflow-y-auto ${isMobile ? "pb-20" : ""}`}>
+          <div className="px-8 py-8 max-w-full">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </main>
+
+        {/* Mobile bottom nav */}
+        {isMobile && <MobileBottomNav />}
       </div>
-    </SidebarProvider>
+    </LayoutContext.Provider>
   );
 }
