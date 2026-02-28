@@ -55,7 +55,7 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
       <div className="mx-0 h-px bg-border/50" />
 
       {/* Nav */}
-      <nav className="flex-1 py-3 px-1 space-y-0.5">
+      <nav className="flex-1 py-3 px-0 space-y-0">
         <AnimatePresence>
           {!collapsed && (
             <motion.div
@@ -76,7 +76,7 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
               key={item.title}
               to={item.url}
               className={`
-                group relative flex w-full items-center gap-2.5 rounded-[8px] transition-all duration-150
+                group relative flex w-full items-center gap-2.5 transition-all duration-150
                 ${collapsed ? "h-9 justify-center" : "h-9 px-3"}
                 ${active
                   ? "bg-primary/[0.08] text-foreground"
@@ -130,7 +130,7 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
       </nav>
 
       {/* Footer */}
-      <div className="px-1 pb-3 space-y-1">
+      <div className="px-0 pb-3 space-y-0">
         <div className="mx-0 h-px bg-border/50 mb-2" />
 
         {/* User */}
