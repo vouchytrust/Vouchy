@@ -24,7 +24,7 @@ export default function DashboardLayout() {
 
         {/* Main content */}
         <main className={`flex-1 overflow-y-auto ${isMobile ? "pb-20" : ""}`}>
-          <div className="px-8 py-8 max-w-full">
+          <div className="py-8 w-full">
             <Outlet />
           </div>
         </main>
