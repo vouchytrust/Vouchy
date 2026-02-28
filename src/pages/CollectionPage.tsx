@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Video, MessageSquareText, CheckCircle2, Upload } from "lucide-react";
+import { Star, Video, MessageSquareText, CheckCircle2 } from "lucide-react";
+import VideoRecorder from "@/components/collection/VideoRecorder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -212,23 +213,13 @@ export default function CollectionPage() {
 
           {mode === "video" && (
             <motion.div key="video" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="aspect-video bg-foreground/5 rounded-lg flex items-center justify-center mb-4 border-2 border-dashed border-border">
-                    <div className="text-center">
-                      <Video className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Camera preview will appear here</p>
-                      <p className="text-xs text-muted-foreground mt-1">Video recording requires camera permissions</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setMode("choose")} className="flex-1">Back</Button>
-                    <Button className="flex-1" style={{ backgroundColor: accentColor }}>
-                      <Video className="h-4 w-4 mr-2" /> Start Recording
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <VideoRecorder
+                spaceId={space!.id}
+                spaceUserId={space!.user_id}
+                accentColor={accentColor}
+                onBack={() => setMode("choose")}
+                onSuccess={() => setMode("success")}
+              />
             </motion.div>
           )}
 
