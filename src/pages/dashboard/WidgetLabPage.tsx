@@ -5,10 +5,14 @@ import {
   Copy, Check, Sparkles, LayoutGrid, Rows3, GalleryHorizontalEnd,
   Timer, Layers3, Wind, Gem, Columns3, Film, Newspaper,
   Circle, Mountain, Image, Zap, SquareStack,
+  Type, Palette, AlignCenter, Square,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -67,36 +71,72 @@ const sampleTestimonials = [
 ];
 
 /* ── Testimonial Card (used in preview) ── */
-function TestimonialCard({ t, darkMode, index }: { t: typeof sampleTestimonials[0]; darkMode: boolean; index: number }) {
+interface CardConfig {
+  darkMode: boolean;
+  radius: number;
+  padding: number;
+  shadow: string;
+  font: string;
+  accent: string;
+  showStars: boolean;
+  showAvatar: boolean;
+  showCompany: boolean;
+}
+
+const shadowMap: Record<string, string> = {
+  none: "shadow-none",
+  sm: "shadow-sm",
+  md: "shadow-md",
+  lg: "shadow-lg",
+};
+
+const fontMap: Record<string, string> = {
+  system: "font-sans",
+  inter: "font-sans",
+  georgia: "font-serif",
+  mono: "font-mono",
+};
+
+function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]; config: CardConfig; index: number }) {
+  const { darkMode, radius, padding, shadow, font, accent, showStars, showAvatar, showCompany } = config;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.35, ease: "easeOut" }}
-      className={`p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 ${
+      className={`border transition-all duration-200 hover:-translate-y-0.5 ${fontMap[font]} ${shadowMap[shadow]} ${
         darkMode
           ? "bg-[hsl(240_10%_8%)] border-[hsl(240_4%_16%)] hover:border-[hsl(240_4%_22%)]"
-          : "bg-card border-border hover:vouchy-shadow-sm"
+          : "bg-card border-border"
       }`}
+      style={{ borderRadius: `${radius}px`, padding: `${padding}px` }}
     >
       <div className="flex items-center gap-2.5 mb-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-          darkMode ? "bg-[hsl(240_4%_16%)]" : "bg-muted"
-        }`}>
-          <span className={`text-2xs font-semibold ${darkMode ? "text-[hsl(0_0%_70%)]" : "text-muted-foreground"}`}>
-            {t.initials}
-          </span>
-        </div>
+        {showAvatar && (
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+              darkMode ? "bg-[hsl(240_4%_16%)]" : "bg-muted"
+            }`}
+          >
+            <span className={`text-2xs font-semibold ${darkMode ? "text-[hsl(0_0%_70%)]" : "text-muted-foreground"}`}>
+              {t.initials}
+            </span>
+          </div>
+        )}
         <div>
           <div className={`text-[12px] font-medium leading-tight ${darkMode ? "text-[hsl(0_0%_90%)]" : "text-foreground"}`}>{t.name}</div>
-          <div className={`text-2xs ${darkMode ? "text-[hsl(0_0%_45%)]" : "text-muted-foreground"}`}>{t.company}</div>
+          {showCompany && (
+            <div className={`text-2xs ${darkMode ? "text-[hsl(0_0%_45%)]" : "text-muted-foreground"}`}>{t.company}</div>
+          )}
         </div>
       </div>
-      <div className="flex gap-0.5 mb-2">
-        {Array.from({ length: 5 }).map((_, j) => (
-          <Star key={j} className={`h-2.5 w-2.5 ${j < t.rating ? "fill-[hsl(var(--vouchy-warning))] text-[hsl(var(--vouchy-warning))]" : darkMode ? "text-[hsl(240_4%_20%)]" : "text-border"}`} />
-        ))}
-      </div>
+      {showStars && (
+        <div className="flex gap-0.5 mb-2">
+          {Array.from({ length: 5 }).map((_, j) => (
+            <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? accent : undefined, fill: j < t.rating ? accent : "none" }} />
+          ))}
+        </div>
+      )}
       <p className={`text-[11.5px] leading-relaxed ${darkMode ? "text-[hsl(0_0%_55%)]" : "text-muted-foreground"}`}>
         {t.content}
       </p>
@@ -112,6 +152,15 @@ export default function WidgetLabPage() {
   const [showVideoFirst, setShowVideoFirst] = useState(true);
   const [copied, setCopied] = useState(false);
   const [layoutFilter, setLayoutFilter] = useState<"all" | "grid" | "scroll" | "immersive">("all");
+  const [cardRadius, setCardRadius] = useState([12]);
+  const [cardPadding, setCardPadding] = useState([16]);
+  const [accentColor, setAccentColor] = useState("#3b82f6");
+  const [showStars, setShowStars] = useState(true);
+  const [showAvatar, setShowAvatar] = useState(true);
+  const [showCompany, setShowCompany] = useState(true);
+  const [fontFamily, setFontFamily] = useState("system");
+  const [cardShadow, setCardShadow] = useState("sm");
+  const [headerAlign, setHeaderAlign] = useState("center");
   const { toast } = useToast();
 
   const embedCode = `<script src="https://vouchy.app/embed.js" data-workspace="ws_demo" data-layout="${selectedLayout}"></script>`;
@@ -204,7 +253,7 @@ export default function WidgetLabPage() {
           </div>
 
           {/* Appearance controls */}
-          <div className="space-y-3 pt-3 border-t border-border">
+          <div className="space-y-3.5 pt-3 border-t border-border">
             <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Appearance</p>
             <div className="flex items-center justify-between">
               <span className="text-[12px] text-foreground">Dark mode</span>
@@ -213,6 +262,102 @@ export default function WidgetLabPage() {
             <div className="flex items-center justify-between">
               <span className="text-[12px] text-foreground">Video first</span>
               <Switch checked={showVideoFirst} onCheckedChange={setShowVideoFirst} />
+            </div>
+          </div>
+
+          {/* Card style */}
+          <div className="space-y-3.5 pt-3 border-t border-border">
+            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Card Style</p>
+            <div>
+              <Label className="text-[11px] text-muted-foreground mb-2 block">Accent color</Label>
+              <div className="flex gap-1.5">
+                {["#3b82f6","#059669","#ea580c","#7c3aed","#e11d48","#0d9488","#f59e0b","#000000"].map(c => (
+                  <button key={c} onClick={() => setAccentColor(c)} className="relative">
+                    <div
+                      className={`w-6 h-6 rounded-full transition-all duration-150 ${
+                        accentColor === c ? "ring-2 ring-offset-2 ring-offset-background ring-primary scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: c }}
+                    />
+                    {accentColor === c && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className="h-2.5 w-2.5 text-white drop-shadow" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-[11px] text-muted-foreground">Border radius</Label>
+                <span className="text-[10px] text-muted-foreground font-mono">{cardRadius[0]}px</span>
+              </div>
+              <Slider value={cardRadius} onValueChange={setCardRadius} min={0} max={24} step={2} className="w-full" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-[11px] text-muted-foreground">Card padding</Label>
+                <span className="text-[10px] text-muted-foreground font-mono">{cardPadding[0]}px</span>
+              </div>
+              <Slider value={cardPadding} onValueChange={setCardPadding} min={8} max={32} step={2} className="w-full" />
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground mb-1.5 block">Shadow</Label>
+              <Select value={cardShadow} onValueChange={setCardShadow}>
+                <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-[11px]">None</SelectItem>
+                  <SelectItem value="sm" className="text-[11px]">Small</SelectItem>
+                  <SelectItem value="md" className="text-[11px]">Medium</SelectItem>
+                  <SelectItem value="lg" className="text-[11px]">Large</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground mb-1.5 block">Font</Label>
+              <Select value={fontFamily} onValueChange={setFontFamily}>
+                <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system" className="text-[11px]">System Default</SelectItem>
+                  <SelectItem value="inter" className="text-[11px]">Inter</SelectItem>
+                  <SelectItem value="georgia" className="text-[11px]">Georgia</SelectItem>
+                  <SelectItem value="mono" className="text-[11px]">Monospace</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Content toggles */}
+          <div className="space-y-3 pt-3 border-t border-border">
+            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Content</p>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] text-foreground">Star ratings</span>
+              <Switch checked={showStars} onCheckedChange={setShowStars} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] text-foreground">Avatars</span>
+              <Switch checked={showAvatar} onCheckedChange={setShowAvatar} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] text-foreground">Company name</span>
+              <Switch checked={showCompany} onCheckedChange={setShowCompany} />
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground mb-1.5 block">Header align</Label>
+              <div className="flex gap-0.5 bg-muted/60 rounded-lg p-0.5 w-fit">
+                {(["left","center","right"] as const).map(a => (
+                  <button
+                    key={a}
+                    onClick={() => setHeaderAlign(a)}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                      headerAlign === a ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {a.charAt(0).toUpperCase() + a.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -330,8 +475,8 @@ export default function WidgetLabPage() {
             >
               <div className="p-6 lg:p-10">
                 {/* Section heading preview */}
-                <div className="text-center mb-8">
-                  <h2 className={`text-lg font-semibold mb-1 ${darkMode ? "text-[hsl(0_0%_90%)]" : "text-foreground"}`}>
+                <div className={`mb-8 ${headerAlign === "center" ? "text-center" : headerAlign === "right" ? "text-right" : "text-left"}`}>
+                  <h2 className={`text-lg font-semibold mb-1 ${fontMap[fontFamily]} ${darkMode ? "text-[hsl(0_0%_90%)]" : "text-foreground"}`}>
                     What our customers say
                   </h2>
                   <p className={`text-[12px] ${darkMode ? "text-[hsl(0_0%_45%)]" : "text-muted-foreground"}`}>
@@ -344,7 +489,11 @@ export default function WidgetLabPage() {
                   device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
                 }`}>
                   {sampleTestimonials.map((t, i) => (
-                    <TestimonialCard key={i} t={t} darkMode={darkMode} index={i} />
+                    <TestimonialCard key={i} t={t} config={{
+                      darkMode, radius: cardRadius[0], padding: cardPadding[0],
+                      shadow: cardShadow, font: fontFamily, accent: accentColor,
+                      showStars, showAvatar, showCompany,
+                    }} index={i} />
                   ))}
                 </div>
               </div>
