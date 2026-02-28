@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Star, MessageSquareText, Video, TrendingUp, ArrowUpRight, Plus, ExternalLink, Copy, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import FirstTimeGuide from "@/components/FirstTimeGuide";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 
@@ -31,12 +33,18 @@ const item = {
 };
 
 export default function DashboardHome() {
+  const { profile } = useAuth();
+  const userName = profile?.company_name || "there";
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
+      {/* First-time guide */}
+      <FirstTimeGuide companyName={profile?.company_name || undefined} />
+
       {/* Header */}
       <motion.div variants={item} className="flex items-end justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold text-foreground">Good morning, Jane</h1>
+          <h1 className="text-[22px] font-semibold text-foreground">Good morning, {userName}</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">Here's what's happening with your testimonials.</p>
         </div>
         <div className="flex gap-2">

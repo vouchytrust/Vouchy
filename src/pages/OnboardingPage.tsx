@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Star, Upload, Check, ArrowRight, ArrowLeft } from "lucide-react";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const brandColors = [
   { name: "Ocean", value: "#1a3f64" },
@@ -21,8 +23,20 @@ export default function OnboardingPage() {
   const [workspace, setWorkspace] = useState("");
   const [color, setColor] = useState("#3b82f6");
   const [logo, setLogo] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { session, profile, refreshProfile } = useAuth();
+
+  // Redirect if not logged in or already onboarded
+  useEffect(() => {
+    if (!session) {
+      navigate("/auth", { replace: true });
+    } else if (profile?.onboarding_completed) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [session, profile, navigate]);
 
   const next = () => setStep((s) => Math.min(s + 1, 2));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
@@ -34,14 +48,53 @@ export default function OnboardingPage() {
       toast({ title: "File too large", description: "Logo must be under 2MB.", variant: "destructive" });
       return;
     }
+    setLogoFile(file);
     const reader = new FileReader();
     reader.onload = () => setLogo(reader.result as string);
     reader.readAsDataURL(file);
   }, [toast]);
 
-  const finish = () => {
-    toast({ title: "Workspace created!", description: "Welcome to Vouchy." });
-    navigate("/dashboard");
+  const finish = async () => {
+    if (!session?.user) return;
+    setSaving(true);
+
+    try {
+      let logoUrl: string | null = null;
+
+      // Upload logo if provided
+      if (logoFile) {
+        const ext = logoFile.name.split(".").pop();
+        const path = `${session.user.id}/logo.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("logos")
+          .upload(path, logoFile, { upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
+        logoUrl = urlData.publicUrl;
+      }
+
+      // Update profile
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          company_name: workspace.trim(),
+          brand_color: color,
+          logo_url: logoUrl,
+          onboarding_completed: true,
+        })
+        .eq("user_id", session.user.id);
+
+      if (error) throw error;
+
+      await refreshProfile();
+      toast({ title: "Workspace created!", description: "Welcome to Vouchy." });
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const canNext = step === 0 ? workspace.trim().length > 0 : true;
@@ -148,8 +201,8 @@ export default function OnboardingPage() {
               Next <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={finish}>
-              Launch Dashboard <ArrowRight className="h-4 w-4 ml-2" />
+            <Button onClick={finish} disabled={saving}>
+              {saving ? "Creating..." : "Launch Dashboard"} <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           )}
         </div>
