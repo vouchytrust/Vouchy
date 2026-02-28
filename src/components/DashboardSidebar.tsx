@@ -30,7 +30,7 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
       className="h-full flex flex-col border-r border-border/60 bg-card relative select-none shrink-0"
     >
       {/* Brand */}
-      <div className={`flex items-center h-14 px-4 ${collapsed ? "justify-center" : "gap-2.5"}`}>
+      <div className={`w-full flex items-center h-14 px-3 ${collapsed ? "justify-center" : "gap-2.5"}`}>
         <Link to="/dashboard" className="flex items-center gap-2.5 group">
           <div className="h-8 w-8 rounded-[10px] vouchy-gradient-bg flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.04]">
             <Star className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
@@ -52,10 +52,10 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
       </div>
 
       {/* Divider */}
-      <div className="mx-3 h-px bg-border/50" />
+      <div className="mx-0 h-px bg-border/50" />
 
       {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5">
+      <nav className="flex-1 py-3 px-1 space-y-0.5">
         <AnimatePresence>
           {!collapsed && (
             <motion.div
@@ -76,8 +76,8 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
               key={item.title}
               to={item.url}
               className={`
-                group relative flex items-center gap-2.5 rounded-[8px] transition-all duration-150
-                ${collapsed ? "h-9 w-9 mx-auto justify-center" : "h-9 px-2.5"}
+                group relative flex w-full items-center gap-2.5 rounded-[8px] transition-all duration-150
+                ${collapsed ? "h-9 justify-center" : "h-9 px-3"}
                 ${active
                   ? "bg-primary/[0.08] text-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
@@ -130,11 +130,11 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
       </nav>
 
       {/* Footer */}
-      <div className="px-2 pb-3 space-y-1">
-        <div className="mx-1 h-px bg-border/50 mb-2" />
+      <div className="px-1 pb-3 space-y-1">
+        <div className="mx-0 h-px bg-border/50 mb-2" />
 
         {/* User */}
-        <div className={`flex items-center gap-2.5 rounded-[8px] px-2.5 py-2 hover:bg-accent/60 cursor-pointer transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
+        <div className={`w-full flex items-center gap-2.5 rounded-[8px] px-3 py-2 hover:bg-accent/60 cursor-pointer transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-border/80 flex items-center justify-center shrink-0">
             <span className="text-[10px] font-semibold text-primary">JD</span>
           </div>
