@@ -31,7 +31,7 @@ export default function SettingsPage() {
       </motion.div>
 
       <motion.div
-        className="mt-10"
+        className="mt-6"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
@@ -69,7 +69,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <Separator className="my-8" />
+        <Separator className="my-6" />
 
         {/* Brand color */}
         <section>
@@ -104,7 +104,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <Separator className="my-8" />
+        <Separator className="my-6" />
 
         {/* Notifications */}
         <section>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <Separator className="my-8" />
+        <Separator className="my-6" />
 
         {/* Plan */}
         <section>
@@ -169,7 +169,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <Separator className="my-8" />
+        <Separator className="my-6" />
 
         <div className="flex items-center justify-between pb-4">
           <Button size="sm" className="h-9 text-xs px-6" onClick={save}>Save Changes</Button>
