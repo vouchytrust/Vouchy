@@ -28,32 +28,19 @@ interface Layout {
   name: string;
   icon: React.ReactNode;
   free: boolean;
-  category: "grid" | "scroll" | "immersive";
 }
 
 const layouts: Layout[] = [
-  { id: "cards", name: "Cards", icon: <LayoutGrid className="h-3.5 w-3.5" />, free: true, category: "grid" },
-  { id: "minimal", name: "Minimal Stacked", icon: <Rows3 className="h-3.5 w-3.5" />, free: true, category: "grid" },
-  { id: "bento", name: "Bento", icon: <Columns3 className="h-3.5 w-3.5" />, free: false, category: "grid" },
-  { id: "masonry", name: "Masonry Wall", icon: <Layers3 className="h-3.5 w-3.5" />, free: false, category: "grid" },
-  { id: "marquee", name: "Marquee", icon: <GalleryHorizontalEnd className="h-3.5 w-3.5" />, free: false, category: "scroll" },
-  { id: "timeline", name: "Timeline", icon: <Timer className="h-3.5 w-3.5" />, free: false, category: "scroll" },
-  { id: "ticker", name: "News Ticker", icon: <Newspaper className="h-3.5 w-3.5" />, free: false, category: "scroll" },
-  { id: "cinematic", name: "Cinematic Slider", icon: <Film className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "floating", name: "Floating Cards", icon: <Wind className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "glass", name: "Glass Prism", icon: <Gem className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "orbit", name: "Orbit Ring", icon: <Circle className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "parallax", name: "Parallax Scroll", icon: <Mountain className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "polaroid", name: "Polaroid Stack", icon: <Image className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "radial", name: "Radial Burst", icon: <Zap className="h-3.5 w-3.5" />, free: false, category: "immersive" },
-  { id: "stacked", name: "Stacked Cards", icon: <SquareStack className="h-3.5 w-3.5" />, free: false, category: "immersive" },
+  { id: "clean", name: "Clean", icon: <LayoutGrid className="h-3.5 w-3.5" />, free: true },
+  { id: "minimal", name: "Minimal", icon: <Rows3 className="h-3.5 w-3.5" />, free: true },
+  { id: "spotlight", name: "Spotlight", icon: <Zap className="h-3.5 w-3.5" />, free: false },
+  { id: "editorial", name: "Editorial", icon: <Columns3 className="h-3.5 w-3.5" />, free: false },
+  { id: "mono", name: "Mono", icon: <Square className="h-3.5 w-3.5" />, free: false },
+  { id: "gradient", name: "Gradient", icon: <Gem className="h-3.5 w-3.5" />, free: false },
+  { id: "brutalist", name: "Brutalist", icon: <Layers3 className="h-3.5 w-3.5" />, free: false },
+  { id: "glass", name: "Glass", icon: <Wind className="h-3.5 w-3.5" />, free: false },
+  { id: "outline", name: "Outline", icon: <Circle className="h-3.5 w-3.5" />, free: false },
 ];
-
-const categories = [
-  { id: "grid", label: "Grid" },
-  { id: "scroll", label: "Scroll" },
-  { id: "immersive", label: "Immersive" },
-] as const;
 
 const devices = [
   { id: "desktop", icon: Monitor, w: "100%" },
@@ -72,6 +59,7 @@ const sampleTestimonials = [
 
 /* ── Testimonial Card (used in preview) ── */
 interface CardConfig {
+  layout: string;
   darkMode: boolean;
   radius: number;
   padding: number;
@@ -88,72 +76,130 @@ interface CardConfig {
   showCompany: boolean;
 }
 
-const shadowMap: Record<string, string> = {
-  none: "shadow-none",
-  sm: "shadow-sm",
-  md: "shadow-md",
-  lg: "shadow-lg",
-};
-
-const fontMap: Record<string, string> = {
-  system: "font-sans",
-  inter: "font-sans",
-  georgia: "font-serif",
-  mono: "font-mono",
-};
+const shadowMap: Record<string, string> = { none: "", sm: "shadow-sm", md: "shadow-md", lg: "shadow-lg" };
+const fontMap: Record<string, string> = { system: "font-sans", inter: "font-sans", georgia: "font-serif", mono: "font-mono" };
 
 function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]; config: CardConfig; index: number }) {
-  const { darkMode, radius, padding, shadow, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany } = config;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.35, ease: "easeOut" }}
-      className={`border transition-all duration-200 hover:-translate-y-0.5 ${fontMap[font]} ${shadowMap[shadow]} ${
-        darkMode ? "border-[hsl(240_4%_16%)]" : "border-border"
-      }`}
-      style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg }}
-    >
-      <div className="flex items-center gap-2.5 mb-3">
-        {showAvatar && (
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6" }}
-          >
-            <span className="text-2xs font-semibold" style={{ color: companyColor }}>
-              {t.initials}
-            </span>
+  const { layout, darkMode, radius, padding, shadow, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany } = config;
+
+  const stars = showStars && (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, j) => (
+        <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? starColor : "#e5e7eb", fill: j < t.rating ? starColor : "none" }} />
+      ))}
+    </div>
+  );
+
+  const avatar = showAvatar && (
+    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6" }}>
+      <span className="text-2xs font-semibold" style={{ color: companyColor }}>{t.initials}</span>
+    </div>
+  );
+
+  // Layout-specific card rendering
+  const getLayoutStyles = (): { className: string; style: React.CSSProperties } => {
+    const base = `${fontMap[font]} transition-all duration-200 hover:-translate-y-0.5`;
+    switch (layout) {
+      case "minimal":
+        return { className: `${base} border-b border-border/50`, style: { padding: `${padding}px 0`, backgroundColor: "transparent" } };
+      case "spotlight":
+        return { className: `${base} border-2 ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding + 4}px`, backgroundColor: cardBg, borderColor: starColor + "30" } };
+      case "editorial":
+        return { className: `${base} border-l-[3px] ${shadowMap[shadow]}`, style: { padding: `${padding}px`, backgroundColor: cardBg, borderColor: starColor } };
+      case "mono":
+        return { className: `${base} border ${shadowMap[shadow]}`, style: { borderRadius: "0px", padding: `${padding}px`, backgroundColor: darkMode ? "#111" : "#fafafa", borderColor: darkMode ? "#333" : "#e0e0e0" } };
+      case "gradient":
+        return { className: `${base} border border-transparent ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, background: `linear-gradient(135deg, ${cardBg}, ${starColor}10)` } };
+      case "brutalist":
+        return { className: `${base} border-2 border-foreground/80`, style: { borderRadius: "0px", padding: `${padding}px`, backgroundColor: cardBg, boxShadow: "4px 4px 0 hsl(var(--foreground) / 0.15)" } };
+      case "glass":
+        return { className: `${base} border border-border/30 backdrop-blur-sm ${shadowMap[shadow]}`, style: { borderRadius: `${radius + 4}px`, padding: `${padding}px`, backgroundColor: cardBg + "cc" } };
+      case "outline":
+        return { className: `${base} border-2 border-dashed ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: "transparent", borderColor: darkMode ? "#444" : "#d0d0d0" } };
+      default: // clean
+        return { className: `${base} border ${shadowMap[shadow]}`, style: { borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined } };
+    }
+  };
+
+  const { className: layoutClass, style: layoutStyle } = getLayoutStyles();
+
+  // Editorial layout — quote-style
+  if (layout === "editorial") {
+    return (
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
+        <p className="text-[12px] leading-relaxed italic mb-3" style={{ color: bodyColor }}>"{t.content}"</p>
+        <div className="flex items-center gap-2">
+          {avatar}
+          <div>
+            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
+            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
           </div>
-        )}
+          <div className="ml-auto">{stars}</div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Spotlight — centered, large quote
+  if (layout === "spotlight") {
+    return (
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={`${layoutClass} text-center`} style={layoutStyle}>
+        <div className="flex justify-center mb-2">{stars}</div>
+        <p className="text-[12px] leading-relaxed mb-3" style={{ color: bodyColor }}>"{t.content}"</p>
+        <div className="flex items-center justify-center gap-2">
+          {avatar}
+          <div className="text-left">
+            <div className="text-[11px] font-semibold" style={{ color: nameColor }}>{t.name}</div>
+            {showCompany && <div className="text-[10px]" style={{ color: companyColor }}>{t.company}</div>}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Minimal — borderless, clean separator
+  if (layout === "minimal") {
+    return (
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
+        <div className="flex items-start gap-3">
+          {avatar}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[12px] font-medium" style={{ color: nameColor }}>{t.name}</span>
+              {showCompany && <span className="text-[10px]" style={{ color: companyColor }}>· {t.company}</span>}
+            </div>
+            <p className="text-[11.5px] leading-relaxed mb-1.5" style={{ color: bodyColor }}>{t.content}</p>
+            {stars}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Default layout for clean, mono, gradient, brutalist, glass, outline
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35 }} className={layoutClass} style={layoutStyle}>
+      <div className="flex items-center gap-2.5 mb-3">
+        {avatar}
         <div>
           <div className="text-[12px] font-medium leading-tight" style={{ color: nameColor }}>{t.name}</div>
-          {showCompany && (
-            <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>
-          )}
+          {showCompany && <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>}
         </div>
       </div>
-      {showStars && (
-        <div className="flex gap-0.5 mb-2">
-          {Array.from({ length: 5 }).map((_, j) => (
-            <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? starColor : "#e5e7eb", fill: j < t.rating ? starColor : "none" }} />
-          ))}
-        </div>
-      )}
-      <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>
-        {t.content}
-      </p>
+      <div className="mb-2">{stars}</div>
+      <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>{t.content}</p>
     </motion.div>
   );
 }
 
 /* ── Main ── */
 export default function WidgetLabPage() {
-  const [selectedLayout, setSelectedLayout] = useState("cards");
+  const [selectedLayout, setSelectedLayout] = useState("clean");
   const [device, setDevice] = useState("desktop");
   const [darkMode, setDarkMode] = useState(false);
   const [showVideoFirst, setShowVideoFirst] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [layoutFilter, setLayoutFilter] = useState<"all" | "grid" | "scroll" | "immersive">("all");
+  
    const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
   const [accentColor, setAccentColor] = useState("#3b82f6");
@@ -179,7 +225,6 @@ export default function WidgetLabPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const filteredLayouts = layoutFilter === "all" ? layouts : layouts.filter(l => l.category === layoutFilter);
   const currentLayout = layouts.find(l => l.id === selectedLayout);
 
   return (
@@ -204,59 +249,27 @@ export default function WidgetLabPage() {
 
         {/* Layout selector */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {/* Category filter pills */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setLayoutFilter("all")}
-              className={`px-2.5 py-1 rounded-full text-2xs font-medium transition-all ${
-                layoutFilter === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              }`}
-            >
-              All
-            </button>
-            {categories.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setLayoutFilter(c.id)}
-                className={`px-2.5 py-1 rounded-full text-2xs font-medium transition-all ${
-                  layoutFilter === c.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+          <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Designs</p>
 
           {/* Layout grid */}
-          <div className="grid grid-cols-2 gap-1.5">
-            <AnimatePresence mode="popLayout">
-              {filteredLayouts.map(l => (
-                <motion.button
-                  key={l.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={() => setSelectedLayout(l.id)}
-                  className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all duration-150 ${
-                    selectedLayout === l.id
-                      ? "bg-primary/[0.08] ring-1 ring-primary/30 text-foreground"
-                      : "hover:bg-accent text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <span className={selectedLayout === l.id ? "text-primary" : ""}>{l.icon}</span>
-                  <span className="text-2xs font-medium leading-tight">{l.name}</span>
-                  {!l.free && (
-                    <Lock className="absolute top-1.5 right-1.5 h-2.5 w-2.5 text-muted-foreground/40" />
-                  )}
-                </motion.button>
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-3 gap-1">
+            {layouts.map(l => (
+              <button
+                key={l.id}
+                onClick={() => setSelectedLayout(l.id)}
+                className={`relative flex flex-col items-center gap-1 p-2.5 rounded-lg text-center transition-all duration-150 ${
+                  selectedLayout === l.id
+                    ? "bg-primary/[0.08] ring-1 ring-primary/30 text-foreground"
+                    : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span className={selectedLayout === l.id ? "text-primary" : ""}>{l.icon}</span>
+                <span className="text-[10px] font-medium leading-tight">{l.name}</span>
+                {!l.free && (
+                  <Lock className="absolute top-1 right-1 h-2 w-2 text-muted-foreground/40" />
+                )}
+              </button>
+            ))}
           </div>
 
           {/* Appearance controls */}
@@ -472,6 +485,7 @@ export default function WidgetLabPage() {
                 }`}>
                   {sampleTestimonials.map((t, i) => (
                     <TestimonialCard key={i} t={t} config={{
+                      layout: selectedLayout,
                       darkMode, radius: cardRadius[0], padding: cardPadding[0],
                       shadow: cardShadow, font: fontFamily, accent: accentColor,
                       cardBg, nameColor, companyColor, bodyColor, starColor,
