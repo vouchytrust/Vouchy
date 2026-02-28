@@ -37,16 +37,22 @@ export default function CollectionPage() {
   useEffect(() => {
     async function loadSpace() {
       try {
-        const { data, error } = await supabase
+        const { data: spaceData, error: spaceErr } = await supabase
           .from("spaces")
-          .select("id, name, slug, form_config, user_id, profiles:user_id(company_name, brand_color, logo_url)")
+          .select("id, name, slug, form_config, user_id")
           .eq("slug", slug)
           .eq("is_active", true)
           .single();
-        if (error || !data) {
+        if (spaceErr || !spaceData) {
           setNotFound(true);
         } else {
-          setSpace(data as unknown as SpaceData);
+          // Fetch profile separately since no FK between spaces and profiles
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("company_name, brand_color, logo_url")
+            .eq("user_id", spaceData.user_id)
+            .single();
+          setSpace({ ...spaceData, profiles: profileData } as unknown as SpaceData);
         }
       } catch {
         setNotFound(true);
