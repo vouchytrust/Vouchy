@@ -22,7 +22,7 @@ export function MobileBottomNav() {
       <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/40" />
 
       {/* Safe area + content */}
-      <div className="relative flex items-end justify-around px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="relative grid grid-cols-5 items-end gap-0 px-0 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           const active = isActive(item);
 
@@ -30,13 +30,13 @@ export function MobileBottomNav() {
             <Link
               key={item.title}
               to={item.url}
-              className="relative flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-colors duration-150"
+              className="relative flex w-full flex-col items-center justify-center gap-0.5 py-2 rounded-none transition-colors duration-150"
             >
               {/* Active pill background */}
               {active && (
                 <motion.div
                   layoutId="mobile-nav-active"
-                  className="absolute inset-0 bg-primary/[0.08] rounded-xl"
+                  className="absolute inset-x-1 inset-y-1 bg-primary/[0.08] rounded-lg"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
