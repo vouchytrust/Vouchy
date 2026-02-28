@@ -78,6 +78,11 @@ interface CardConfig {
   shadow: string;
   font: string;
   accent: string;
+  cardBg: string;
+  nameColor: string;
+  companyColor: string;
+  bodyColor: string;
+  starColor: string;
   showStars: boolean;
   showAvatar: boolean;
   showCompany: boolean;
@@ -98,46 +103,43 @@ const fontMap: Record<string, string> = {
 };
 
 function TestimonialCard({ t, config, index }: { t: typeof sampleTestimonials[0]; config: CardConfig; index: number }) {
-  const { darkMode, radius, padding, shadow, font, accent, showStars, showAvatar, showCompany } = config;
+  const { darkMode, radius, padding, shadow, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany } = config;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.35, ease: "easeOut" }}
       className={`border transition-all duration-200 hover:-translate-y-0.5 ${fontMap[font]} ${shadowMap[shadow]} ${
-        darkMode
-          ? "bg-[hsl(240_10%_8%)] border-[hsl(240_4%_16%)] hover:border-[hsl(240_4%_22%)]"
-          : "bg-card border-border"
+        darkMode ? "border-[hsl(240_4%_16%)]" : "border-border"
       }`}
-      style={{ borderRadius: `${radius}px`, padding: `${padding}px` }}
+      style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg }}
     >
       <div className="flex items-center gap-2.5 mb-3">
         {showAvatar && (
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-              darkMode ? "bg-[hsl(240_4%_16%)]" : "bg-muted"
-            }`}
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6" }}
           >
-            <span className={`text-2xs font-semibold ${darkMode ? "text-[hsl(0_0%_70%)]" : "text-muted-foreground"}`}>
+            <span className="text-2xs font-semibold" style={{ color: companyColor }}>
               {t.initials}
             </span>
           </div>
         )}
         <div>
-          <div className={`text-[12px] font-medium leading-tight ${darkMode ? "text-[hsl(0_0%_90%)]" : "text-foreground"}`}>{t.name}</div>
+          <div className="text-[12px] font-medium leading-tight" style={{ color: nameColor }}>{t.name}</div>
           {showCompany && (
-            <div className={`text-2xs ${darkMode ? "text-[hsl(0_0%_45%)]" : "text-muted-foreground"}`}>{t.company}</div>
+            <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>
           )}
         </div>
       </div>
       {showStars && (
         <div className="flex gap-0.5 mb-2">
           {Array.from({ length: 5 }).map((_, j) => (
-            <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? accent : undefined, fill: j < t.rating ? accent : "none" }} />
+            <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? starColor : "#e5e7eb", fill: j < t.rating ? starColor : "none" }} />
           ))}
         </div>
       )}
-      <p className={`text-[11.5px] leading-relaxed ${darkMode ? "text-[hsl(0_0%_55%)]" : "text-muted-foreground"}`}>
+      <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>
         {t.content}
       </p>
     </motion.div>
@@ -152,9 +154,14 @@ export default function WidgetLabPage() {
   const [showVideoFirst, setShowVideoFirst] = useState(true);
   const [copied, setCopied] = useState(false);
   const [layoutFilter, setLayoutFilter] = useState<"all" | "grid" | "scroll" | "immersive">("all");
-  const [cardRadius, setCardRadius] = useState([12]);
+   const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
   const [accentColor, setAccentColor] = useState("#3b82f6");
+  const [cardBg, setCardBg] = useState("#ffffff");
+  const [nameColor, setNameColor] = useState("#1a1a1a");
+  const [companyColor, setCompanyColor] = useState("#888888");
+  const [bodyColor, setBodyColor] = useState("#666666");
+  const [starColor, setStarColor] = useState("#f59e0b");
   const [showStars, setShowStars] = useState(true);
   const [showAvatar, setShowAvatar] = useState(true);
   const [showCompany, setShowCompany] = useState(true);
@@ -267,27 +274,27 @@ export default function WidgetLabPage() {
 
           {/* Card style */}
           <div className="space-y-3.5 pt-3 border-t border-border">
-            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Card Style</p>
-            <div>
-              <Label className="text-[11px] text-muted-foreground mb-2 block">Accent color</Label>
-              <div className="flex gap-1.5">
-                {["#3b82f6","#059669","#ea580c","#7c3aed","#e11d48","#0d9488","#f59e0b","#000000"].map(c => (
-                  <button key={c} onClick={() => setAccentColor(c)} className="relative">
-                    <div
-                      className={`w-6 h-6 rounded-full transition-all duration-150 ${
-                        accentColor === c ? "ring-2 ring-offset-2 ring-offset-background ring-primary scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: c }}
-                    />
-                    {accentColor === c && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-white drop-shadow" />
-                      </div>
-                    )}
-                  </button>
-                ))}
+            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Colors</p>
+            {([
+              { label: "Card background", value: cardBg, set: setCardBg },
+              { label: "Name", value: nameColor, set: setNameColor },
+              { label: "Company", value: companyColor, set: setCompanyColor },
+              { label: "Testimonial", value: bodyColor, set: setBodyColor },
+              { label: "Stars", value: starColor, set: setStarColor },
+            ] as const).map(({ label, value, set }) => (
+              <div key={label} className="flex items-center justify-between">
+                <Label className="text-[11px] text-muted-foreground">{label}</Label>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: value }} />
+                  <input
+                    type="color"
+                    value={value}
+                    onChange={(e) => set(e.target.value)}
+                    className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-0"
+                  />
+                </div>
               </div>
-            </div>
+            ))}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <Label className="text-[11px] text-muted-foreground">Border radius</Label>
@@ -342,22 +349,6 @@ export default function WidgetLabPage() {
             <div className="flex items-center justify-between">
               <span className="text-[12px] text-foreground">Company name</span>
               <Switch checked={showCompany} onCheckedChange={setShowCompany} />
-            </div>
-            <div>
-              <Label className="text-[11px] text-muted-foreground mb-1.5 block">Header align</Label>
-              <div className="flex gap-0.5 bg-muted/60 rounded-lg p-0.5 w-fit">
-                {(["left","center","right"] as const).map(a => (
-                  <button
-                    key={a}
-                    onClick={() => setHeaderAlign(a)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
-                      headerAlign === a ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {a.charAt(0).toUpperCase() + a.slice(1)}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -474,15 +465,6 @@ export default function WidgetLabPage() {
               }`}
             >
               <div className="p-6 lg:p-10">
-                {/* Section heading preview */}
-                <div className={`mb-8 ${headerAlign === "center" ? "text-center" : headerAlign === "right" ? "text-right" : "text-left"}`}>
-                  <h2 className={`text-lg font-semibold mb-1 ${fontMap[fontFamily]} ${darkMode ? "text-[hsl(0_0%_90%)]" : "text-foreground"}`}>
-                    What our customers say
-                  </h2>
-                  <p className={`text-[12px] ${darkMode ? "text-[hsl(0_0%_45%)]" : "text-muted-foreground"}`}>
-                    Real feedback from real people.
-                  </p>
-                </div>
 
                 {/* Testimonial grid */}
                 <div className={`grid gap-3 ${
@@ -492,6 +474,7 @@ export default function WidgetLabPage() {
                     <TestimonialCard key={i} t={t} config={{
                       darkMode, radius: cardRadius[0], padding: cardPadding[0],
                       shadow: cardShadow, font: fontFamily, accent: accentColor,
+                      cardBg, nameColor, companyColor, bodyColor, starColor,
                       showStars, showAvatar, showCompany,
                     }} index={i} />
                   ))}
