@@ -24,7 +24,7 @@ export default function SettingsPage() {
   const save = () => toast({ title: "Changes saved" });
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-xl">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[22px] font-semibold text-foreground">Settings</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">Account, workspace, and billing.</p>
