@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DODO_API_URL = "https://live.dodopayments.com";
+const DODO_API_URLS = ["https://live.dodopayments.com", "https://test.dodopayments.com"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,9 +26,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    if (!supabaseUrl || !supabaseKey) throw new Error("Missing Supabase env vars");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey =
+      Deno.env.get("SUPABASE_ANON_KEY") ||
+      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase env vars: SUPABASE_URL and key");
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
@@ -48,29 +54,56 @@ Deno.serve(async (req) => {
 
     const { product_id, return_url } = await req.json();
 
-    // Create Dodo checkout session
-    const response = await fetch(`${DODO_API_URL}/checkouts`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${DODO_API_KEY}`,
-        "Content-Type": "application/json",
+    // Create Dodo checkout session (live first, then test fallback for product mismatch)
+    const checkoutPayload = {
+      product_cart: [{ product_id, quantity: 1 }],
+      customer: {
+        email: userEmail,
       },
-      body: JSON.stringify({
-        product_cart: [{ product_id, quantity: 1 }],
-        customer: {
-          email: userEmail,
-        },
-        payment_link: true,
-        return_url: return_url || undefined,
-        metadata: {
-          user_id: userId,
-        },
-      }),
-    });
+      payment_link: true,
+      return_url: return_url || undefined,
+      metadata: {
+        user_id: userId,
+      },
+    };
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(`Dodo API error [${response.status}]: ${JSON.stringify(data)}`);
+    let data: any = null;
+    let response: Response | null = null;
+
+    for (const baseUrl of DODO_API_URLS) {
+      response = await fetch(`${baseUrl}/checkouts`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${DODO_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(checkoutPayload),
+      });
+
+      const raw = await response.text();
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = { message: raw };
+      }
+      if (response.ok) break;
+
+      const message =
+        typeof data?.message === "string"
+          ? data.message
+          : typeof data?.error === "string"
+            ? data.error
+            : "";
+
+      const isProductMissing =
+        response.status === 422 &&
+        message.toLowerCase().includes("does not exist");
+
+      if (!isProductMissing) break;
+    }
+
+    if (!response?.ok) {
+      throw new Error(`Dodo API error [${response?.status}]: ${JSON.stringify(data)}`);
     }
 
     return new Response(JSON.stringify({ checkout_url: data.checkout_url, session_id: data.session_id }), {
