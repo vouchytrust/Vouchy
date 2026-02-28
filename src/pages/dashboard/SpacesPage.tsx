@@ -133,101 +133,55 @@ export default function SpacesPage() {
                 variants={cardVariant}
                 layout
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col hover:vouchy-shadow-sm transition-all duration-200"
+                className="group rounded-xl border border-border bg-card p-4 flex flex-col gap-3 hover:border-primary/20 transition-all duration-200"
               >
-                {/* Top accent bar */}
-                <div className={`h-1.5 bg-gradient-to-r ${space.accentGradient} ${!space.isActive ? "opacity-30" : ""}`} />
-
-                <div className="p-5 flex-1 flex flex-col">
-                  {/* Header */}
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${space.accentGradient} flex items-center justify-center shrink-0 ${!space.isActive ? "opacity-40" : ""}`}>
-                      <span className="text-[11px] font-bold text-primary-foreground">{space.initial}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-[14px] font-semibold text-foreground truncate">{space.name}</h3>
-                        {space.isActive ? (
-                          <span className="flex items-center gap-1 text-2xs font-medium text-vouchy-success bg-vouchy-success/10 px-1.5 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-vouchy-success animate-pulse" />
-                            Live
-                          </span>
-                        ) : (
-                          <span className="text-2xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Inactive</span>
-                        )}
-                      </div>
-                      <p className="text-2xs text-muted-foreground mt-0.5">Created {space.createdAt}</p>
-                    </div>
+                {/* Header */}
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${space.accentGradient} flex items-center justify-center shrink-0 ${!space.isActive ? "opacity-40" : ""}`}>
+                    <span className="text-[10px] font-bold text-primary-foreground">{space.initial}</span>
                   </div>
-
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                      <div className="text-[16px] font-bold text-foreground leading-none">{space.testimonialCount}</div>
-                      <div className="text-2xs text-muted-foreground mt-1">Total</div>
-                    </div>
-                    <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Video className="h-3 w-3 text-primary" />
-                        <span className="text-[16px] font-bold text-foreground leading-none">{space.videoCount}</span>
-                      </div>
-                      <div className="text-2xs text-muted-foreground mt-1">Video</div>
-                    </div>
-                    <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <MessageSquareText className="h-3 w-3 text-chart-3" />
-                        <span className="text-[16px] font-bold text-foreground leading-none">{space.textCount}</span>
-                      </div>
-                      <div className="text-2xs text-muted-foreground mt-1">Text</div>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[13px] font-semibold text-foreground truncate">{space.name}</h3>
+                    <p className="text-2xs text-muted-foreground">{space.testimonialCount} testimonials</p>
                   </div>
+                  {space.isActive ? (
+                    <span className="flex items-center gap-1 text-2xs font-medium text-vouchy-success bg-vouchy-success/10 px-1.5 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-vouchy-success animate-pulse" />
+                      Live
+                    </span>
+                  ) : (
+                    <span className="text-2xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Inactive</span>
+                  )}
+                </div>
 
-                  {/* Collection link */}
-                  <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border/60 px-3 py-2 mb-4">
-                    <Link2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="text-2xs text-muted-foreground truncate flex-1 font-mono">/collect/{space.slug.split("-").slice(0, -1).join("-")}</span>
-                    <button
-                      onClick={() => copyLink(space.slug)}
-                      className="text-2xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0"
-                    >
-                      Copy
-                    </button>
-                  </div>
+                {/* Stats inline */}
+                <div className="flex items-center gap-3 text-2xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><Video className="h-3 w-3 text-primary" />{space.videoCount} video</span>
+                  <span className="flex items-center gap-1"><MessageSquareText className="h-3 w-3 text-chart-3" />{space.textCount} text</span>
+                  <span className="ml-auto">{space.createdAt}</span>
+                </div>
 
-                  {/* Actions footer */}
-                  <div className="flex items-center gap-1.5 mt-auto pt-3 border-t border-border/60">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground"
-                      onClick={() => toggleActive(space.id)}
-                    >
-                      {space.isActive ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
-                      {space.isActive ? "Pause" : "Activate"}
+                {/* Actions */}
+                <div className="flex items-center gap-1 pt-2 border-t border-border/60">
+                  <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground" onClick={() => toggleActive(space.id)}>
+                    {space.isActive ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
+                    {space.isActive ? "Pause" : "Activate"}
+                  </Button>
+                  <a href={`/collect/${space.slug}`} target="_blank" rel="noreferrer">
+                    <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground">
+                      <ExternalLink className="h-3 w-3" /> Open
                     </Button>
-                    <a href={`/collect/${space.slug}`} target="_blank" rel="noreferrer">
-                      <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground">
-                        <ExternalLink className="h-3 w-3" /> Open
-                      </Button>
-                    </a>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground"
-                      onClick={() => openEditor(space)}
-                    >
-                      <Settings2 className="h-3 w-3" /> Edit
-                    </Button>
-                    <div className="flex-1" />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => deleteSpace(space.id)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  </a>
+                  <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground" onClick={() => copyLink(space.slug)}>
+                    <Copy className="h-3 w-3" /> Copy
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground" onClick={() => openEditor(space)}>
+                    <Settings2 className="h-3 w-3" /> Edit
+                  </Button>
+                  <div className="flex-1" />
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSpace(space.id)}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -237,12 +191,12 @@ export default function SpacesPage() {
           <motion.button
             variants={cardVariant}
             onClick={openCreateEditor}
-            className="rounded-xl border-2 border-dashed border-border/60 bg-card/50 p-5 flex flex-col items-center justify-center gap-2 min-h-[280px] hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-200 cursor-pointer group"
+            className="rounded-xl border-2 border-dashed border-border/60 bg-card/50 p-4 flex flex-col items-center justify-center gap-2 min-h-[160px] hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-200 cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
-            <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">New Space</span>
+            <span className="text-[12px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">New Space</span>
           </motion.button>
         </motion.div>
       )}
