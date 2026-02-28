@@ -2,9 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageSquareText, Video, Link2, ArrowUpRight, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import SpaceEditorPanel, { type SpaceFormConfig } from "@/components/SpaceEditorPanel";
 interface Space {
@@ -33,28 +30,18 @@ const cardVariant = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, t
 
 export default function SpacesPage() {
   const [spaces, setSpaces] = useState(mockSpaces);
-  const [newName, setNewName] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
 
-  const gradients = ["from-primary to-chart-3", "from-chart-2 to-primary", "from-chart-4 to-chart-5", "from-chart-3 to-chart-5", "from-primary to-chart-2"];
-
-  const createSpace = () => {
-    if (!newName.trim()) return;
-    const slug = newName.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
-    const initial = newName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-    setSpaces([...spaces, {
-      id: crypto.randomUUID(), name: newName, slug, isActive: true,
-      testimonialCount: 0, videoCount: 0, textCount: 0,
-      createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      accentGradient: gradients[spaces.length % gradients.length], initial,
-    }]);
-    setNewName("");
-    setDialogOpen(false);
-    toast({ title: "Space created", description: `${newName} is ready for testimonials.` });
+  const openCreateEditor = () => {
+    setSelectedSpace(null);
+    setIsCreating(true);
+    setEditorOpen(true);
   };
+
+  const gradients = ["from-primary to-chart-3", "from-chart-2 to-primary", "from-chart-4 to-chart-5", "from-chart-3 to-chart-5", "from-primary to-chart-2"];
 
   const copyLink = (slug: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/collect/${slug}`);
@@ -76,13 +63,35 @@ export default function SpacesPage() {
   };
 
   const handleEditorSave = (spaceId: string, updates: { name?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => {
-    setSpaces(prev => prev.map(s => s.id === spaceId ? {
-      ...s,
-      ...(updates.name && { name: updates.name, initial: updates.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) }),
-      ...(updates.isActive !== undefined && { isActive: updates.isActive }),
-      ...(updates.formConfig && { formConfig: updates.formConfig }),
-    } : s));
-    toast({ title: "Space updated" });
+    if (isCreating) {
+      // Creating a new space
+      const spaceName = updates.name || "Untitled";
+      const slug = spaceName.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
+      const initial = spaceName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      setSpaces(prev => [...prev, {
+        id: spaceId,
+        name: spaceName,
+        slug,
+        isActive: updates.isActive ?? true,
+        testimonialCount: 0,
+        videoCount: 0,
+        textCount: 0,
+        createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        accentGradient: gradients[spaces.length % gradients.length],
+        initial,
+        formConfig: updates.formConfig,
+      }]);
+      setIsCreating(false);
+      toast({ title: "Space created", description: `${spaceName} is ready for testimonials.` });
+    } else {
+      setSpaces(prev => prev.map(s => s.id === spaceId ? {
+        ...s,
+        ...(updates.name && { name: updates.name, initial: updates.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) }),
+        ...(updates.isActive !== undefined && { isActive: updates.isActive }),
+        ...(updates.formConfig && { formConfig: updates.formConfig }),
+      } : s));
+      toast({ title: "Space updated" });
+    }
   };
 
   return (
@@ -93,22 +102,9 @@ export default function SpacesPage() {
           <h1 className="text-[22px] font-semibold text-foreground">Spaces</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">Collection pages for gathering testimonials.</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="h-8 text-xs gap-1.5"><Plus className="h-3.5 w-3.5" /> New Space</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader><DialogTitle className="text-base">Create a new space</DialogTitle></DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div>
-                <Label className="text-[13px]">Space name</Label>
-                <Input className="mt-1.5 h-9 text-[13px]" placeholder="e.g. Product Feedback" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={100} autoFocus />
-                <p className="text-2xs text-muted-foreground mt-1">{newName.length}/100 characters</p>
-              </div>
-              <Button onClick={createSpace} className="w-full h-9 text-[13px]" disabled={!newName.trim()}>Create Space</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button size="sm" className="h-8 text-xs gap-1.5" onClick={openCreateEditor}>
+          <Plus className="h-3.5 w-3.5" /> New Space
+        </Button>
       </motion.div>
 
       {/* Summary strip */}
@@ -126,7 +122,7 @@ export default function SpacesPage() {
           </div>
           <h3 className="text-[14px] font-medium text-foreground mb-1">No spaces yet</h3>
           <p className="text-[12px] text-muted-foreground mb-4">Create your first space to start collecting.</p>
-          <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Space</Button>
+          <Button size="sm" onClick={openCreateEditor}><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Space</Button>
         </motion.div>
       ) : (
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -240,7 +236,7 @@ export default function SpacesPage() {
           {/* Add new card */}
           <motion.button
             variants={cardVariant}
-            onClick={() => setDialogOpen(true)}
+            onClick={openCreateEditor}
             className="rounded-xl border-2 border-dashed border-border/60 bg-card/50 p-5 flex flex-col items-center justify-center gap-2 min-h-[280px] hover:border-primary/30 hover:bg-primary/[0.02] transition-all duration-200 cursor-pointer group"
           >
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -253,8 +249,12 @@ export default function SpacesPage() {
 
       <SpaceEditorPanel
         open={editorOpen}
-        onOpenChange={setEditorOpen}
+        onOpenChange={(open) => {
+          setEditorOpen(open);
+          if (!open) setIsCreating(false);
+        }}
         space={selectedSpace}
+        isCreating={isCreating}
         onSave={handleEditorSave}
       />
     </div>
