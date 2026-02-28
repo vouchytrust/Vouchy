@@ -301,8 +301,13 @@ export default function WidgetLabPage() {
         </div>
 
         {/* Browser frame + preview */}
-        <div className="flex-1 p-4 overflow-hidden">
-          <div className="h-full rounded-xl border border-border bg-card overflow-hidden flex flex-col vouchy-shadow-sm">
+        <div className="flex-1 p-4 overflow-hidden flex justify-center">
+          <motion.div
+            className="h-full rounded-xl border border-border bg-card overflow-hidden flex flex-col vouchy-shadow-sm"
+            animate={{ maxWidth: device === "mobile" ? "375px" : device === "tablet" ? "768px" : "100%" }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            style={{ width: "100%" }}
+          >
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/20">
               <div className="flex gap-1.5">
@@ -335,21 +340,16 @@ export default function WidgetLabPage() {
                 </div>
 
                 {/* Testimonial grid */}
-                <div
-                  className="mx-auto transition-all duration-300"
-                  style={{ maxWidth: device === "mobile" ? "375px" : device === "tablet" ? "768px" : "100%" }}
-                >
-                  <div className={`grid gap-3 ${
-                    device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
-                  }`}>
-                    {sampleTestimonials.map((t, i) => (
-                      <TestimonialCard key={i} t={t} darkMode={darkMode} index={i} />
-                    ))}
-                  </div>
+                <div className={`grid gap-3 ${
+                  device === "mobile" ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
+                }`}>
+                  {sampleTestimonials.map((t, i) => (
+                    <TestimonialCard key={i} t={t} darkMode={darkMode} index={i} />
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </div>
