@@ -25,7 +25,9 @@ export default function FirstTimeGuide({ companyName }: { companyName?: string }
         </button>
 
         <div className="flex items-start gap-4">
-          <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-10 w-10 object-contain" />
+          <div className="w-10 h-10 rounded-xl vouchy-gradient-bg flex items-center justify-center shrink-0">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
+          </div>
           <div className="flex-1">
             <h3 className="text-[15px] font-semibold text-foreground mb-1">
               Welcome{companyName ? `, ${companyName}` : ""}! Let's get your first testimonials.

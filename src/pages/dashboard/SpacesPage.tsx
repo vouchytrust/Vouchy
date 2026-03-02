@@ -139,18 +139,18 @@ export default function SpacesPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-end justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold text-foreground">Collectors</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Share your collection link to gather video and text social proof.</p>
+          <h1 className="text-[22px] font-semibold text-foreground">Spaces</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Collection pages for gathering testimonials.</p>
         </div>
         <Button size="sm" className="h-8 text-xs gap-1.5" onClick={openCreateEditor}>
-          <Plus className="h-3.5 w-3.5" /> New Collector
+          <Plus className="h-3.5 w-3.5" /> New Space
         </Button>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex items-center gap-6 text-[12px]">
-        <span className="text-muted-foreground"><span className="font-semibold text-foreground">{spaces.length}</span> collectors</span>
+        <span className="text-muted-foreground"><span className="font-semibold text-foreground">{spaces.length}</span> spaces</span>
         <span className="text-muted-foreground"><span className="font-semibold text-foreground">{spaces.filter(s => s.is_active).length}</span> active</span>
-        <span className="text-muted-foreground"><span className="font-semibold text-foreground">{totalTestimonials}</span> total stories</span>
+        <span className="text-muted-foreground"><span className="font-semibold text-foreground">{totalTestimonials}</span> total testimonials</span>
       </motion.div>
 
       {spaces.length === 0 ? (
@@ -159,8 +159,8 @@ export default function SpacesPage() {
             <FolderOpen className="h-5 w-5 text-muted-foreground" />
           </div>
           <h3 className="text-[14px] font-medium text-foreground mb-1">No spaces yet</h3>
-          <p className="text-[12px] text-muted-foreground mb-4">Create your first collector to start gathering social proof.</p>
-          <Button size="sm" onClick={openCreateEditor}><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Collector</Button>
+          <p className="text-[12px] text-muted-foreground mb-4">Create your first space to start collecting.</p>
+          <Button size="sm" onClick={openCreateEditor}><Plus className="h-3.5 w-3.5 mr-1.5" /> Create Space</Button>
         </motion.div>
       ) : (
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -235,7 +235,7 @@ export default function SpacesPage() {
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
               <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
-            <span className="text-[12px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">New Collector</span>
+            <span className="text-[12px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">New Space</span>
           </motion.button>
         </motion.div>
       )}

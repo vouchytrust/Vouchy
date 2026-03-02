@@ -25,8 +25,6 @@ export interface ThankYouConfig {
 export interface SpaceFormConfig {
   formFields: FormField[];
   thankYouConfig: ThankYouConfig;
-  allowVideo: boolean;
-  allowText: boolean;
 }
 
 interface SpaceEditorProps {
@@ -78,99 +76,62 @@ const fieldTypePlaceholders: Record<FormField["type"], string> = {
 };
 
 /* ── Live Preview Component ── */
-function FormLivePreview({ fields, spaceName, allowVideo, allowText }: { fields: FormField[]; spaceName: string; allowVideo: boolean; allowText: boolean }) {
-  const [previewMode, setPreviewMode] = useState<"choose" | "form">(allowVideo && allowText ? "choose" : "form");
-
-  useEffect(() => {
-    setPreviewMode(allowVideo && allowText ? "choose" : "form");
-  }, [allowVideo, allowText]);
-
+function FormLivePreview({ fields, spaceName }: { fields: FormField[]; spaceName: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       {/* Preview header */}
-      <div className="bg-gradient-to-br from-primary/10 to-primary/5 px-5 py-4 border-b border-border/60 text-center">
-        {spaceName && (
-          <div className="flex flex-col items-center gap-1.5 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center vouchy-shadow-sm">
-              <Star className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-[12px] font-bold text-foreground">{spaceName}</span>
+      <div className="bg-gradient-to-br from-primary/10 to-primary/5 px-5 py-4 border-b border-border/60">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-6 h-6 rounded-md bg-primary/20 flex items-center justify-center">
+            <MessageSquare className="h-3 w-3 text-primary" />
           </div>
-        )}
+          <span className="text-[11px] font-semibold text-foreground">{spaceName || "Your Space"}</span>
+        </div>
         <p className="text-[10px] text-muted-foreground">We'd love to hear your feedback!</p>
       </div>
 
-      <div className="p-4">
-        {previewMode === "choose" ? (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="p-3 border rounded-lg text-center bg-muted/20">
-              <Video className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-[9px] font-semibold">Video</div>
-            </div>
-            <div className="p-3 border rounded-lg text-center bg-muted/20">
-              <MessageSquare className="h-4 w-4 text-primary mx-auto mb-1" />
-              <div className="text-[9px] font-semibold">Text</div>
-            </div>
-            <Button size="sm" variant="ghost" className="col-span-2 h-5 text-[8px] mt-1" onClick={() => setPreviewMode("form")}>
-              Preview Form
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {allowVideo && !allowText && (
-              <div className="h-14 rounded-lg border border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-1 mb-3">
+      {/* Preview form fields */}
+      <div className="p-4 space-y-3">
+        {fields.map(field => (
+          <div key={field.id} className="space-y-1">
+            <label className="text-[10px] font-medium text-foreground flex items-center gap-1">
+              {field.label}
+              {field.required && <span className="text-destructive text-[9px]">*</span>}
+            </label>
+
+            {field.type === "rating" ? (
+              <div className="flex gap-0.5 py-0.5">
+                {[1, 2, 3, 4, 5].map(s => (
+                  <Star
+                    key={s}
+                    className={`h-4 w-4 ${s <= 3 ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"}`}
+                  />
+                ))}
+              </div>
+            ) : field.type === "video" ? (
+              <div className="h-14 rounded-lg border border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-1">
                 <Video className="h-3.5 w-3.5 text-muted-foreground/50" />
-                <span className="text-[9px] text-muted-foreground/60">Record or upload video</span>
+                <span className="text-[9px] text-muted-foreground/60">Record or upload</span>
               </div>
-            )}
-
-            {fields.map(field => (
-              <div key={field.id} className="space-y-1">
-                <label className="text-[10px] font-medium text-foreground flex items-center gap-1">
-                  {field.label}
-                  {field.required && <span className="text-destructive text-[9px]">*</span>}
-                </label>
-
-                {field.type === "rating" ? (
-                  <div className="flex gap-0.5 py-0.5">
-                    {[1, 2, 3, 4, 5].map(s => (
-                      <Star
-                        key={s}
-                        className={`h-4 w-4 ${s <= 3 ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"}`}
-                      />
-                    ))}
-                  </div>
-                ) : field.type === "video" ? (
-                  <div className="h-14 rounded-lg border border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-1">
-                    <Video className="h-3.5 w-3.5 text-muted-foreground/50" />
-                    <span className="text-[9px] text-muted-foreground/60">Record or upload</span>
-                  </div>
-                ) : field.type === "text" || field.type === "custom" ? (
-                  <div className="rounded-md border border-border bg-background px-2.5 py-2 min-h-[48px]">
-                    <span className="text-[10px] text-muted-foreground/40">{fieldTypePlaceholders[field.type]}</span>
-                  </div>
-                ) : (
-                  <div className="rounded-md border border-border bg-background px-2.5 py-1.5 h-7 flex items-center">
-                    <span className="text-[10px] text-muted-foreground/40">{fieldTypePlaceholders[field.type]}</span>
-                  </div>
-                )}
+            ) : field.type === "text" || field.type === "custom" ? (
+              <div className="rounded-md border border-border bg-background px-2.5 py-2 min-h-[48px]">
+                <span className="text-[10px] text-muted-foreground/40">{fieldTypePlaceholders[field.type]}</span>
               </div>
-            ))}
-
-            <div className="pt-1.5">
-              <div className="h-7 w-full rounded-md bg-primary flex items-center justify-center gap-1.5">
-                <Send className="h-2.5 w-2.5 text-primary-foreground" />
-                <span className="text-[10px] font-medium text-primary-foreground">Submit</span>
+            ) : (
+              <div className="rounded-md border border-border bg-background px-2.5 py-1.5 h-7 flex items-center">
+                <span className="text-[10px] text-muted-foreground/40">{fieldTypePlaceholders[field.type]}</span>
               </div>
-            </div>
-
-            {allowVideo && allowText && (
-              <Button size="sm" variant="ghost" className="w-full h-5 text-[8px] mt-1" onClick={() => setPreviewMode("choose")}>
-                Back to Selection
-              </Button>
             )}
           </div>
-        )}
+        ))}
+
+        {/* Submit button preview */}
+        <div className="pt-1.5">
+          <div className="h-7 w-full rounded-md bg-primary flex items-center justify-center gap-1.5">
+            <Send className="h-2.5 w-2.5 text-primary-foreground" />
+            <span className="text-[10px] font-medium text-primary-foreground">Submit</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -276,8 +237,6 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
   const [name, setName] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [fields, setFields] = useState<FormField[]>(defaultFields);
-  const [allowVideo, setAllowVideo] = useState(true);
-  const [allowText, setAllowText] = useState(true);
   const [thankYou, setThankYou] = useState<ThankYouConfig>(defaultThankYou);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("general");
@@ -289,8 +248,6 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
     setName(space.name);
     setIsActive(space.isActive);
     setFields(space.formConfig?.formFields ?? defaultFields);
-    setAllowVideo(space.formConfig?.allowVideo ?? true);
-    setAllowText(space.formConfig?.allowText ?? true);
     setThankYou(space.formConfig?.thankYouConfig ?? defaultThankYou);
     setActiveTab("general");
   }
@@ -302,8 +259,6 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
       setName("");
       setIsActive(true);
       setFields([...defaultFields]);
-      setAllowVideo(true);
-      setAllowText(true);
       setThankYou({ ...defaultThankYou });
       setActiveTab("general");
     }
@@ -344,12 +299,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
     onSave(spaceId, {
       name,
       isActive,
-      formConfig: {
-        formFields: fields,
-        thankYouConfig: thankYou,
-        allowVideo,
-        allowText
-      },
+      formConfig: { formFields: fields, thankYouConfig: thankYou },
     });
     onOpenChange(false);
   };
@@ -369,7 +319,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
                 <span className="text-[10px] font-bold text-primary-foreground">{displayInitial}</span>
               </div>
               <div>
-                <SheetTitle className="text-[15px]">{isCreating ? "Create Collector" : "Edit Collector"}</SheetTitle>
+                <SheetTitle className="text-[15px]">{isCreating ? "Create Space" : "Edit Space"}</SheetTitle>
                 <SheetDescription className="text-2xs">
                   {isCreating ? "Set up your collection page" : space?.slug}
                 </SheetDescription>
@@ -390,7 +340,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
           {/* ── General ── */}
           <TabsContent value="general" className="px-6 py-5 space-y-5">
             <div className="space-y-1.5">
-              <Label className="text-[13px]">Collector Name</Label>
+              <Label className="text-[13px]">Space Name</Label>
               <Input
                 className="h-9 text-[13px]"
                 value={name}
@@ -422,36 +372,8 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Left: field config */}
               <div className="space-y-3">
-                <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-4 mb-3">
-                  <p className="text-[13px] font-semibold text-foreground flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    Collection Types
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setAllowVideo(!allowVideo)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${allowVideo ? "bg-card border-primary ring-2 ring-primary/20 shadow-sm" : "bg-muted/50 border-transparent text-muted-foreground"
-                        }`}
-                    >
-                      <Video className={`h-5 w-5 ${allowVideo ? "text-primary" : "text-muted-foreground/40"}`} />
-                      <span className="text-[11px] font-medium leading-none">Video</span>
-                    </button>
-                    <button
-                      onClick={() => setAllowText(!allowText)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${allowText ? "bg-card border-primary ring-2 ring-primary/20 shadow-sm" : "bg-muted/50 border-transparent text-muted-foreground"
-                        }`}
-                    >
-                      <Type className={`h-5 w-5 ${allowText ? "text-primary" : "text-muted-foreground/40"}`} />
-                      <span className="text-[11px] font-medium leading-none">Text</span>
-                    </button>
-                  </div>
-                  {(!allowVideo && !allowText) && (
-                    <p className="text-[10px] text-destructive font-medium text-center">Please select at least one collection type.</p>
-                  )}
-                </div>
-
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-medium text-foreground">Custom Fields</p>
+                  <p className="text-[13px] font-medium text-foreground">Fields</p>
                   <Button size="sm" variant="outline" className="h-7 text-2xs gap-1" onClick={addField}>
                     <Plus className="h-3 w-3" /> Add
                   </Button>
@@ -477,7 +399,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
               {/* Right: live preview */}
               <div className="space-y-2">
                 <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Live Preview</p>
-                <FormLivePreview fields={fields} spaceName={displayName} allowVideo={allowVideo} allowText={allowText} />
+                <FormLivePreview fields={fields} spaceName={displayName} />
               </div>
             </div>
           </TabsContent>
@@ -517,7 +439,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
         <div className="sticky bottom-0 bg-background border-t border-border px-6 py-4 flex justify-end gap-2">
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button size="sm" className="h-8 text-xs" onClick={handleSave} disabled={!name.trim()}>
-            {isCreating ? "Create Collector" : "Save Changes"}
+            {isCreating ? "Create Space" : "Save Changes"}
           </Button>
         </div>
       </SheetContent>

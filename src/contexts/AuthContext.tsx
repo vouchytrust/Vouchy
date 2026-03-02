@@ -9,7 +9,6 @@ interface Profile {
   brand_color: string;
   logo_url: string | null;
   onboarding_completed: boolean;
-  plan?: string | null;
 }
 
 interface AuthContextType {
@@ -26,8 +25,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
-  refreshProfile: async () => { },
-  signOut: async () => { },
+  refreshProfile: async () => {},
+  signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);

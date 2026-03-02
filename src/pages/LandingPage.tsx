@@ -32,8 +32,11 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <img src="/src/assets/logo-primary.svg" alt="Vouchy Logo" className="h-[42px] mt-1.5" />
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg vouchy-gradient-bg flex items-center justify-center">
+              <Star className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground">Vouchy</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -223,7 +226,9 @@ export default function LandingPage() {
       <footer className="border-t border-border py-12 px-6">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-6 w-6" />
+            <div className="h-6 w-6 rounded-md vouchy-gradient-bg flex items-center justify-center">
+              <Star className="h-3 w-3 text-primary-foreground" />
+            </div>
             <span className="font-semibold text-foreground">Vouchy</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">

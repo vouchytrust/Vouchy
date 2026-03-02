@@ -4,7 +4,7 @@ import {
   Monitor, Tablet, Smartphone, Code, Star, Eye, Lock,
   Copy, Check, Sparkles, LayoutGrid, Rows3, GalleryHorizontalEnd,
   MessageCircle, Users, Layers3, Quote, Heart, AlignCenter,
-  FolderOpen, Play, Video,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -54,8 +54,6 @@ interface TestimonialItem {
   rating: number;
   content: string;
   initials: string;
-  type?: string;
-  video_url?: string | null;
 }
 
 /* ── Testimonial Card ── */
@@ -83,34 +81,6 @@ const fontMap: Record<string, string> = { system: "font-sans", inter: "font-sans
 function TestimonialCard({ t, config, index }: { t: TestimonialItem; config: CardConfig; index: number }) {
   const { layout, darkMode, radius, padding, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany, shadow } = config;
 
-  const isVideo = t.type === "video";
-
-  const videoThumbnail = isVideo && (
-    <div className="relative aspect-video overflow-hidden rounded-t" style={{ borderRadius: `${radius}px ${radius}px 0 0` }}>
-      {t.video_url ? (
-        <video
-          src={t.video_url}
-          preload="metadata"
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.5; }}
-        />
-      ) : (
-        <div className="absolute inset-0" style={{ background: darkMode ? "hsl(240 4% 10%)" : "#f3f4f6" }} />
-      )}
-      <div className="absolute inset-0 bg-black/25" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Play className="h-4 w-4 text-white ml-0.5" />
-        </div>
-      </div>
-      <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 text-[9px] font-medium text-white bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
-        <Video className="h-2 w-2" /> Video
-      </span>
-    </div>
-  );
-
   const stars = showStars && (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, j) => (
@@ -129,10 +99,6 @@ function TestimonialCard({ t, config, index }: { t: TestimonialItem; config: Car
     <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: starColor + "20" }}>
       <span className="text-sm font-bold" style={{ color: starColor }}>{t.initials}</span>
     </div>
-  );
-
-  const bodyText = isVideo ? null : (
-    <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>{t.content}</p>
   );
 
   const anim = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { delay: index * 0.05, duration: 0.35 } };
@@ -241,19 +207,16 @@ function TestimonialCard({ t, config, index }: { t: TestimonialItem; config: Car
 
   // Default: Clean
   return (
-    <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5 overflow-hidden`} style={{ borderRadius: `${radius}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined }}>
-      {videoThumbnail}
-      <div style={{ padding: `${padding}px` }}>
-        <div className="flex items-center gap-2.5 mb-3">
-          {avatarSmall}
-          <div>
-            <div className="text-[12px] font-medium leading-tight" style={{ color: nameColor }}>{t.name}</div>
-            {showCompany && <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>}
-          </div>
+    <motion.div {...anim} className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all hover:-translate-y-0.5`} style={{ borderRadius: `${radius}px`, padding: `${padding}px`, backgroundColor: cardBg, borderColor: darkMode ? "hsl(240 4% 16%)" : undefined }}>
+      <div className="flex items-center gap-2.5 mb-3">
+        {avatarSmall}
+        <div>
+          <div className="text-[12px] font-medium leading-tight" style={{ color: nameColor }}>{t.name}</div>
+          {showCompany && <div className="text-2xs" style={{ color: companyColor }}>{t.company}</div>}
         </div>
-        <div className="mb-2">{stars}</div>
-        {bodyText}
       </div>
+      <div className="mb-2">{stars}</div>
+      <p className="text-[11.5px] leading-relaxed" style={{ color: bodyColor }}>{t.content}</p>
     </motion.div>
   );
 }
@@ -342,8 +305,6 @@ export default function WidgetLabPage() {
             rating: t.rating,
             content: t.content,
             initials: t.author_name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2),
-            type: t.type,
-            video_url: t.video_url || null,
           }));
         setTestimonials(mapped);
       } catch (err) {
@@ -374,27 +335,6 @@ export default function WidgetLabPage() {
 
   const currentLayout = layouts.find(l => l.id === selectedLayout);
 
-  const previewUrl = (() => {
-    const p = new URLSearchParams({
-      spaceId: selectedSpaceId,
-      layout: selectedLayout,
-      dark: darkMode ? "1" : "0",
-      radius: String(cardRadius[0]),
-      padding: String(cardPadding[0]),
-      shadow: cardShadow,
-      font: fontFamily,
-      cardBg: encodeURIComponent(cardBg),
-      nameColor: encodeURIComponent(nameColor),
-      companyColor: encodeURIComponent(companyColor),
-      bodyColor: encodeURIComponent(bodyColor),
-      starColor: encodeURIComponent(starColor),
-      showStars: showStars ? "1" : "0",
-      showAvatar: showAvatar ? "1" : "0",
-      showCompany: showCompany ? "1" : "0",
-    });
-    return `/embed/preview?${p.toString()}`;
-  })();
-
   return (
     <div className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-7rem)]">
       {/* ── Left: Controls ── */}
@@ -406,10 +346,12 @@ export default function WidgetLabPage() {
       >
         <div className="px-5 pt-5 pb-4 border-b border-border">
           <div className="flex items-center gap-2.5 mb-1">
-            <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 object-contain" />
-            <h1 className="text-[17px] font-semibold text-foreground">Design Widgets</h1>
+            <div className="w-7 h-7 rounded-lg vouchy-gradient-bg flex items-center justify-center">
+              <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+            </div>
+            <h1 className="text-[17px] font-semibold text-foreground">Widget Lab</h1>
           </div>
-          <p className="text-2xs text-muted-foreground">Customize how your testimonials look on your website.</p>
+          <p className="text-2xs text-muted-foreground">Design and preview your embed widget.</p>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
@@ -447,10 +389,11 @@ export default function WidgetLabPage() {
               <button
                 key={l.id}
                 onClick={() => setSelectedLayout(l.id)}
-                className={`relative flex flex-col items-center gap-1 p-2.5 rounded-lg text-center transition-all duration-150 ${selectedLayout === l.id
-                  ? "bg-primary/[0.08] ring-1 ring-primary/30 text-foreground"
-                  : "hover:bg-accent text-muted-foreground hover:text-foreground"
-                  }`}
+                className={`relative flex flex-col items-center gap-1 p-2.5 rounded-lg text-center transition-all duration-150 ${
+                  selectedLayout === l.id
+                    ? "bg-primary/[0.08] ring-1 ring-primary/30 text-foreground"
+                    : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                }`}
               >
                 <span className={selectedLayout === l.id ? "text-primary" : ""}>{l.icon}</span>
                 <span className="text-[10px] font-medium leading-tight">{l.name}</span>
@@ -573,7 +516,7 @@ export default function WidgetLabPage() {
             </DialogContent>
           </Dialog>
           <Button variant="outline" className="w-full h-9 text-xs gap-1.5" asChild>
-            <a href={previewUrl} target="_blank" rel="noreferrer">
+            <a href="/embed/demo" target="_blank" rel="noreferrer">
               <Eye className="h-3.5 w-3.5" /> Full Preview
             </a>
           </Button>
@@ -595,10 +538,11 @@ export default function WidgetLabPage() {
                 <button
                   key={d.id}
                   onClick={() => setDevice(d.id)}
-                  className={`p-1.5 rounded-md transition-all duration-150 ${device === d.id
-                    ? "bg-background text-foreground vouchy-shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                    }`}
+                  className={`p-1.5 rounded-md transition-all duration-150 ${
+                    device === d.id
+                      ? "bg-background text-foreground vouchy-shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
                   <d.icon className="h-3.5 w-3.5" />
                 </button>

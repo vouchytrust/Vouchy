@@ -3,13 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 // ── Spaces ──
 
 export async function fetchSpaces() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
   const { data, error } = await supabase
     .from("spaces")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;
@@ -63,13 +59,9 @@ export async function toggleSpaceActive(id: string, isActive: boolean) {
 // ── Testimonials ──
 
 export async function fetchTestimonials() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
   const { data, error } = await supabase
     .from("testimonials")
     .select("*, spaces(name)")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;
@@ -131,13 +123,9 @@ export async function deleteTestimonial(id: string) {
 // ── Dashboard Stats ──
 
 export async function fetchDashboardStats() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { total: 0, avgRating: "0.0", videoRate: 0, testimonials: [] };
-
   const { data: testimonials, error } = await supabase
     .from("testimonials")
-    .select("id, rating, type, status, created_at")
-    .eq("user_id", user.id);
+    .select("id, rating, type, status, created_at");
   if (error) throw error;
 
   const total = testimonials?.length || 0;
@@ -151,13 +139,9 @@ export async function fetchDashboardStats() {
 }
 
 export async function fetchSpaceTestimonialCounts() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return {};
-
   const { data, error } = await supabase
     .from("testimonials")
-    .select("space_id, type")
-    .eq("user_id", user.id);
+    .select("space_id, type");
   if (error) throw error;
 
   const counts: Record<string, { total: number; video: number; text: number }> = {};
