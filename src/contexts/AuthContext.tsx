@@ -9,7 +9,7 @@ interface Profile {
   brand_color: string;
   logo_url: string | null;
   onboarding_completed: boolean;
-  plan: string | null;
+  plan?: string | null;
 }
 
 interface AuthContextType {
