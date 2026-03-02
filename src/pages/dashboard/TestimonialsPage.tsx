@@ -20,6 +20,8 @@ interface Testimonial {
   is_favorite: boolean;
   created_at: string;
   video_duration: string | null;
+  video_url: string | null;
+  extra_fields?: Record<string, any>;
   spaces?: { name: string } | null;
 }
 
@@ -130,7 +132,7 @@ export default function TestimonialsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[22px] font-semibold text-foreground">Testimonials</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">Review, approve, and manage collected testimonials.</p>
+        <p className="text-[13px] text-muted-foreground mt-0.5">Manage and approve your incoming reviews before showing them off.</p>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -139,9 +141,8 @@ export default function TestimonialsPage() {
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`relative px-3 py-1.5 text-[12px] font-medium rounded-md transition-all duration-200 ${
-                filter === tab.id ? "bg-card text-foreground vouchy-shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`relative px-3 py-1.5 text-[12px] font-medium rounded-md transition-all duration-200 ${filter === tab.id ? "bg-card text-foreground vouchy-shadow-xs" : "text-muted-foreground hover:text-foreground"
+                }`}
             >
               {tab.label}
               <span className={`ml-1.5 text-2xs ${filter === tab.id ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
@@ -185,17 +186,33 @@ export default function TestimonialsPage() {
                   className="rounded-xl border border-border bg-card overflow-hidden flex flex-col"
                 >
                   {t.type === "video" && (
-                    <div className="relative bg-muted/60 aspect-video flex items-center justify-center cursor-pointer group/video">
-                      <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-foreground/[0.02]" />
-                      <div className="w-12 h-12 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center vouchy-shadow-sm group-hover/video:scale-110 transition-transform duration-200">
-                        <Play className="h-5 w-5 text-foreground ml-0.5" />
+                    <div className="relative bg-muted/60 aspect-video flex items-center justify-center cursor-pointer group/video overflow-hidden">
+                      {t.video_url ? (
+                        <video
+                          src={t.video_url}
+                          preload="metadata"
+                          muted
+                          playsInline
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onLoadedMetadata={(e) => {
+                            const v = e.currentTarget;
+                            v.currentTime = 0.5;
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-foreground/[0.02]" />
+                      )}
+                      {/* dark scrim for overlay legibility */}
+                      <div className="absolute inset-0 bg-black/20 group-hover/video:bg-black/30 transition-colors duration-200" />
+                      <div className="relative w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center vouchy-shadow-sm group-hover/video:scale-110 transition-transform duration-200">
+                        <Play className="h-5 w-5 text-white ml-0.5" />
                       </div>
                       {t.video_duration && (
-                        <span className="absolute bottom-2 right-2 text-2xs font-medium bg-foreground/70 text-background px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                        <span className="absolute bottom-2 right-2 text-2xs font-medium bg-black/60 text-white px-1.5 py-0.5 rounded-md backdrop-blur-sm">
                           {t.video_duration}
                         </span>
                       )}
-                      <span className="absolute top-2 left-2 flex items-center gap-1 text-2xs font-medium text-background bg-foreground/50 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
+                      <span className="absolute top-2 left-2 flex items-center gap-1 text-2xs font-medium text-white bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
                         <Video className="h-2.5 w-2.5" /> Video
                       </span>
                     </div>
@@ -229,6 +246,17 @@ export default function TestimonialsPage() {
                     </div>
 
                     <p className="text-[12.5px] text-muted-foreground leading-relaxed flex-1 line-clamp-3">{t.content}</p>
+
+                    {t.extra_fields && Object.keys(t.extra_fields).length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {Object.entries(t.extra_fields).map(([label, value]) => (
+                          <div key={label} className="bg-muted px-2 py-1 rounded-md border border-border/50">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block leading-none mb-1">{label}</span>
+                            <span className="text-[11px] font-medium text-foreground block leading-none">{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/60">
                       <span className={`flex items-center gap-1 text-2xs font-medium px-2 py-1 rounded-md ${S.bg} ${S.text}`}>

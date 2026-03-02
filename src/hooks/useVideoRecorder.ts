@@ -14,8 +14,19 @@ export function useVideoRecorder(maxDurationSec = 120) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const previewRef = useRef<HTMLVideoElement | null>(null);
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // The video preview element — set by the component via a callback ref
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
+
+  /** Call this when the <video> element mounts so we can assign srcObject */
+  const attachVideoEl = useCallback((el: HTMLVideoElement | null) => {
+    videoElRef.current = el;
+    if (el && streamRef.current) {
+      el.srcObject = streamRef.current;
+      el.play().catch(() => { });
+    }
+  }, []);
 
   const cleanup = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -43,12 +54,15 @@ export function useVideoRecorder(maxDurationSec = 120) {
         audio: true,
       });
       streamRef.current = stream;
-      if (previewRef.current) {
-        previewRef.current.srcObject = stream;
-        previewRef.current.play();
+
+      // If the video element is already in the DOM (e.g. re-enable), assign now
+      if (videoElRef.current) {
+        videoElRef.current.srcObject = stream;
+        videoElRef.current.play().catch(() => { });
       }
+      // Either way, set state — the component will attach via callback ref
       setState("previewing");
-    } catch (err: any) {
+    } catch {
       setError("Camera access denied. Please allow camera and microphone permissions.");
     }
   }, []);
@@ -85,13 +99,12 @@ export function useVideoRecorder(maxDurationSec = 120) {
       setVideoBlob(blob);
       const url = URL.createObjectURL(blob);
       setVideoUrl(url);
-      // Stop camera
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       setState("review");
     };
 
-    recorder.start(1000); // collect in 1s chunks
+    recorder.start(1000);
     setElapsed(0);
     setState("recording");
 
@@ -113,12 +126,29 @@ export function useVideoRecorder(maxDurationSec = 120) {
     }
   }, []);
 
-  const retake = useCallback(() => {
+  const retake = useCallback(async () => {
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     setVideoBlob(null);
     setVideoUrl(null);
     setElapsed(0);
-    setState("idle");
+
+    // Re-open camera
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      });
+      streamRef.current = stream;
+      if (videoElRef.current) {
+        videoElRef.current.srcObject = stream;
+        videoElRef.current.play().catch(() => { });
+      }
+      setState("previewing");
+    } catch {
+      setError("Camera access denied.");
+      setState("idle");
+    }
   }, [videoUrl]);
 
   const reset = useCallback(() => {
@@ -138,7 +168,7 @@ export function useVideoRecorder(maxDurationSec = 120) {
     videoBlob,
     videoUrl,
     error,
-    previewRef,
+    attachVideoEl,   // ← use this as callback ref on <video>
     startPreview,
     startCountdown,
     stopRecording,

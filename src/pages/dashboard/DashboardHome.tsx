@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, ArrowUpRight, Plus, Sparkles, Video, MessageSquareText } from "lucide-react";
+import { Star, ArrowUpRight, Plus, Sparkles, Video, MessageSquareText, Zap, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import FirstTimeGuide from "@/components/FirstTimeGuide";
-import { fetchDashboardStats, fetchTestimonials } from "@/lib/api";
+import { fetchDashboardStats, fetchTestimonials, fetchSpaces } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
-  { label: "New Space", icon: Plus, to: "/dashboard/spaces" },
-  { label: "Widget Lab", icon: Sparkles, to: "/dashboard/widgets" },
+  { label: "New Collector", icon: Plus, to: "/dashboard/spaces" },
+  { label: "Design Widgets", icon: Sparkles, to: "/dashboard/widgets" },
 ];
 
 const container = {
@@ -24,7 +24,7 @@ const item = {
 };
 
 const gradients = [
-  "from-blue-500/20 to-blue-600/5",
+  "from-emerald-500/20 to-emerald-600/5",
   "from-violet-500/20 to-violet-600/5",
   "from-emerald-500/20 to-emerald-600/5",
   "from-amber-500/20 to-amber-600/5",
@@ -39,16 +39,19 @@ export default function DashboardHome() {
   const [recentTestimonials, setRecentTestimonials] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasSpaces, setHasSpaces] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [statsData, testimonials] = await Promise.all([
+        const [statsData, testimonials, spaces] = await Promise.all([
           fetchDashboardStats(),
           fetchTestimonials(),
+          fetchSpaces(),
         ]);
         setStats(statsData);
         setRecentTestimonials((testimonials as any[]).slice(0, 4));
+        setHasSpaces((spaces as any[]).length > 0);
 
         // Build chart data from last 7 days
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -92,7 +95,7 @@ export default function DashboardHome() {
       <motion.div variants={item} className="flex items-end justify-between">
         <div>
           <h1 className="text-[22px] font-semibold text-foreground">Good morning, {userName}</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Here's what's happening with your testimonials.</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Quick overview of your social proof performance.</p>
         </div>
         <div className="flex gap-2">
           {quickActions.map((a) => (
@@ -102,6 +105,52 @@ export default function DashboardHome() {
           ))}
         </div>
       </motion.div>
+
+      {/* ── First-time CTA banner ── */}
+      {!hasSpaces && (
+        <motion.div
+          variants={item}
+          className="relative rounded-2xl overflow-hidden border border-primary/20"
+          style={{
+            background: "linear-gradient(135deg, hsl(142 76% 36% / 0.08) 0%, hsl(160 84% 39% / 0.08) 50%, hsl(142 76% 36% / 0.04) 100%)",
+          }}
+        >
+          {/* Decorative blobs */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 lg:p-8">
+            {/* Icon */}
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-8 w-8" />
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-[17px] font-semibold text-foreground mb-1">
+                Create your first Collector 🚀
+              </h2>
+              <p className="text-[13px] text-muted-foreground leading-relaxed max-w-xl">
+                Collectors are the pages where you gather stories. Create one to get your unique link and start collecting social proof today.
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Button asChild size="sm" className="h-9 text-[12px] gap-1.5 font-medium">
+                <Link to="/dashboard/spaces">
+                  <Plus className="h-3.5 w-3.5" /> New Collector
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="h-9 text-[12px] gap-1.5 font-medium">
+                <Link to="/dashboard/widgets">
+                  See Widget Lab <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Stat cards */}
       <motion.div variants={item} className="grid grid-cols-3 gap-4">
@@ -140,17 +189,19 @@ export default function DashboardHome() {
                 <stop offset="100%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(240, 6%, 93%)" vertical={false} />
-            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(240, 4%, 46%)" }} dy={8} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(240, 4%, 46%)" }} dx={-8} />
+            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} vertical={false} />
+            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "currentColor" }} opacity={0.6} dy={8} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "currentColor" }} opacity={0.6} dx={-8} />
             <Tooltip
               contentStyle={{
-                background: "hsl(0, 0%, 100%)",
-                border: "1px solid hsl(240, 6%, 93%)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "8px",
                 fontSize: "12px",
-                boxShadow: "0 4px 6px -1px hsl(240, 10%, 4%, 0.05)",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
+              labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+              itemStyle={{ color: "hsl(var(--foreground))" }}
             />
             <Area type="monotone" dataKey="count" stroke="hsl(221, 83%, 53%)" fill="url(#chartGrad)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: "hsl(221, 83%, 53%)" }} />
           </AreaChart>

@@ -61,11 +61,41 @@ export default function SettingsPage() {
   const userEmail = user?.email || "";
   const initials = displayName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
 
+  const handleUpgrade = async (productId: string) => {
+    if (!user) {
+      toast({ title: "Error", description: "You must be logged in to upgrade." });
+      return;
+    }
+
+    setUpgrading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          productId,
+          customerEmail: user.email,
+          customerName: user.user_metadata?.full_name || user.email?.split('@')[0],
+          returnUrl: `${window.location.origin}/dashboard/settings?payment=success`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.paymentLink) {
+        window.location.href = data.paymentLink;
+      } else {
+        throw new Error("Failed to generate checkout link");
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUpgrading(false);
+    }
+  };
+
   return (
     <div>
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[22px] font-semibold text-foreground">Settings</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">Account, workspace, and billing.</p>
+        <p className="text-[13px] text-muted-foreground mt-0.5">Customize your profile, branding, and billing preferences.</p>
       </motion.div>
 
       <motion.div className="mt-6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
@@ -103,9 +133,8 @@ export default function SettingsPage() {
             {brandColors.map((c) => (
               <button key={c} onClick={() => setBrandColor(c)} className="relative">
                 <div
-                  className={`w-8 h-8 rounded-full transition-all duration-200 ${
-                    brandColor === c ? "ring-2 ring-offset-3 ring-offset-background ring-primary scale-110" : "hover:scale-105 opacity-70 hover:opacity-100"
-                  }`}
+                  className={`w-8 h-8 rounded-full transition-all duration-200 ${brandColor === c ? "ring-2 ring-offset-3 ring-offset-background ring-primary scale-110" : "hover:scale-105 opacity-70 hover:opacity-100"
+                    }`}
                   style={{ backgroundColor: c }}
                 />
                 <AnimatePresence>
@@ -147,64 +176,87 @@ export default function SettingsPage() {
 
         {/* Billing / Plan */}
         <section>
-          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Plan & Billing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Current Plan */}
-            <Card className="border-border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Plan & Billing</h2>
+            <div className="text-[11px] font-semibold text-primary px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 uppercase tracking-tight">
+              Current: {profile?.plan || 'Free'}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Free Plan */}
+            <Card className={`border-border ${profile?.plan === 'free' || !profile?.plan ? 'bg-muted/30 border-primary/20' : ''}`}>
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="h-4 w-4 text-muted-foreground" />
                   <span className="text-[13px] font-semibold text-foreground">Free Plan</span>
                 </div>
-                <ul className="space-y-1 text-[12px] text-muted-foreground">
+                <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
                   <li>• 10 testimonials</li>
                   <li>• 1 space</li>
                   <li>• 60s video max</li>
                 </ul>
+                {(profile?.plan === 'free' || !profile?.plan) ? (
+                  <Button size="sm" variant="secondary" className="w-full h-8 text-xs cursor-default" disabled>Active Plan</Button>
+                ) : (
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs" onClick={() => window.location.reload()}>Downgrade</Button>
+                )}
               </CardContent>
             </Card>
 
             {/* Pro Plan */}
-            <Card className="border-primary/50 bg-primary/5 relative overflow-hidden">
+            <Card className={`border-primary/50 relative overflow-hidden ${profile?.plan === 'pro' ? 'bg-primary/5 border-primary shadow-vouchy-sm' : ''}`}>
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <Crown className="h-4 w-4 text-primary" />
-                  <span className="text-[13px] font-semibold text-foreground">Pro Plan</span>
+                  <Crown className="h-4 w-4 text-vouchy-warning" />
+                  <span className="text-[13px] font-semibold text-foreground">Pro Plan <span className="text-[11px] font-normal text-muted-foreground ml-1">$12/mo</span></span>
                 </div>
                 <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
                   <li>• 50 testimonials</li>
                   <li>• 3 spaces</li>
-                  <li>• 180s video, 200 AI/mo</li>
+                  <li>• 180s video max</li>
                 </ul>
-                <Button
-                  size="sm"
-                  className="w-full h-8 text-xs"
-                  disabled={upgrading}
-                  onClick={async () => {
-                    setUpgrading(true);
-                    try {
-                      const { data: { session } } = await supabase.auth.getSession();
-                      if (!session) throw new Error("Not logged in");
+                {profile?.plan === 'pro' ? (
+                  <Button size="sm" variant="secondary" className="w-full h-8 text-xs cursor-default" style={{ backgroundColor: brandColor, color: 'white' }} disabled>Current Plan</Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="w-full h-8 text-xs shadow-vouchy-sm"
+                    disabled={upgrading}
+                    style={{ backgroundColor: profile?.plan === 'agency' ? 'transparent' : brandColor, border: profile?.plan === 'agency' ? '1px solid #ddd' : 'none' }}
+                    variant={profile?.plan === 'agency' ? 'outline' : 'default'}
+                    onClick={() => handleUpgrade('pdt_0NVVmIlZrdWC90xs1ZgOm')}
+                  >
+                    {upgrading ? "Redirecting..." : "Upgrade to Pro"}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
 
-                      const res = await supabase.functions.invoke("create-checkout", {
-                        body: {
-                          product_id: "iBM6dbPHMsXqlV49.5Gd_LDMOfWCd34jiMSak8zc_d2rbC6zo71Y2tmc17f1HXR3Y",
-                          return_url: `${window.location.origin}/dashboard/settings`,
-                        },
-                      });
-
-                      if (res.error) throw new Error(res.error.message);
-                      const { checkout_url } = res.data;
-                      if (checkout_url) window.location.href = checkout_url;
-                    } catch (err: any) {
-                      toast({ title: "Error", description: err.message, variant: "destructive" });
-                    } finally {
-                      setUpgrading(false);
-                    }
-                  }}
-                >
-                  {upgrading ? "Redirecting..." : "Upgrade to Pro"}
-                </Button>
+            {/* Agency Plan */}
+            <Card className={`border-foreground/50 relative overflow-hidden ${profile?.plan === 'agency' ? 'bg-foreground/5 border-foreground shadow-vouchy-sm' : ''}`}>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-foreground" />
+                  <span className="text-[13px] font-semibold text-foreground">Agency <span className="text-[11px] font-normal text-muted-foreground ml-1">$45/mo</span></span>
+                </div>
+                <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
+                  <li>• Unlimited testimonials</li>
+                  <li>• Unlimited spaces</li>
+                  <li>• Custom domain (soon)</li>
+                </ul>
+                {profile?.plan === 'agency' ? (
+                  <Button size="sm" variant="secondary" className="w-full h-8 text-xs cursor-default" disabled>Current Plan</Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="w-full h-8 text-xs bg-foreground text-background hover:bg-foreground/90 shadow-vouchy-md"
+                    disabled={upgrading}
+                    onClick={() => handleUpgrade('pdt_0NVVmba1bevOgK6sfV8Wx')}
+                  >
+                    {upgrading ? "Redirecting..." : "Upgrade to Agency"}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
