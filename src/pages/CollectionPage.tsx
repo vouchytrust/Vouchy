@@ -62,11 +62,11 @@ export default function CollectionPage() {
         } else {
           const { data: profileData } = await supabase
             .from("profiles")
-            .select("company_name, brand_color, logo_url, plan")
+            .select("company_name, brand_color, logo_url")
             .eq("user_id", spaceData.user_id)
             .single();
 
-          const isPaid = profileData?.plan === "pro" || profileData?.plan === "agency";
+          const isPaid = false; // Plan check removed - plan column doesn't exist yet
           const space = { ...spaceData, profiles: profileData, isPaid } as unknown as SpaceData;
           setSpace(space);
 
