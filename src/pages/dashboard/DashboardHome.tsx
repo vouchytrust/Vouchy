@@ -86,7 +86,7 @@ export default function DashboardHome() {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
-      <FirstTimeGuide companyName={profile?.company_name || undefined} />
+      
 
       {/* Header */}
       <motion.div variants={item} className="flex items-end justify-between">
