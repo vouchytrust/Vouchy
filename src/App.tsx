@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -15,6 +16,9 @@ import SpacesPage from "./pages/dashboard/SpacesPage";
 import WidgetLabPage from "./pages/dashboard/WidgetLabPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import CollectionPage from "./pages/CollectionPage";
+import EmbedWidgetPage from "./pages/EmbedWidgetPage";
+import ViewTestimonialsPage from "./pages/ViewTestimonialsPage";
+import ShortEmbedRedirect from "./pages/ShortEmbedRedirect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -29,28 +33,33 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/collect/:slug" element={<CollectionPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index element={<DashboardHome />} />
-              <Route path="testimonials" element={<TestimonialsPage />} />
-              <Route path="spaces" element={<SpacesPage />} />
-              <Route path="widgets" element={<WidgetLabPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/collect/:slug" element={<CollectionPage />} />
+              <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
+              <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
+              <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route index element={<DashboardHome />} />
+                <Route path="testimonials" element={<TestimonialsPage />} />
+                <Route path="spaces" element={<SpacesPage />} />
+                <Route path="widgets" element={<WidgetLabPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

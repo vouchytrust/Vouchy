@@ -2,12 +2,21 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, MessageSquareText, FolderOpen, Palette, Settings, Star, ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home, exact: true },
   { title: "Testimonials", url: "/dashboard/testimonials", icon: MessageSquareText },
-  { title: "Spaces", url: "/dashboard/spaces", icon: FolderOpen },
-  { title: "Widget Lab", url: "/dashboard/widgets", icon: Palette },
+  { title: "Collectors", url: "/dashboard/spaces", icon: FolderOpen },
+  { title: "Design Widgets", url: "/dashboard/widgets", icon: Palette },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -18,6 +27,14 @@ interface Props {
 
 export function DashboardSidebar({ collapsed, onToggle }: Props) {
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  const displayName = profile?.company_name || user?.email?.split("@")[0] || "User";
+  const initials = displayName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
   const isActive = (item: typeof navItems[0]) =>
     item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
@@ -31,10 +48,8 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
     >
       {/* Brand */}
       <div className={`flex items-center h-14 px-4 ${collapsed ? "justify-center" : "gap-2.5"}`}>
-        <Link to="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="h-8 w-8 rounded-[10px] vouchy-gradient-bg flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.04]">
-            <Star className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
-          </div>
+        <Link to="/dashboard" className="flex items-center gap-2.5 group hover:scale-105 transition-transform duration-200">
+          <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-[30px] w-[30px] object-contain" />
           <AnimatePresence>
             {!collapsed && (
               <motion.span
@@ -134,25 +149,42 @@ export function DashboardSidebar({ collapsed, onToggle }: Props) {
         <div className="mx-1 h-px bg-border/50 mb-2" />
 
         {/* User */}
-        <div className={`flex items-center gap-2.5 rounded-[8px] px-2.5 py-2 hover:bg-accent/60 cursor-pointer transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
-          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-border/80 flex items-center justify-center shrink-0">
-            <span className="text-[10px] font-semibold text-primary">JD</span>
-          </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex-1 min-w-0 overflow-hidden"
-              >
-                <div className="text-[12px] font-medium text-foreground truncate leading-tight">Jane Doe</div>
-                <div className="text-[10px] text-muted-foreground/70 truncate leading-tight">Pro Plan</div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className={`flex items-center gap-2.5 rounded-[8px] px-2.5 py-2 hover:bg-accent/60 cursor-pointer transition-colors ${collapsed ? "justify-center px-0" : ""}`}>
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-border/80 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-semibold text-primary">{initials}</span>
+              </div>
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex-1 min-w-0 overflow-hidden"
+                  >
+                    <div className="text-[12px] font-medium text-foreground truncate leading-tight">{displayName}</div>
+                    <div className="text-[10px] text-muted-foreground/70 truncate leading-tight capitalize">{profile?.plan || 'Free'} Plan</div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 mb-2">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" /> Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive gap-2">
+              <LogOut className="h-4 w-4" /> Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Collapse toggle */}
         <button
