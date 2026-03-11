@@ -20,6 +20,7 @@ interface Testimonial {
   is_favorite: boolean;
   created_at: string;
   video_duration: string | null;
+  author_avatar_url: string | null;
   spaces?: { name: string } | null;
 }
 
@@ -127,32 +128,33 @@ export default function TestimonialsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-[22px] font-semibold text-foreground">Testimonials</h1>
+        <h1 className="text-[20px] md:text-[22px] font-semibold text-foreground">Testimonials</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">Review, approve, and manage collected testimonials.</p>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="flex items-center gap-1 p-0.5 bg-muted rounded-lg">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="flex flex-col gap-3">
+        {/* Tabs row — scrollable on mobile */}
+        <div className="flex items-center gap-1 p-0.5 bg-muted rounded-lg overflow-x-auto scrollbar-none w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`relative px-3 py-1.5 text-[12px] font-medium rounded-md transition-all duration-200 ${
-                filter === tab.id ? "bg-card text-foreground vouchy-shadow-xs" : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`relative shrink-0 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-[12px] font-medium rounded-md transition-all duration-200 whitespace-nowrap ${filter === tab.id ? "bg-card text-foreground vouchy-shadow-xs" : "text-muted-foreground hover:text-foreground"
+                }`}
             >
               {tab.label}
-              <span className={`ml-1.5 text-2xs ${filter === tab.id ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
+              <span className={`ml-1 text-2xs ${filter === tab.id ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
                 {counts[tab.id]}
               </span>
             </button>
           ))}
         </div>
-        <div className="relative flex-1 max-w-xs ml-auto">
+        {/* Search — full width */}
+        <div className="relative w-full sm:max-w-xs sm:ml-auto">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input placeholder="Search..." className="pl-8 h-8 text-xs bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Search..." className="pl-8 h-8 text-xs bg-card w-full" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </motion.div>
 
@@ -167,7 +169,7 @@ export default function TestimonialsPage() {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <motion.div variants={container} initial="hidden" animate="show" className="columns-1 sm:columns-2 xl:columns-3 gap-4">
           <AnimatePresence mode="popLayout">
             {filtered.map((t, idx) => {
               const S = statusConfig[t.status] || statusConfig.pending;
@@ -182,7 +184,7 @@ export default function TestimonialsPage() {
                   variants={cardVariant}
                   layout
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="rounded-xl border border-border bg-card overflow-hidden flex flex-col"
+                  className="break-inside-avoid mb-4 rounded-xl border border-border bg-card overflow-hidden flex flex-col"
                 >
                   {t.type === "video" && (
                     <div className="relative bg-muted/60 aspect-video flex items-center justify-center cursor-pointer group/video">
@@ -203,8 +205,12 @@ export default function TestimonialsPage() {
 
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="flex items-start gap-3 mb-3">
-                      <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} border border-border/50 flex items-center justify-center shrink-0`}>
-                        <span className="text-2xs font-semibold text-foreground">{initials}</span>
+                      <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} border border-border/50 flex items-center justify-center shrink-0 overflow-hidden`}>
+                        {t.author_avatar_url ? (
+                          <img src={t.author_avatar_url} alt={t.author_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xs font-semibold text-foreground">{initials}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
@@ -228,7 +234,7 @@ export default function TestimonialsPage() {
                       )}
                     </div>
 
-                    <p className="text-[12.5px] text-muted-foreground leading-relaxed flex-1 line-clamp-3">{t.content}</p>
+                    <p className="text-[12.5px] text-muted-foreground leading-relaxed flex-1">{t.content}</p>
 
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/60">
                       <span className={`flex items-center gap-1 text-2xs font-medium px-2 py-1 rounded-md ${S.bg} ${S.text}`}>

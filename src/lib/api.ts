@@ -87,6 +87,7 @@ export async function submitTestimonial(testimonial: {
   content: string;
   rating: number;
   type: string;
+  author_avatar_url?: string;
 }) {
   const { data, error } = await supabase.from("testimonials").insert(testimonial).select().single();
   if (error) throw error;

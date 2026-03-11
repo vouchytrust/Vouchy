@@ -5,7 +5,7 @@ import { Home, MessageSquareText, FolderOpen, Palette, Settings } from "lucide-r
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home, exact: true },
   { title: "Testimonials", url: "/dashboard/testimonials", icon: MessageSquareText },
-  { title: "Spaces", url: "/dashboard/spaces", icon: FolderOpen },
+  { title: "Collectors", url: "/dashboard/spaces", icon: FolderOpen },
   { title: "Widgets", url: "/dashboard/widgets", icon: Palette },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
@@ -17,9 +17,9 @@ export function MobileBottomNav() {
     item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50">
+    <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden">
       {/* Frosted glass background */}
-      <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/40" />
+      <div className="absolute inset-0 bg-card/90 backdrop-blur-xl border-t border-border/40" />
 
       {/* Safe area + content */}
       <div className="relative flex items-end justify-around px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
@@ -44,9 +44,8 @@ export function MobileBottomNav() {
               {/* Icon */}
               <div className="relative">
                 <item.icon
-                  className={`h-[18px] w-[18px] transition-colors duration-150 ${
-                    active ? "text-primary" : "text-muted-foreground"
-                  }`}
+                  className={`h-[18px] w-[18px] transition-colors duration-150 ${active ? "text-primary" : "text-muted-foreground"
+                    }`}
                   strokeWidth={active ? 2.3 : 1.7}
                 />
                 {/* Active dot */}
@@ -60,9 +59,8 @@ export function MobileBottomNav() {
               </div>
 
               {/* Label */}
-              <span className={`text-[9px] font-medium transition-colors duration-150 leading-none ${
-                active ? "text-primary" : "text-muted-foreground/70"
-              }`}>
+              <span className={`text-[9px] font-medium transition-colors duration-150 leading-none ${active ? "text-primary" : "text-muted-foreground/70"
+                }`}>
                 {item.title}
               </span>
             </Link>

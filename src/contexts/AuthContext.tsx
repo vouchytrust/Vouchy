@@ -8,7 +8,11 @@ interface Profile {
   company_name: string | null;
   brand_color: string;
   logo_url: string | null;
+  plan: string | null;
+  email: string | null;
   onboarding_completed: boolean;
+  ai_credits_used: number | null;
+  ai_credits_reset_at: string | null;
 }
 
 interface AuthContextType {
@@ -25,8 +29,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
-  refreshProfile: async () => {},
-  signOut: async () => {},
+  refreshProfile: async () => { },
+  signOut: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -42,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("*")
       .eq("user_id", userId)
       .single();
-    setProfile(data as Profile | null);
+    setProfile(data as unknown as Profile | null);
   };
 
   const refreshProfile = async () => {

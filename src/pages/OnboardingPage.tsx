@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Star, Upload, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,22 +103,18 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex">
       {/* Left - Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 max-w-lg mx-auto">
-        <div className="flex items-center gap-2 mb-12">
-          <div className="h-8 w-8 rounded-lg vouchy-gradient-bg flex items-center justify-center">
-            <Star className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-foreground">Vouchy</span>
-        </div>
+        <Link to="/" className="flex items-center gap-2 mb-12 group hover:scale-105 transition-transform duration-200">
+          <img src="/src/assets/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
+        </Link>
 
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                i < step ? "bg-primary text-primary-foreground" :
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${i < step ? "bg-primary text-primary-foreground" :
                 i === step ? "bg-primary text-primary-foreground" :
-                "bg-muted text-muted-foreground"
-              }`}>
+                  "bg-muted text-muted-foreground"
+                }`}>
                 {i < step ? <Check className="h-4 w-4" /> : i + 1}
               </div>
               {i < 2 && <div className={`w-12 h-0.5 ${i < step ? "bg-primary" : "bg-border"}`} />}
@@ -136,25 +132,24 @@ export default function OnboardingPage() {
           >
             {step === 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Name your workspace</h2>
-                <p className="text-muted-foreground mb-6">This is your company or project name.</p>
-                <Label htmlFor="ws">Workspace name</Label>
-                <Input id="ws" className="mt-1.5 h-11" placeholder="Acme Inc." maxLength={100} value={workspace} onChange={(e) => setWorkspace(e.target.value)} autoFocus />
-                <p className="text-xs text-muted-foreground mt-2">{workspace.length}/100 characters</p>
+                <h2 className="text-3xl font-bold text-foreground mb-2 tracking-[-0.04em]">Name your workspace</h2>
+                <p className="text-[14px] text-muted-foreground mb-8 font-medium">This is your company or project name.</p>
+                <Label htmlFor="ws" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Workspace name</Label>
+                <Input id="ws" className="mt-2.5 h-12 rounded-none border-border/60 focus:ring-1 focus:ring-primary/40" placeholder="Acme Inc." maxLength={100} value={workspace} onChange={(e) => setWorkspace(e.target.value)} autoFocus />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/30 mt-3">{workspace.length}/100 characters</p>
               </div>
             )}
             {step === 1 && (
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Choose your brand color</h2>
-                <p className="text-muted-foreground mb-6">This color will be applied across your collection pages and widgets.</p>
+                <h2 className="text-3xl font-bold text-foreground mb-2 tracking-[-0.04em]">Choose your brand color</h2>
+                <p className="text-[14px] text-muted-foreground mb-8 font-medium">This color will be applied across your collection pages and widgets.</p>
                 <div className="grid grid-cols-3 gap-3">
                   {brandColors.map((c) => (
                     <button
                       key={c.value}
                       onClick={() => setColor(c.value)}
-                      className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${
-                        color === c.value ? "border-primary" : "border-border hover:border-muted-foreground/30"
-                      }`}
+                      className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${color === c.value ? "border-primary" : "border-border hover:border-muted-foreground/30"
+                        }`}
                     >
                       <div className="w-8 h-8 rounded-full shrink-0" style={{ backgroundColor: c.value }} />
                       <span className="text-sm font-medium text-foreground">{c.name}</span>
@@ -174,8 +169,8 @@ export default function OnboardingPage() {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Upload your logo</h2>
-                <p className="text-muted-foreground mb-6">Optional — you can always add this later.</p>
+                <h2 className="text-3xl font-bold text-foreground mb-2 tracking-[-0.04em]">Upload your logo</h2>
+                <p className="text-[14px] text-muted-foreground mb-8 font-medium">Optional — you can always add this later.</p>
                 <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:border-muted-foreground/40 transition-colors">
                   {logo ? (
                     <img src={logo} alt="Logo preview" className="h-16 w-auto object-contain" />
@@ -215,7 +210,7 @@ export default function OnboardingPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-full max-w-sm bg-card rounded-xl border border-border vouchy-shadow-lg overflow-hidden"
+          className="w-full max-w-sm bg-card border border-border/40 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.05)] overflow-hidden"
         >
           <div className="h-2" style={{ backgroundColor: color }} />
           <div className="p-6">
@@ -223,8 +218,8 @@ export default function OnboardingPage() {
               {logo ? (
                 <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-cover" />
               ) : (
-                <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: color }}>
-                  <Star className="h-5 w-5 text-primary-foreground" />
+                <div className="h-11 w-11 rounded-lg flex items-center justify-center vouchy-gradient-bg p-2 shadow-sm border border-white/10 hover:scale-105 transition-transform">
+                  <img src="/src/assets/logo-icon-white.svg" alt="Vouchy Logo Icon" className="h-6 w-6" />
                 </div>
               )}
               <div>

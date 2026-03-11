@@ -25,7 +25,22 @@ export default function SettingsPage() {
   const [weeklyDigest, setWeeklyDigest] = useState(false);
   const [saving, setSaving] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
+  const [liveCredits, setLiveCredits] = useState<{ used: number; reset_at: string | null } | null>(null);
   const { toast } = useToast();
+
+  // Fetch fresh credits directly — profile in context may be stale
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        const d = data as unknown as { ai_credits_used: number | null; ai_credits_reset_at: string | null } | null;
+        if (d) setLiveCredits({ used: d.ai_credits_used ?? 0, reset_at: d.ai_credits_reset_at });
+      });
+  }, [user]);
 
   useEffect(() => {
     if (profile) {
@@ -68,159 +83,214 @@ export default function SettingsPage() {
         <p className="text-[13px] text-muted-foreground mt-0.5">Account, workspace, and billing.</p>
       </motion.div>
 
-      <motion.div className="mt-6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        {/* Profile */}
-        <section>
-          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Profile</h2>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border flex items-center justify-center shrink-0">
-              <span className="text-sm font-semibold text-primary">{initials}</span>
+      <motion.div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5 items-start"
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+
+        {/* ── LEFT COLUMN: Profile + Brand Color ── */}
+        <div className="space-y-5">
+
+          {/* Profile */}
+          <div className="rounded-xl border border-border/60 bg-card p-5">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Profile</h2>
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border flex items-center justify-center shrink-0">
+                <span className="text-sm font-semibold text-primary">{initials}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-medium text-foreground">{displayName}</div>
+                <div className="text-[12px] text-muted-foreground">{userEmail}</div>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[14px] font-medium text-foreground">{displayName}</div>
-              <div className="text-[12px] text-muted-foreground">{userEmail}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-[12px] text-muted-foreground">Display name</Label>
+                <Input className="mt-1.5 h-9 text-[13px]" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-[12px] text-muted-foreground">Workspace</Label>
+                <Input className="mt-1.5 h-9 text-[13px]" value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <Label className="text-[12px] text-muted-foreground">Display name</Label>
-              <Input className="mt-1.5 h-9 text-[13px]" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-            </div>
-            <div>
-              <Label className="text-[12px] text-muted-foreground">Workspace</Label>
-              <Input className="mt-1.5 h-9 text-[13px]" value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
+          {/* Brand Color */}
+          <div className="rounded-xl border border-border/60 bg-card p-5">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Brand Color</h2>
+            <div className="flex gap-2.5 flex-wrap">
+              {brandColors.map((c) => (
+                <button key={c} onClick={() => setBrandColor(c)} className="relative">
+                  <div
+                    className={`w-8 h-8 rounded-full transition-all duration-200 ${brandColor === c ? "ring-2 ring-offset-3 ring-offset-background ring-primary scale-110" : "hover:scale-105 opacity-70 hover:opacity-100"}`}
+                    style={{ backgroundColor: c }}
+                  />
+                  <AnimatePresence>
+                    {brandColor === c && (
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="absolute inset-0 flex items-center justify-center">
+                        <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
+              ))}
             </div>
           </div>
-        </section>
 
-        <Separator className="my-6" />
+          {/* Notifications */}
+          <div className="rounded-xl border border-border/60 bg-card p-5">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Notifications</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[13px] font-medium text-foreground">New testimonials</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">Get notified when someone submits feedback</div>
+                </div>
+                <Switch checked={emailNotifs} onCheckedChange={setEmailNotifs} />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[13px] font-medium text-foreground">Weekly digest</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">Summary of activity every Monday</div>
+                </div>
+                <Switch checked={weeklyDigest} onCheckedChange={setWeeklyDigest} />
+              </div>
+            </div>
+          </div>
 
-        {/* Brand color */}
-        <section>
-          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Brand color</h2>
-          <div className="flex gap-2.5 flex-wrap">
-            {brandColors.map((c) => (
-              <button key={c} onClick={() => setBrandColor(c)} className="relative">
-                <div
-                  className={`w-8 h-8 rounded-full transition-all duration-200 ${
-                    brandColor === c ? "ring-2 ring-offset-3 ring-offset-background ring-primary scale-110" : "hover:scale-105 opacity-70 hover:opacity-100"
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-                <AnimatePresence>
-                  {brandColor === c && (
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="absolute inset-0 flex items-center justify-center">
-                      <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
-                    </motion.div>
+          {/* Save + Delete */}
+          <div className="flex items-center justify-between">
+            <Button size="sm" className="h-9 text-xs px-6" onClick={save} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+            <button className="text-[11px] text-muted-foreground hover:text-destructive transition-colors">
+              Delete account
+            </button>
+          </div>
+
+        </div>
+
+        {/* ── RIGHT COLUMN: Plan & Billing + Notifications ── */}
+        <div className="space-y-5">
+
+          {/* Plan & Billing */}
+          <div className="rounded-xl border border-border/60 bg-card p-5">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Plan & Billing</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Current Plan */}
+              <Card className="border-border">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-[13px] font-semibold text-foreground capitalize">
+                      {profile?.plan ?? "Free"} Plan
+                    </span>
+                  </div>
+                  <ul className="space-y-1 text-[12px] text-muted-foreground">
+                    <li>• Up to 10 testimonials</li>
+                    <li>• 1 collector space</li>
+                    <li>• Text testimonials only</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Upgrade card */}
+              <Card className="border-primary/50 bg-primary/5 relative overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="h-4 w-4 text-primary" />
+                    <span className="text-[13px] font-semibold text-foreground">Pro Plan</span>
+                  </div>
+                  <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
+                    <li>• Unlimited testimonials</li>
+                    <li>• Video + text collection</li>
+                    <li>• AI enhancement (200 credits/mo)</li>
+                    <li>• 3 collector spaces</li>
+                  </ul>
+                  <Button
+                    size="sm"
+                    className="w-full h-8 text-xs"
+                    disabled={upgrading || profile?.plan === "pro" || profile?.plan === "agency"}
+                    onClick={async () => {
+                      setUpgrading(true);
+                      try {
+                        const res = await supabase.functions.invoke("create-checkout", {
+                          body: {
+                            productId: "pdt_0NVVmIlZrdWC90xs1ZgOm",
+                            customerEmail: user?.email,
+                            customerName: displayName || user?.email?.split("@")[0],
+                            returnUrl: `${window.location.origin}/dashboard/settings`,
+                          },
+                        });
+                        if (res.error) throw new Error(res.error.message);
+                        const { paymentLink } = res.data;
+                        if (paymentLink) window.location.href = paymentLink;
+                        else throw new Error("No payment link returned");
+                      } catch (err: any) {
+                        toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setUpgrading(false);
+                      }
+                    }}
+                  >
+                    {profile?.plan === "pro" || profile?.plan === "agency"
+                      ? "✓ Current plan"
+                      : upgrading ? "Redirecting…" : "Upgrade to Pro"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* AI Credits meter — visible for everyone to show usage */}
+            {(() => {
+              const plan = profile?.plan?.toLowerCase() || 'free';
+              const limits: Record<string, number> = { free: 5, pro: 200, agency: 2000 };
+              const limit = limits[plan] || 5;
+              const used = liveCredits?.used ?? 0;
+              const pct = Math.min(100, Math.round((used / limit) * 100));
+
+              const resetAt = liveCredits?.reset_at
+                ? new Date(liveCredits.reset_at)
+                : new Date();
+              const nextReset = new Date(resetAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+              const daysLeft = Math.max(0, Math.ceil((nextReset.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+
+              return (
+                <div className="mt-4 p-4 rounded-lg border border-border bg-muted/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[12px] font-semibold text-foreground flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      AI Credits this month
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">{used} / {limit} used</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${pct}%`,
+                        background: pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--primary)",
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    {Math.max(0, limit - used)} credits remaining · resets in {daysLeft} day{daysLeft !== 1 ? "s" : ""}
+                  </p>
+                  {plan === 'free' && (
+                    <p className="text-[10px] text-primary font-medium mt-1.5 flex items-center gap-1">
+                      <Zap className="h-3 w-3" /> Upgrade for 200+ monthly credits
+                    </p>
                   )}
-                </AnimatePresence>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <Separator className="my-6" />
-
-        {/* Notifications */}
-        <section>
-          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-5">Notifications</h2>
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[13px] font-medium text-foreground">New testimonials</div>
-                <div className="text-[12px] text-muted-foreground mt-0.5">Get notified when someone submits feedback</div>
-              </div>
-              <Switch checked={emailNotifs} onCheckedChange={setEmailNotifs} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[13px] font-medium text-foreground">Weekly digest</div>
-                <div className="text-[12px] text-muted-foreground mt-0.5">Summary of activity every Monday</div>
-              </div>
-              <Switch checked={weeklyDigest} onCheckedChange={setWeeklyDigest} />
-            </div>
-          </div>
-        </section>
-
-        <Separator className="my-6" />
-
-        {/* Billing / Plan */}
-        <section>
-          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Plan & Billing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Current Plan */}
-            <Card className="border-border">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-[13px] font-semibold text-foreground">Free Plan</span>
                 </div>
-                <ul className="space-y-1 text-[12px] text-muted-foreground">
-                  <li>• 10 testimonials</li>
-                  <li>• 1 space</li>
-                  <li>• 60s video max</li>
-                </ul>
-              </CardContent>
-            </Card>
+              );
+            })()}
 
-            {/* Pro Plan */}
-            <Card className="border-primary/50 bg-primary/5 relative overflow-hidden">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown className="h-4 w-4 text-primary" />
-                  <span className="text-[13px] font-semibold text-foreground">Pro Plan</span>
-                </div>
-                <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
-                  <li>• 50 testimonials</li>
-                  <li>• 3 spaces</li>
-                  <li>• 180s video, 200 AI/mo</li>
-                </ul>
-                <Button
-                  size="sm"
-                  className="w-full h-8 text-xs"
-                  disabled={upgrading}
-                  onClick={async () => {
-                    setUpgrading(true);
-                    try {
-                      const { data: { session } } = await supabase.auth.getSession();
-                      if (!session) throw new Error("Not logged in");
-
-                      const res = await supabase.functions.invoke("create-checkout", {
-                        body: {
-                          product_id: "iBM6dbPHMsXqlV49.5Gd_LDMOfWCd34jiMSak8zc_d2rbC6zo71Y2tmc17f1HXR3Y",
-                          return_url: `${window.location.origin}/dashboard/settings`,
-                        },
-                      });
-
-                      if (res.error) throw new Error(res.error.message);
-                      const { checkout_url } = res.data;
-                      if (checkout_url) window.location.href = checkout_url;
-                    } catch (err: any) {
-                      toast({ title: "Error", description: err.message, variant: "destructive" });
-                    } finally {
-                      setUpgrading(false);
-                    }
-                  }}
-                >
-                  {upgrading ? "Redirecting..." : "Upgrade to Pro"}
-                </Button>
-              </CardContent>
-            </Card>
           </div>
-        </section>
 
-        <Separator className="my-6" />
 
-        <div className="flex items-center justify-between pb-4">
-          <Button size="sm" className="h-9 text-xs px-6" onClick={save} disabled={saving}>
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
-          <button className="text-[11px] text-muted-foreground hover:text-destructive transition-colors">
-            Delete account
-          </button>
+
         </div>
       </motion.div>
     </div>
   );
 }
+
