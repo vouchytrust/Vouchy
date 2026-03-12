@@ -8,9 +8,12 @@ export default function CTA() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 px-4 md:px-6 relative overflow-hidden bg-background">
+    <section className="py-12 lg:py-16 px-4 md:px-6 relative overflow-hidden bg-background min-h-screen flex flex-col justify-center">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--primary)/0.03)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" />
+
       <div className="container mx-auto max-w-5xl relative z-10">
-        <div className="relative px-8 py-20 text-center">
+        <div className="relative px-8 py-10 md:py-16 text-center bg-card/30 border border-border/50 backdrop-blur-md rounded-2xl">
 
           {/* Floating Element */}
           <motion.div
@@ -36,16 +39,14 @@ export default function CTA() {
           </div>
 
           {/* Headline */}
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 max-w-4xl mx-auto leading-[1.1] text-foreground">
-            Start collecting reviews <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
-              in minutes, not days.
-            </span>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-8 max-w-4xl mx-auto leading-[1.1] text-foreground">
+            Ready to start <br />
+            <span className="text-primary font-medium">collecting reviews?</span>
           </h2>
 
           {/* Subhead */}
           <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
-            No coding required. Copy and paste one line of code to showcase your social proof and boost credibility instantly.
+            Free to start. Takes five minutes to set up. Your first testimonial could be live today.
           </p>
 
           {/* CTA */}

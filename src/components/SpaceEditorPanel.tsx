@@ -310,7 +310,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
+      <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col h-full">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b border-border px-6 pt-6 pb-4">
           <SheetHeader>
@@ -328,8 +328,8 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
           </SheetHeader>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
-          <div className="px-6 pt-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+          <div className="px-6 pt-4 shrink-0">
             <TabsList className="w-full h-9 text-xs">
               <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
               <TabsTrigger value="form" className="flex-1 text-xs">Form Builder</TabsTrigger>
@@ -338,7 +338,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
           </div>
 
           {/* ── General ── */}
-          <TabsContent value="general" className="px-6 py-5 space-y-5">
+          <TabsContent value="general" className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
             <div className="space-y-1.5">
               <Label className="text-[13px]">Space Name</Label>
               <Input
@@ -368,10 +368,16 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
           </TabsContent>
 
           {/* ── Form Builder ── */}
-          <TabsContent value="form" className="px-6 py-5 space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Left: field config */}
-              <div className="space-y-3">
+          <TabsContent value="form" className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-5">
+              {/* Left: live preview (Desktop: Left, Mobile: Bottom) */}
+              <div className="space-y-4 lg:space-y-2 order-last lg:order-first">
+                <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Live Preview</p>
+                <FormLivePreview fields={fields} spaceName={displayName} />
+              </div>
+
+              {/* Right: field config (Desktop: Right, Mobile: Top) */}
+              <div className="space-y-3 order-first lg:order-last">
                 <div className="flex items-center justify-between">
                   <p className="text-[13px] font-medium text-foreground">Fields</p>
                   <Button size="sm" variant="outline" className="h-7 text-2xs gap-1" onClick={addField}>
@@ -395,42 +401,38 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
                   ))}
                 </div>
               </div>
-
-              {/* Right: live preview */}
-              <div className="space-y-2">
-                <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Live Preview</p>
-                <FormLivePreview fields={fields} spaceName={displayName} />
-              </div>
             </div>
           </TabsContent>
 
           {/* ── Thank You ── */}
-          <TabsContent value="thankyou" className="px-6 py-5 space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Thank You Message</Label>
-                  <Textarea
-                    className="text-[13px] min-h-[80px]"
-                    value={thankYou.message}
-                    onChange={e => setThankYou({ ...thankYou, message: e.target.value })}
-                  />
+          <TabsContent value="thankyou" className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-5">
+                {/* Left: Preview (Desktop: Left, Mobile: Bottom) */}
+                <div className="space-y-4 lg:space-y-2 order-last lg:order-first">
+                  <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Preview</p>
+                  <ThankYouPreview config={thankYou} spaceName={displayName} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">CTA Button Text</Label>
-                  <Input className="h-9 text-[13px]" value={thankYou.ctaText} onChange={e => setThankYou({ ...thankYou, ctaText: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Redirect URL <span className="text-muted-foreground">(optional)</span></Label>
-                  <Input className="h-9 text-[13px]" placeholder="https://yoursite.com" value={thankYou.redirectUrl} onChange={e => setThankYou({ ...thankYou, redirectUrl: e.target.value })} />
-                  <p className="text-2xs text-muted-foreground">Where to send users after submitting</p>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Preview</p>
-                <ThankYouPreview config={thankYou} spaceName={displayName} />
-              </div>
+                {/* Right: Config (Desktop: Right, Mobile: Top) */}
+                <div className="space-y-4 order-first lg:order-last">
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Thank You Message</Label>
+                    <Textarea
+                      className="text-[13px] min-h-[80px]"
+                      value={thankYou.message}
+                      onChange={e => setThankYou({ ...thankYou, message: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">CTA Button Text</Label>
+                    <Input className="h-9 text-[13px]" value={thankYou.ctaText} onChange={e => setThankYou({ ...thankYou, ctaText: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Redirect URL <span className="text-muted-foreground">(optional)</span></Label>
+                    <Input className="h-9 text-[13px]" placeholder="https://yoursite.com" value={thankYou.redirectUrl} onChange={e => setThankYou({ ...thankYou, redirectUrl: e.target.value })} />
+                    <p className="text-2xs text-muted-foreground">Where to send users after submitting</p>
+                  </div>
+                </div>
             </div>
           </TabsContent>
         </Tabs>

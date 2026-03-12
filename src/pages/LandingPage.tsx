@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ArrowRight, X, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -14,197 +14,389 @@ import {
   TestimonialDesigns,
 } from "@/components/landing";
 
-const EMBED_SPACE = "lol-1772383756334";
+import { TbStarFilled, TbSparkles } from "react-icons/tb";
 
-const VouchyWidget = () => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  useEffect(() => {
-    const host = window.location.origin;
-    const handler = (event: MessageEvent) => {
-      if (
-        event.origin === host &&
-        event.data?.type === "vouchy-resize" &&
-        event.data?.height &&
-        iframeRef.current
-      ) {
-        iframeRef.current.style.height = `${event.data.height}px`;
-      }
-    };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, []);
-
-  const params = new URLSearchParams({
-    layout: "editorial",
-    minRating: "0",
-    max: "50",
-    darkMode: "true",
-    radius: "12",
-    padding: "16",
-    font: "system",
-    accent: encodeURIComponent("#3b82f6"),
-    cardBg: encodeURIComponent("#121212"),
-    nameColor: encodeURIComponent("#f5f5f7"),
-    companyColor: encodeURIComponent("#8e8e93"),
-    bodyColor: encodeURIComponent("#aeaeb2"),
-    starColor: encodeURIComponent("#0aa939"),
-    showStars: "true",
-    showAvatar: "true",
-    showCompany: "true",
-    shadow: "sm",
-    displayMode: "grid",
-    carouselVisible: "3",
-    navStyle: "arrows",
-    autoPlay: "false",
-    autoPlaySpeed: "3000",
-    navIconColor: encodeURIComponent("#ffffff"),
-    navBgColor: encodeURIComponent("#2c2c2e"),
-    primaryBtnColor: encodeURIComponent("#ffffff"),
-    t: Date.now().toString(),
-  });
-
-  const src = `${window.location.origin}/embed/${EMBED_SPACE}?${params.toString()}`;
-
-  return (
-    <div className="w-full relative z-20 -mt-10 overflow-hidden">
-      <iframe
-        ref={iframeRef}
-        src={src}
-        style={{ width: "100%", border: "none", overflow: "hidden", background: "transparent", height: "650px" }}
-        title="Vouchy testimonials"
-      />
-    </div>
-  );
-};
 
 export default function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState("Home");
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const container = document.getElementById('landing-widget-container');
+    if (!container) return;
+
+    // Remove any existing children to ensure a clean slate (handles React 18 strict mode double-invoke)
+    container.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.src = window.location.origin + "/embed.js";
+    script.setAttribute("data-widget-id", "f5618c3c-22a1-40d6-b9b4-114fc7abb53b");
+    script.async = true;
+
+    container.appendChild(script);
+
+    return () => {
+      // Leave cleanup to the next mount to prevent flicker or race conditions
+    };
+  }, []);
+
+  const navLinks = [
+    { label: "Home", href: "#top" },
+    { label: "Features", href: "#features" },
+    { label: "Design", href: "#design-showcase" },
+    { label: "Workflow", href: "#how-it-works" },
+    { label: "Pricing", href: "#pricing" },
+  ];
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/10 selection:text-primary overflow-x-hidden relative">
 
-      {/* Navigation — Wide Split Glassmorphism Header */}
-      <nav className="fixed top-6 inset-x-0 z-[100] flex justify-center px-6 pointer-events-none">
+      {/* ── NAVIGATION ─────────────────────────────────────────────── */}
+      <nav className="fixed top-0 inset-x-0 z-[999] flex justify-center pointer-events-none">
         <motion.div
-          initial={{ y: -20, opacity: 0 }}
+          initial={{ y: -24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] as any }}
-          className="w-full max-w-7xl h-16 bg-background/60 dark:bg-card/40 backdrop-blur-2xl border border-primary/20 shadow-[0_20px_50px_-15px_rgba(20,184,166,0.15),inset_0_1px_0_0_rgba(255,255,255,0.05)] rounded-[24px] flex items-center justify-between px-6 pointer-events-auto"
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-7xl pointer-events-auto px-4 md:px-6"
         >
-          {/* LEFT: Logo Icon Section (Hidden on Mobile) */}
-          <div className="hidden lg:flex flex-1 justify-start">
+          {/* Bar */}
+          <div
+            className={`
+              mt-4 md:mt-5 flex items-center h-[58px] md:h-[62px] px-3 md:px-4
+              rounded-2xl border transition-all duration-500
+              ${scrolled
+                ? "bg-background/80 dark:bg-card/70 backdrop-blur-2xl border-primary/20 shadow-[0_16px_48px_-12px_rgba(10,169,57,0.18),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                : "bg-background/40 dark:bg-card/30 backdrop-blur-xl border-primary/10 shadow-none"
+              }
+            `}
+          >
+            {/* ── LEFT: Logo + Wordmark ─────────────────────── */}
             <Link
               to="/"
-              className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:scale-105 transition-all duration-300 group overflow-hidden"
+              aria-label="Vouchy home"
+              className="flex items-center gap-2.5 shrink-0 group mr-4"
             >
-              <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <img
-                src="/src/assets/logo-icon.svg"
-                alt="Vouchy"
-                className="h-6 w-6 relative z-10 transition-transform duration-500 group-hover:rotate-6"
-              />
-            </Link>
-          </div>
-
-          {/* CENTER: Navigation Links (Always Visible, Focused on Mobile) */}
-          <div className="flex-1 lg:flex-none flex items-center justify-center overflow-x-auto no-scrollbar py-2">
-            {[
-              { label: "Features", href: "#features" },
-              { label: "Design", href: "#design-showcase" },
-              { label: "Workflow", href: "#how-it-works" },
-              { label: "Pricing", href: "#pricing" },
-            ].map(({ label, href }, index, array) => (
-              <div key={label} className="flex items-center">
-                <a
-                  href={href}
-                  className="px-3 md:px-6 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] text-muted-foreground/70 hover:text-primary transition-all duration-300 relative group/nav h-12 flex items-center shrink-0"
-                >
-                  {label}
-                  <motion.span
-                    className="absolute bottom-2 left-3 md:left-6 right-3 md:right-6 h-[1.5px] bg-primary rounded-full scale-x-0 group-hover/nav:scale-x-100 transition-transform origin-center"
-                  />
-                </a>
-                {index < array.length - 1 && (
-                  <div className="h-3 w-px bg-primary/30 shrink-0" />
-                )}
+              <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/25 overflow-hidden transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_16px_rgba(10,169,57,0.3)]">
+                <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <img
+                  src="/logo-icon.svg"
+                  alt=""
+                  className="h-5 w-5 md:h-[22px] md:w-[22px] relative z-10 transition-transform duration-500 group-hover:scale-110"
+                />
               </div>
-            ))}
-          </div>
-
-          {/* RIGHT: Actions Section (Hidden on Mobile) */}
-          <div className="hidden lg:flex flex-1 items-center justify-end gap-5">
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300 border border-transparent hover:border-primary/10"
-              aria-label="Toggle theme"
-            >
-              <motion.div
-                key={theme}
-                initial={{ rotate: -30, opacity: 0, scale: 0.7 }}
-                animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </motion.div>
-            </button>
-
-            <Link
-              to="/auth"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70 hover:text-primary transition-colors"
-            >
-              Sign In
+              <span className="hidden sm:block text-[15px] font-black tracking-[-0.03em] text-foreground group-hover:text-primary transition-colors duration-300">
+                Vouch<span className="text-primary">y</span>
+              </span>
             </Link>
 
-            <Button
-              size="sm"
-              className="vouchy-gradient-bg text-white hover:opacity-90 rounded-full px-6 h-10 text-[10px] font-extrabold uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:scale-[1.05] active:scale-[0.98] border-0"
-              asChild
-            >
-              <Link to="/auth?mode=signup">Get Access</Link>
-            </Button>
+            {/* ── CENTER: Nav pills ─────────────────────────── */}
+            <div className="hidden md:flex flex-1 items-center justify-center">
+              <div className="relative flex items-center gap-0.5 bg-primary/[0.04] dark:bg-primary/[0.06] border border-primary/10 rounded-full px-1.5 py-1">
+                {/* Sliding indicator */}
+                <AnimatePresence>
+                  {navLinks.map(({ label }) =>
+                    label === activeLink ? (
+                      <motion.div
+                        key="indicator"
+                        layoutId="nav-indicator"
+                        className="absolute inset-y-1 rounded-full bg-primary/12 border border-primary/20"
+                        style={{
+                          left: `${navLinks.findIndex((l) => l.label === activeLink) * (100 / navLinks.length)}%`,
+                          width: `calc(${100 / navLinks.length}% - 4px)`,
+                        }}
+                        transition={{ type: "spring", stiffness: 380, damping: 36 }}
+                      />
+                    ) : null
+                  )}
+                </AnimatePresence>
+
+                {navLinks.map(({ label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={(e) => {
+                      if (href === "#top") {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }
+                      setActiveLink(label);
+                    }}
+                    className={`
+                      relative z-10 px-4 py-1.5 rounded-full text-[10.5px] font-bold uppercase tracking-[0.18em]
+                      transition-colors duration-250 whitespace-nowrap select-none
+                      ${activeLink === label
+                        ? "text-primary"
+                        : "text-muted-foreground/70 hover:text-foreground"
+                      }
+                    `}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* ── RIGHT: Actions ────────────────────────────── */}
+            <div className="flex items-center gap-1 md:gap-2 ml-auto shrink-0">
+
+              {/* Theme toggle (desktop) */}
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                aria-label="Toggle theme"
+                className="hidden md:flex relative w-9 h-9 rounded-xl items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/6 border border-transparent hover:border-primary/15 transition-all duration-250 overflow-hidden"
+              >
+                <motion.span
+                  key={theme}
+                  initial={{ rotate: -30, scale: 0.6, opacity: 0 }}
+                  animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                  exit={{ rotate: 30, scale: 0.6, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute"
+                >
+                  {theme === "dark" ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}
+                </motion.span>
+              </button>
+
+              {/* Divider */}
+              <div className="hidden md:block h-5 w-px bg-border/60 mx-1" />
+
+              {/* Sign In */}
+              <Link
+                to="/auth"
+                className="hidden md:flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground/80 hover:text-primary hover:bg-primary/5 border border-transparent hover:border-primary/15 transition-all duration-250 whitespace-nowrap"
+              >
+                Sign In
+              </Link>
+
+              {/* Get Access CTA */}
+              <Link
+                to="/auth?mode=signup"
+                className="hidden md:flex items-center gap-2 pl-4 pr-3.5 h-9 rounded-full vouchy-gradient-bg text-white text-[10px] font-extrabold uppercase tracking-[0.18em] shadow-[0_0_20px_rgba(10,169,57,0.30)] hover:shadow-[0_0_28px_rgba(10,169,57,0.45)] hover:scale-[1.04] active:scale-[0.97] transition-all duration-200 whitespace-nowrap border-0"
+              >
+                Get Access
+                <ArrowRight className="h-3 w-3 opacity-80" />
+              </Link>
+
+              {/* Hamburger (mobile) */}
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Toggle menu"
+                className="md:hidden relative w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 border border-transparent hover:border-primary/15 transition-all duration-250"
+              >
+                <AnimatePresence mode="wait">
+                  {menuOpen ? (
+                    <motion.span key="x" initial={{ rotate: -45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 45, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      <X className="h-5 w-5" />
+                    </motion.span>
+                  ) : (
+                    <motion.span key="menu" initial={{ rotate: 45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -45, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      <Menu className="h-5 w-5" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            </div>
           </div>
+
+          {/* ── MOBILE DRAWER ──────────────────────────────── */}
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                key="mobile-menu"
+                initial={{ opacity: 0, y: -12, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.97 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                className="md:hidden mt-2 pb-safe"
+              >
+                <div className="relative bg-background/96 dark:bg-card/92 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-[0_30px_70px_-20px_rgba(10,169,57,0.18)] overflow-hidden">
+                  {/* Vouchy corner accents */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-[1.5px] border-l-[1.5px] border-primary/50 rounded-tl-[4px]" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-[1.5px] border-r-[1.5px] border-primary/50 rounded-tr-[4px]" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[1.5px] border-l-[1.5px] border-primary/50 rounded-bl-[4px]" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[1.5px] border-r-[1.5px] border-primary/50 rounded-br-[4px]" />
+
+                  {/* Header strip */}
+                  <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-primary/8">
+                    <div className="flex items-center gap-2">
+                      <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-50" />
+                      <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">Vouchy Navigation</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                      <span className="text-[8px] font-black text-primary/50 uppercase tracking-widest">Live</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex flex-col gap-0.5">
+                    {/* Nav links */}
+                    {navLinks.map(({ label, href }, i) => (
+                      <motion.a
+                        key={label}
+                        href={href}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.04, duration: 0.25, ease: "easeOut" }}
+                        onClick={(e) => {
+                          if (href === "#top") {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }
+                          setMenuOpen(false);
+                          setActiveLink(label);
+                        }}
+                        className="flex items-center gap-3 h-12 px-4 rounded-xl group/link hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200"
+                      >
+                        <span className="text-[9px] font-black text-primary/20 font-mono group-hover/link:text-primary/50 transition-colors tabular-nums">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/link:text-primary transition-colors flex-1">
+                          {label}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 text-primary/0 group-hover/link:text-primary/40 transition-colors -translate-x-1 group-hover/link:translate-x-0 duration-200" />
+                      </motion.a>
+                    ))}
+
+                    {/* Divider */}
+                    <div className="my-2.5 flex items-center gap-3 px-1">
+                      <div className="h-px flex-1 bg-border/50" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.45em] text-muted-foreground/35">Account</span>
+                      <div className="h-px flex-1 bg-border/50" />
+                    </div>
+
+                    {/* Theme toggle */}
+                    <button
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      className="flex items-center gap-3 h-12 px-4 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200 group/theme w-full text-left"
+                    >
+                      <div className="relative w-7 h-7 rounded-lg flex items-center justify-center bg-primary/5 border border-primary/15 group-hover/theme:border-primary/35 transition-colors shrink-0">
+                        {theme === "dark"
+                          ? <Sun className="h-3.5 w-3.5 text-primary" />
+                          : <Moon className="h-3.5 w-3.5 text-primary" />
+                        }
+                      </div>
+                      <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/theme:text-primary transition-colors">
+                        {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
+                      </span>
+                    </button>
+
+                    {/* Sign In */}
+                    <Link
+                      to="/auth"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 h-12 px-4 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200 group/signin"
+                    >
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black bg-primary/5 border border-primary/15 group-hover/signin:border-primary/35 transition-colors text-primary/60 shrink-0">
+                        ↗
+                      </div>
+                      <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/signin:text-primary transition-colors">
+                        Sign In
+                      </span>
+                    </Link>
+
+                    {/* Get Started CTA */}
+                    <Link
+                      to="/auth?mode=signup"
+                      onClick={() => setMenuOpen(false)}
+                      className="mt-1.5 relative flex items-center justify-between h-14 px-5 vouchy-gradient-bg text-white rounded-2xl shadow-[0_4px_20px_rgba(10,169,57,0.35)] hover:shadow-[0_6px_28px_rgba(10,169,57,0.45)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 overflow-hidden group/cta"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 group-hover/cta:opacity-100 transition-opacity" />
+                      <div className="absolute top-0 left-0 w-5 h-5 border-t border-l border-white/25 rounded-tl-lg" />
+                      <div className="absolute bottom-0 right-0 w-5 h-5 border-b border-r border-white/25 rounded-br-lg" />
+                      <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] relative z-10">Get Started Free</span>
+                      <ArrowRight className="h-4 w-4 relative z-10 group-hover/cta:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </nav>
 
       {/* Page Sections */}
-      <main className="pt-24">
+      <main className="pt-20">
         <Hero />
-        <VouchyWidget />
+
         <BentoGrid />
         <ProductShowcase />
         <TestimonialDesigns />
+
+        {/* Testimonials Embed */}
+        <div className="container mx-auto px-6 max-w-7xl relative z-10 mb-12 py-16">
+          <div className="flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4"
+            >
+              <TbSparkles className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Social Proof</span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground mb-4"
+            >
+              Trusted by <span className="text-primary font-medium">builders</span> worldwide
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-muted-foreground text-sm md:text-base max-w-2xl font-medium leading-relaxed"
+            >
+              See why hundreds of companies choose Vouchy to collect, manage, and display their video testimonials.
+            </motion.p>
+          </div>
+        </div>
+        <div id="landing-widget-container" style={{ background: 'transparent' }}></div>
+
         <HowItWorks />
         <Pricing />
         <CTA />
       </main>
 
       {/* Footer */}
-      <footer className="py-24 bg-background border-t border-border">
-        <div className="container max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="flex flex-col items-center md:items-start gap-4">
-              <img
-                src="/src/assets/logo-horizontal.svg"
-                alt="Vouchy"
-                className="h-5 w-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500 dark:invert"
-              />
-              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground/50">
-                Precision Social Proof Architecture.
-              </p>
-            </div>
+      <footer className="border-t border-border/50">
+        <div className="container max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-6">
 
-            <div className="flex flex-col items-center md:items-end gap-6">
-              <div className="flex gap-12">
-                <a href="#" className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-foreground transition-all">Privacy</a>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-foreground transition-all">Terms</a>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-foreground transition-all">Twitter</a>
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/30">
-                © 2026 Vouchy Labs — All Rights Reserved.
-              </p>
-            </div>
+          {/* Logo + wordmark */}
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
+            <img src="/logo-icon.svg" alt="Vouchy" className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="text-[12px] font-black tracking-[-0.02em] text-muted-foreground/50 group-hover:text-foreground transition-colors duration-300">
+              Vouch<span className="text-primary">y</span>
+            </span>
+          </Link>
+
+          {/* Links + copyright */}
+          <div className="flex items-center gap-6">
+            {["Privacy", "Terms", "Twitter"].map((label) => (
+              <a
+                key={label}
+                href="#"
+                className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
+              >
+                {label}
+              </a>
+            ))}
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/25 whitespace-nowrap">
+              © 2026 Vouchy Labs
+            </span>
           </div>
+
         </div>
       </footer>
     </div>

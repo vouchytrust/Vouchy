@@ -154,3 +154,41 @@ export async function fetchSpaceTestimonialCounts() {
   });
   return counts;
 }
+
+// ── Widgets ──
+
+export async function fetchWidgetById(id: string) {
+  const { data, error } = await supabase
+    .from("widgets")
+    .select("*, spaces(slug)")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertWidget(widget: {
+  id?: string;
+  space_id: string;
+  user_id: string;
+  name?: string;
+  config: any;
+}) {
+  const { data, error } = await supabase
+    .from("widgets")
+    .upsert(widget)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchWidgetsBySpace(spaceId: string) {
+  const { data, error } = await supabase
+    .from("widgets")
+    .select("*")
+    .eq("space_id", spaceId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}

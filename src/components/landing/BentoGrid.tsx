@@ -1,208 +1,264 @@
 import { motion } from "framer-motion";
-import { TbVideo, TbMessage, TbCode, TbBolt, TbPlayerPlayFilled, TbTrendingUp, TbStarFilled, TbWand, TbMicrophone } from "react-icons/tb";
+import { TbMessage, TbBolt, TbPlayerPlayFilled, TbTrendingUp, TbStarFilled, TbWand, TbMicrophone } from "react-icons/tb";
+import { Sparkles, Cpu } from "lucide-react";
+
+/**
+ * ARCHITECTURAL CORNER MARKERS
+ */
+const CardArchitecture = ({ id, light = false }: { id: string, light?: boolean }) => (
+  <>
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.02] pointer-events-none" />
+    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1px] bg-primary/[0.02] pointer-events-none" />
+    <div className={`absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 rounded-tl-[4px] ${light ? 'border-background/30' : 'border-primary/30'} transition-all duration-500 group-hover:border-primary/70 group-hover:w-9 group-hover:h-9 pointer-events-none`} />
+    <div className={`absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 rounded-tr-[4px] ${light ? 'border-background/30' : 'border-primary/30'} transition-all duration-500 group-hover:border-primary/70 group-hover:w-9 group-hover:h-9 pointer-events-none`} />
+    <div className={`absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 rounded-bl-[4px] ${light ? 'border-background/30' : 'border-primary/30'} transition-all duration-500 group-hover:border-primary/70 group-hover:w-9 group-hover:h-9 pointer-events-none`} />
+    <div className={`absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 rounded-br-[4px] ${light ? 'border-background/30' : 'border-primary/30'} transition-all duration-500 group-hover:border-primary/70 group-hover:w-9 group-hover:h-9 pointer-events-none`} />
+    <div className={`absolute top-3 left-3 text-[7px] font-mono ${light ? 'text-background/25' : 'text-primary/25'} uppercase tracking-[0.4em] pointer-events-none select-none`}>
+      {id}
+    </div>
+  </>
+);
 
 const BentoGrid = () => {
   return (
-    <section id="features" className="py-24 bg-background">
-      <div className="container mx-auto px-6">
+    <section id="features" className="py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center">
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-px h-full bg-primary" />
+        <div className="absolute top-0 left-2/4 w-px h-full bg-primary" />
+        <div className="absolute top-0 left-3/4 w-px h-full bg-primary" />
+        <div className="absolute top-1/3 left-0 w-full h-px bg-primary" />
+        <div className="absolute top-2/3 left-0 w-full h-px bg-primary" />
+      </div>
 
-        {/* Header */}
-        <div className="text-center mb-16 max-w-2xl mx-auto">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Header — Left title / Right description */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-10 max-w-7xl mx-auto">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4"
+            >
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Features</span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" as const }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-foreground leading-[1.1]"
+            >
+              Everything you need <br />
+              <span className="text-primary font-medium">in one place.</span>
+            </motion.h2>
+          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4"
+            className="text-base text-muted-foreground leading-relaxed max-w-sm font-light lg:text-right"
           >
-            Capabilities
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
-          >
-            All-in-one platform for <br />
-            <span className="text-primary">social proof.</span>
-          </motion.h2>
+            Collect, manage, and display testimonials without juggling multiple tools.
+          </motion.p>
         </div>
 
         {/* Grid Container */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
 
           {/* Card 1: Dual-Mode Collection */}
           <motion.div
-            className="lg:col-span-3 bg-card rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all duration-500 border border-border flex flex-col justify-between h-[400px] overflow-hidden relative group"
+            className="lg:col-span-3 rounded-2xl p-5 transition-all duration-500 flex flex-col gap-4 relative group bg-card/40 border border-border/50 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="absolute top-10 inset-x-10 h-[220px] flex gap-4">
-              <div className="flex-1 bg-foreground rounded-2xl flex items-center justify-center relative overflow-hidden group-hover:-translate-x-2 transition-transform duration-500">
-                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
-                  <div className="w-6 h-6 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+            <CardArchitecture id="SYS_COMP_01" />
+            {/* Visual - inline, not absolute */}
+            <div className="flex gap-3 h-[140px] mt-4 overflow-hidden rounded-2xl">
+              <div className="flex-1 bg-card rounded-2xl border border-border/50 flex items-center justify-center relative overflow-hidden group-hover:-translate-x-1 transition-transform duration-500 shadow-xl">
+                <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
+                  <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
                 </div>
-                <div className="absolute bottom-3 text-[10px] text-background/60 font-medium">Video</div>
+                <div className="absolute bottom-3 text-[8px] text-background/40 font-black uppercase tracking-[0.2em]">Video Intake</div>
               </div>
-              <div className="flex-1 bg-muted rounded-2xl border-2 border-dashed border-border flex flex-col items-center justify-center relative group-hover:translate-x-2 transition-transform duration-500">
-                <div className="w-10 h-10 bg-card rounded-full flex items-center justify-center shadow-sm mb-2">
-                  <TbMessage className="w-5 h-5 text-muted-foreground" />
+              <div className="flex-1 bg-muted/40 rounded-2xl border-2 border-dashed border-primary/10 flex flex-col items-center justify-center relative group-hover:translate-x-1 transition-transform duration-500">
+                <div className="w-8 h-8 bg-card rounded-full flex items-center justify-center shadow-sm mb-1.5 border border-border">
+                  <TbMessage className="w-4 h-4 text-primary/60" />
                 </div>
-                <div className="w-16 h-1.5 bg-border rounded-full mb-1" />
-                <div className="w-10 h-1.5 bg-border rounded-full" />
-                <div className="absolute bottom-3 text-[10px] text-muted-foreground font-medium">Text</div>
+                <div className="w-12 h-0.5 bg-primary/10 rounded-full mb-1" />
+                <div className="w-8 h-0.5 bg-primary/10 rounded-full" />
+                <div className="absolute bottom-3 text-[8px] text-primary/40 font-black uppercase tracking-[0.2em]">Text Format</div>
               </div>
             </div>
-            <div className="mt-auto relative z-10">
-              <h3 className="text-2xl font-bold mb-2 text-foreground">Dual-Mode Collection</h3>
-              <p className="text-muted-foreground text-sm">Give your customers the choice. They can record a quick video or type a thoughtful note.</p>
+            <div className="relative z-10">
+              <h3 className="text-lg font-bold mb-1 text-foreground tracking-tight">Video or text — their choice</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed font-medium">Customers can record a quick video or type a written review. Whatever feels natural to them.</p>
             </div>
           </motion.div>
 
           {/* Card 2: Wall of Love */}
           <motion.div
-            className="lg:col-span-3 bg-card rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all duration-500 border border-border flex flex-col justify-between h-[400px] overflow-hidden relative group"
+            className="lg:col-span-3 rounded-2xl p-5 transition-all duration-500 flex flex-col gap-4 relative group bg-card/40 border border-border/50 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
+            <CardArchitecture id="SYS_COMP_02" />
+            {/* Visual - inline */}
             <div
-              className="absolute top-8 inset-x-10 h-[180px] flex flex-col gap-3 overflow-hidden"
+              className="h-[140px] mt-4 overflow-hidden rounded-2xl"
               style={{
-                maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
+                maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)"
               }}
             >
               <div className="columns-2 gap-3 space-y-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className={`break-inside-avoid bg-muted p-3 rounded-xl border border-border ${i % 2 === 0 ? 'mt-4' : ''}`}>
-                    <div className="flex gap-1 mb-2">
-                      {[...Array(5)].map((_, j) => <TbStarFilled key={j} className="w-2 h-2 text-yellow-500" />)}
+                  <div key={i} className={`break-inside-avoid bg-muted/30 p-3 rounded-2xl border border-primary/5 ${i % 2 === 0 ? 'mt-4' : ''}`}>
+                    <div className="flex gap-0.5 mb-2">
+                      {[...Array(5)].map((_, j) => <TbStarFilled key={j} className="w-2 h-2 text-yellow-500/80" />)}
                     </div>
                     {i === 2 ? (
-                      <div className="aspect-video bg-border rounded-lg mb-2 relative overflow-hidden">
+                      <div className="aspect-video bg-muted/80 rounded-xl mb-1 relative overflow-hidden border border-primary/5">
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <TbPlayerPlayFilled className="w-4 h-4 text-muted-foreground drop-shadow-md" />
+                          <TbPlayerPlayFilled className="w-4 h-4 text-primary/40" />
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-1.5">
-                        <div className="h-1.5 w-full bg-border rounded-full" />
-                        <div className="h-1.5 w-2/3 bg-border rounded-full" />
-                        <div className="h-1.5 w-4/5 bg-border rounded-full" />
+                      <div className="space-y-1 opacity-60">
+                        <div className="h-0.5 w-full bg-primary/10 rounded-full" />
+                        <div className="h-0.5 w-2/3 bg-primary/10 rounded-full" />
                       </div>
                     )}
-                    <div className="flex items-center gap-2 mt-3">
-                      <div className="w-4 h-4 rounded-full bg-muted-foreground/20" />
-                      <div className="h-1.5 w-12 bg-border rounded-full" />
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div className="w-4 h-4 rounded-full bg-primary/10 border border-primary/10" />
+                      <div className="h-0.5 w-8 bg-primary/10 rounded-full" />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="mt-auto relative z-10">
-              <h3 className="text-2xl font-bold mb-2 text-foreground">The Wall of Love</h3>
-              <p className="text-muted-foreground text-sm">Mix video and text testimonials in a single, beautiful grid. It makes your social proof look dense and active.</p>
+            <div className="relative z-10">
+              <h3 className="text-lg font-bold mb-1 text-foreground tracking-tight">Your wall of love</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed font-medium">All your reviews in one place — videos, text, and ratings displayed beautifully.</p>
             </div>
           </motion.div>
 
           {/* Card 3: AI Script Assistant */}
           <motion.div
-            className="lg:col-span-2 bg-card rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all duration-500 border border-border flex flex-col justify-between h-[320px] overflow-hidden relative group"
+            className="lg:col-span-2 rounded-2xl p-5 transition-all duration-500 flex flex-col gap-3 relative group bg-card/40 border border-border/50 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            <div className="h-[140px] relative overflow-hidden rounded-2xl bg-muted/60 border border-border p-4">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-40 bg-foreground rounded-xl p-4 shadow-xl transform rotate-[-3deg] group-hover:rotate-0 transition-all duration-500 border border-border">
-                  <div className="flex items-center justify-between mb-3">
-                    <TbMicrophone className="w-3 h-3 text-background/50" />
-                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[11px] text-background font-medium leading-tight">"This product changed our workflow..."</p>
-                    <p className="text-[11px] text-background/40 font-medium leading-tight blur-[0.5px]">It was incredibly easy to setup.</p>
-                  </div>
+            <CardArchitecture id="SYS_COMP_03" />
+            {/* Visual */}
+            <div className="h-[100px] mt-4 relative overflow-hidden rounded-2xl bg-primary/[0.02] border border-primary/5 flex items-center justify-center">
+              <div className="w-32 bg-foreground rounded-xl p-3 shadow-xl transform rotate-[-3deg] group-hover:rotate-0 transition-all duration-700 border border-primary/10">
+                <div className="flex items-center justify-between mb-2">
+                  <TbMicrophone className="w-3 h-3 text-background/40" />
+                  <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
                 </div>
-                <div className="absolute top-3 right-3 w-8 h-8 bg-card rounded-full shadow-sm flex items-center justify-center border border-border">
-                  <TbWand className="w-4 h-4 text-primary" />
+                <div className="space-y-1">
+                  <div className="h-0.5 w-full bg-background/20 rounded-full" />
+                  <div className="h-0.5 w-4/5 bg-background/10 rounded-full" />
                 </div>
               </div>
+              <div className="absolute top-3 right-3 w-7 h-7 bg-background rounded-xl shadow-lg flex items-center justify-center border border-primary/10 animate-bounce">
+                <TbWand className="w-3.5 h-3.5 text-primary" />
+              </div>
             </div>
-            <div className="mt-auto relative z-10">
-              <h3 className="text-xl font-bold mb-2 text-foreground">AI Script Assistant</h3>
-              <p className="text-muted-foreground text-xs">Stuck? Our AI generates scripts and cues a teleprompter for perfect takes.</p>
+            <div className="relative z-10">
+              <h3 className="text-base font-bold mb-1 text-foreground tracking-tight">AI helps them say it right</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed font-medium">A built-in teleprompter guides customers so they never freeze in front of the camera.</p>
             </div>
           </motion.div>
 
-          {/* Card 4: Zero-Code Embed (Dark accent card — intentionally high contrast) */}
+          {/* Card 4: Zero-Code Embed */}
           <motion.div
-            className="lg:col-span-2 bg-foreground rounded-[2.5rem] p-8 shadow-xl border border-border hover:opacity-95 transition-all duration-500 flex flex-col justify-between h-[320px] overflow-hidden relative group"
+            className="lg:col-span-2 rounded-2xl p-5 transition-all duration-500 flex flex-col gap-3 relative group bg-card/40 border border-border/50 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            <div className="h-[140px] bg-background/10 rounded-xl p-4 font-mono text-[10px] text-background/50 border border-background/10 overflow-hidden relative">
-              <div className="absolute top-0 w-full h-6 bg-background/10 border-b border-background/10 flex items-center px-2 gap-1.5 left-0">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
-                <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                <div className="w-2 h-2 rounded-full bg-green-500" />
+            <CardArchitecture id="SYS_DIST_04" />
+            {/* Visual */}
+            <div className="mt-4 h-[100px] relative overflow-hidden rounded-2xl bg-primary/[0.02] border border-primary/5 p-3 flex flex-col justify-between">
+              {/* Mini widget rows */}
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-primary/10 border border-primary/10 shrink-0" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-1 w-3/4 bg-primary/15 rounded-full" />
+                  <div className="h-1 w-1/2 bg-primary/8 rounded-full" />
+                </div>
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-sm bg-yellow-500/50" />)}
+                </div>
               </div>
-              <div className="mt-6 space-y-1 opacity-80 break-all">
-                <p>&lt;<span className="text-blue-400">script</span></p>
-                <p className="pl-2">src=<span className="text-primary/80">"https://vouchy.click/embed.js"</span></p>
-                <p className="pl-2">data-id=<span className="text-yellow-400/80">"f985f44e..."</span></p>
-                <p className="pl-2">defer</p>
-                <p>&gt;&lt;/<span className="text-blue-400">script</span>&gt;</p>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-primary/10 border border-primary/10 shrink-0" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-1 w-2/3 bg-primary/15 rounded-full" />
+                  <div className="h-1 w-1/3 bg-primary/8 rounded-full" />
+                </div>
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-sm bg-yellow-500/50" />)}
+                </div>
+              </div>
+              {/* "Powered by" strip */}
+              <div className="absolute bottom-0 inset-x-0 h-5 bg-primary/[0.03] border-t border-primary/5 flex items-center justify-center gap-1">
+                <img src="/logo-icon.svg" alt="" className="h-2.5 w-2.5 opacity-30" />
+                <span className="text-[7px] font-black text-primary/30 uppercase tracking-[0.3em]">Powered by Vouchy</span>
               </div>
             </div>
-            <div className="mt-auto relative z-10">
-              <h3 className="text-xl font-bold mb-2 text-background">Zero-Code Embed</h3>
-              <p className="text-background/50 text-xs">One script for everything. Just paste a single line into your site.</p>
+            <div className="relative z-10">
+              <h3 className="text-base font-bold mb-1 text-foreground tracking-tight">Add it to your site in seconds</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed font-medium">Copy one line of code and your testimonials appear on any page, instantly.</p>
             </div>
           </motion.div>
 
           {/* Card 5: Lightning Fast */}
           <motion.div
-            className="lg:col-span-2 bg-card rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all duration-500 border border-border flex flex-col justify-between h-[320px] overflow-hidden relative group"
+            className="lg:col-span-2 rounded-2xl p-5 transition-all duration-500 flex flex-col gap-3 relative group bg-card/40 border border-border/50 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
           >
-            <div className="h-[140px] relative overflow-hidden rounded-2xl bg-muted/60 border border-border p-4">
-              <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-card shadow-sm border border-border flex items-center justify-center">
-                  <TbCode className="w-5 h-5 text-primary" />
+            <CardArchitecture id="SYS_PERF_05" />
+            {/* Visual */}
+            <div className="h-[100px] mt-4 relative overflow-hidden rounded-2xl bg-primary/[0.02] border border-primary/5 p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-8 h-8 rounded-[12px] bg-background shadow-lg border border-primary/10 flex items-center justify-center">
+                  <Cpu className="w-4 h-4 text-primary" />
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-primary">
-                  <TbBolt className="w-4 h-4" />
-                  Fast load
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">
+                  <TbBolt className="w-2.5 h-2.5 shrink-0" />
+                  Fast
                 </div>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-xl bg-card border border-border p-3">
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Embed</p>
-                  <p className="mt-1 text-sm font-black text-foreground">1 line</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl bg-background/50 border border-primary/5 p-2 group-hover:border-primary/20 transition-colors">
+                  <p className="text-[7px] text-primary/40 font-black uppercase tracking-[0.2em]">Payload</p>
+                  <p className="mt-0.5 text-[11px] font-black text-foreground tracking-tighter">0.8 KB</p>
                 </div>
-                <div className="rounded-xl bg-card border border-border p-3">
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Impact</p>
-                  <p className="mt-1 text-sm font-black flex items-center gap-1 text-foreground">
-                    <TbTrendingUp className="w-4 h-4 text-primary" />
-                    Faster
+                <div className="rounded-xl bg-background/50 border border-primary/5 p-2 group-hover:border-primary/20 transition-colors">
+                  <p className="text-[7px] text-primary/40 font-black uppercase tracking-[0.2em]">Score</p>
+                  <p className="mt-0.5 text-[11px] font-black flex items-center gap-0.5 text-foreground tracking-tighter">
+                    <TbTrendingUp className="w-2.5 h-2.5 text-primary" />
+                    100
                   </p>
                 </div>
               </div>
-              <div className="absolute -left-10 -top-12 w-32 h-32 rounded-full bg-primary/10 blur-2xl" />
             </div>
-            <div className="mt-auto relative z-10">
-              <h3 className="text-xl font-bold mb-2 text-foreground">Install in minutes</h3>
-              <p className="text-muted-foreground text-xs">Drop in a tiny script and publish. No rebuilds, no performance tradeoffs.</p>
+            <div className="relative z-10">
+              <h3 className="text-base font-bold mb-1 text-foreground tracking-tight">Fast by default</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed font-medium">Lightweight and optimized — your page speed won't take a hit.</p>
             </div>
           </motion.div>
 

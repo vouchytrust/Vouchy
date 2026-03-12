@@ -104,7 +104,7 @@ export default function OnboardingPage() {
       {/* Left - Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 max-w-lg mx-auto">
         <Link to="/" className="flex items-center gap-2 mb-12 group hover:scale-105 transition-transform duration-200">
-          <img src="/src/assets/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
+          <img src="/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
         </Link>
 
         {/* Progress */}
@@ -219,7 +219,7 @@ export default function OnboardingPage() {
                 <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-cover" />
               ) : (
                 <div className="h-11 w-11 rounded-lg flex items-center justify-center vouchy-gradient-bg p-2 shadow-sm border border-white/10 hover:scale-105 transition-transform">
-                  <img src="/src/assets/logo-icon-white.svg" alt="Vouchy Logo Icon" className="h-6 w-6" />
+                  <img src="/logo-icon-white.svg" alt="Vouchy Logo Icon" className="h-6 w-6" />
                 </div>
               )}
               <div>

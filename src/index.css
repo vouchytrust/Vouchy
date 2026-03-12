@@ -181,3 +181,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(240 4% 46% / 0.35);
 }
+
+/* Embed iframe: transparent background, no scroll */
+html.vouchy-embed-frame,
+html.vouchy-embed-frame body {
+  background: transparent !important;
+  background-color: transparent !important;
+  overflow: hidden !important;
+}

@@ -77,7 +77,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
               <p className="text-[10px] text-muted-foreground">{data.role}</p>
             </div>
           </div>
-          <p className="text-xs font-medium text-foreground/80 leading-relaxed mb-4 italic">"{data.content}"</p>
+          <p className="text-xs font-medium text-foreground/80 leading-relaxed mb-4">"{data.content}"</p>
           <div className="mt-auto pt-4 border-t border-border/10">
             <Stars />
           </div>
@@ -91,7 +91,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
             <div className="flex-1">
               <p className="text-xs font-bold text-foreground mb-1">{data.name}</p>
               <Stars />
-              <p className="text-xs font-medium text-foreground/70 leading-relaxed italic mt-2">"{data.content}"</p>
+              <p className="text-xs font-medium text-foreground/70 leading-relaxed mt-2">"{data.content}"</p>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
             <Stars />
             <div className="px-2 py-0.5 rounded-full bg-vouchy-success/10 border border-vouchy-success/20 text-[8px] font-bold text-vouchy-success uppercase tracking-wider">Verified</div>
           </div>
-          <p className="text-xs font-medium text-foreground/80 leading-relaxed mb-4 italic">"{data.content}"</p>
+          <p className="text-xs font-medium text-foreground/80 leading-relaxed mb-4">"{data.content}"</p>
           <div className="mt-auto pt-4 border-t border-border/10 flex items-center gap-3">
             <img src={data.avatar} className="h-8 w-8 rounded-full border border-border" alt={data.name} />
             <div>
@@ -130,12 +130,12 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
       );
     case 'avatar-wall':
       return (
-        <div className="p-6 bg-card/40 border border-border/50 rounded-2xl h-full flex flex-col items-center text-center">
-          <img src={data.avatar} className="h-16 w-16 rounded-full border-4 border-background shadow-lg mb-4" alt={data.name} />
-          <p className="text-xs font-bold text-foreground mb-1">{data.name}</p>
-          <p className="text-[10px] text-muted-foreground mb-4">{data.role}</p>
-          <Stars />
-          <p className="text-[10px] font-medium text-foreground/70 leading-relaxed mt-4">"{data.content}"</p>
+        <div className="p-4 sm:p-6 bg-card/40 border border-border/50 rounded-2xl h-full flex flex-col items-center text-center overflow-y-auto scrollbar-hide">
+          <img src={data.avatar} className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-4 border-background shadow-lg mb-3 sm:mb-4 shrink-0" alt={data.name} />
+          <p className="text-[11px] sm:text-xs font-bold text-foreground mb-0.5 sm:mb-1">{data.name}</p>
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-3 sm:mb-4">{data.role}</p>
+          <div className="shrink-0"><Stars /></div>
+          <p className="text-[10px] font-medium text-foreground/70 leading-relaxed mt-3 sm:mt-4 pb-2">"{data.content}"</p>
         </div>
       );
     case 'masonry':
@@ -160,7 +160,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
           <img src={data.avatar} className="h-12 w-12 rounded-full flex-shrink-0" alt={data.name} />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-foreground truncate">{data.name}</p>
-            <p className="text-[10px] text-foreground/60 truncate italic">"{data.content}"</p>
+            <p className="text-[10px] text-foreground/60 truncate">"{data.content}"</p>
           </div>
           <div className="flex-shrink-0 opacity-20">
             <GalleryHorizontalEnd className="w-6 h-6" />
@@ -184,55 +184,44 @@ const layouts = [
 
 export default function TestimonialDesigns() {
   return (
-    <section id="design-showcase" className='py-32 bg-background relative overflow-hidden'>
+    <section id="design-showcase" className='py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center'>
       {/* Blueprint Grid Background - Slightly more visible for the "architect" feel */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--primary)/0.06)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.06)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_90%)]"></div>
 
       <div className='container mx-auto px-6 relative z-10 max-w-7xl font-sans'>
 
         {/* Header */}
-        <div className='flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-24'>
+        <div className='flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-10'>
           <div className='max-w-xl'>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/[0.03] border border-primary/10 mb-6'
+              className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/[0.03] border border-primary/10 mb-4'
             >
               <Sparkles className="w-3 h-3 text-primary" />
-              <span className='text-[10px] font-black text-primary/60 uppercase tracking-[0.2em]'>Reference Master</span>
+              <span className='text-[10px] font-black text-primary/60 uppercase tracking-[0.2em]'>Display styles</span>
             </motion.div>
 
             <motion.h2
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className='text-3xl md:text-5xl lg:text-5xl font-black tracking-tight text-foreground mb-6 leading-[1.2]'
+              className='text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-foreground leading-[1.1]'
             >
-              Seven precision <br />
-              <span className='text-primary italic font-medium'>layout archetypes.</span>
+              Pick a style that <br />
+              <span className='text-primary font-medium'>fits your brand.</span>
             </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground font-medium max-w-lg leading-relaxed"
-            >
-              Engineered for conversion. Every pixel is calculated to maximize trust
-              and social proof efficiency across any interface.
-            </motion.p>
           </div>
 
-          <motion.div
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="hidden lg:flex items-center gap-4 text-primary/40 text-[10px] font-black uppercase tracking-[0.4em]"
+            transition={{ delay: 0.2 }}
+            className="text-base text-muted-foreground font-medium max-w-sm leading-relaxed lg:text-right"
           >
-            <span>v.1.0-alpha</span>
-            <div className="w-12 h-px bg-primary/20" />
-            <span>Blueprint Master</span>
-          </motion.div>
+            Seven ready-to-use layouts. Slide through them and drop your favourite on any page.
+          </motion.p>
         </div>
 
         {/* Slidable Blueprints */}
@@ -246,14 +235,20 @@ export default function TestimonialDesigns() {
           >
             <CarouselContent className="-ml-6">
               {layouts.map((layout, index) => (
-                <CarouselItem key={layout.id} className="pl-6 basis-full md:basis-1/2 lg:basis-1/3 h-[420px]">
+                <CarouselItem key={layout.id} className="pl-6 basis-full md:basis-1/2 lg:basis-1/3 h-[400px] sm:h-[380px] lg:h-[350px]">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex flex-col h-full group"
+                    className="flex flex-col h-full group pb-4"
                   >
-                    <div className="flex-1 relative rounded-[40px] bg-card/20 border border-border/50 p-8 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-primary/40 group-hover:bg-card/30">
+                    <div className="flex-1 relative rounded-2xl p-8 flex items-center justify-center transition-all duration-500 group">
+                      
+                      {/* Architecture Corners */}
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
 
                       {/* Metric lines - Purely decorative architect feel */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.04]" />
@@ -263,10 +258,7 @@ export default function TestimonialDesigns() {
                         <BlueprintCard layoutId={layout.id} />
                       </div>
 
-                      {/* Layout Label */}
-                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-primary/40 uppercase tracking-[0.6em] whitespace-nowrap">
-                        SYS_ARC_0{index + 1} // {layout.id.toUpperCase()}
-                      </div>
+
                     </div>
 
                     <div className="mt-6 px-4">
@@ -284,35 +276,50 @@ export default function TestimonialDesigns() {
             </CarouselContent>
 
             <div className="flex justify-center md:justify-end gap-3 mt-12 md:-mt-12 md:relative md:z-20">
-              <CarouselPrevious className="static translate-y-0 h-12 w-12 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all rounded-2xl group" />
-              <CarouselNext className="static translate-y-0 h-12 w-12 border-border/50 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all rounded-2xl group" />
+              <CarouselPrevious className="static translate-y-0 h-12 w-12 border-border/50 bg-card/40 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all rounded-xl group flex items-center justify-center" />
+              <CarouselNext className="static translate-y-0 h-12 w-12 border-border/50 bg-card/40 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all rounded-xl group flex items-center justify-center" />
             </div>
           </Carousel>
         </div>
 
-        {/* Action Bar - Premium Dark Footer for the section */}
+        {/* Action Bar — Dark Branded Blueprint CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="mt-32 p-1 bg-card/50 border border-border rounded-3xl"
+          viewport={{ once: true }}
+          className="mt-16 group relative"
         >
-          <div className="bg-foreground text-background p-8 md:p-12 rounded-[22px] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group/action">
-            {/* Gloss Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover/action:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          <div className="relative rounded-2xl border border-white/5 bg-card/40 backdrop-blur-sm overflow-hidden">
+            {/* Corner accents — Branded Green with matching rounding */}
+            <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
 
-            <div className="relative z-10 text-center md:text-left">
-              <h4 className="text-3xl md:text-4xl font-black mb-3 tracking-tighter text-background">Precision-engineered <br className="hidden md:block" /> for high-velocity trust.</h4>
-              <p className="text-background/70 font-medium text-sm md:text-lg max-w-md">Every blueprint is designed to be fully adaptable via our signature Widget Lab.</p>
+            {/* Crosshair lines — Subtle light accents on dark */}
+            <div className="absolute top-0 right-[28%] h-full w-[1px] bg-white/[0.03]" />
+            <div className="absolute bottom-[38%] left-0 w-full h-[1px] bg-white/[0.03]" />
+
+            <div className="relative z-10 p-10 md:p-14 flex flex-col md:flex-row items-center justify-between gap-10">
+              <div className="text-center md:text-left">
+                <h4 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter text-foreground leading-[1.05]">
+                  Make it look <br className="hidden md:block" />
+                  <span className="text-primary">exactly yours.</span>
+                </h4>
+                <p className="text-muted-foreground font-medium text-base md:text-lg max-w-sm leading-relaxed">
+                  Tweak colours, fonts, and layout in the Widget Lab until it feels like it was built for your brand.
+                </p>
+              </div>
+
+              <div className="relative group/btn">
+                {/* Glow for button */}
+                <div className="absolute -inset-2 bg-primary/10 blur-xl group-hover/btn:bg-primary/20 transition-colors" />
+                <button className="relative h-16 px-10 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4 shadow-2xl">
+                  Start Building
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-
-            <button className="relative z-10 h-16 px-10 bg-background text-foreground rounded-2xl font-black text-[11px] uppercase tracking-[0.25em] transition-all hover:scale-[1.05] active:scale-[0.95] flex items-center justify-center gap-3 group/btn shadow-2xl shadow-black/20">
-              Start Building
-              <ArrowRight className="w-4 h-4 transition-all group-hover/btn:translate-x-1 group-hover/btn:text-primary" />
-            </button>
-
-            {/* Subtle Reference lines in background - slightly more visible */}
-            <div className="absolute top-0 right-1/4 h-full w-[1px] bg-background/10" />
-            <div className="absolute bottom-1/3 left-0 w-full h-[1px] bg-background/10" />
           </div>
         </motion.div>
 

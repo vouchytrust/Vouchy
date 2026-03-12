@@ -21,7 +21,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative bg-background pt-8 pb-20 lg:pt-12 lg:pb-32 overflow-hidden">
+    <section className="relative bg-background pt-4 pb-20 lg:pt-8 lg:pb-32 overflow-hidden z-10">
       {/* Grid Background */}
       <div className="absolute inset-0 z-0 opacity-[0.03] [mask-image:linear-gradient(to_bottom,black_60%,transparent)]"
         style={{
@@ -31,14 +31,14 @@ export default function Hero() {
       />
 
       <div className="container mx-auto px-6 relative z-10 max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* LEFT: Content */}
           <motion.div
             initial="initial"
             animate="animate"
             variants={stagger}
-            className="text-center lg:text-left max-w-2xl mx-auto lg:mx-0"
+            className="text-center lg:text-left max-w-4xl mx-auto lg:mx-0"
           >
             {/* Pill badge */}
             <motion.div variants={fadeIn} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border text-muted-foreground mb-8 cursor-default">
@@ -46,27 +46,32 @@ export default function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider">The Future of Social Proof</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Sell with social proof.</span>
             </motion.div>
 
             {/* Headline */}
-            <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6 leading-[1.1]">
-              The easiest way to collect
-              <span className="inline-flex items-center -space-x-4 ml-2 align-middle transform translate-y-[-4px]">
-                {[1, 2, 3, 4].map((i) => (
-                  <Avatar key={i} className="w-10 h-10 md:w-14 border-4 border-background ring-1 ring-primary/20 overflow-hidden">
-                    <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" />
-                    <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-black uppercase">U{i}</AvatarFallback>
-                  </Avatar>
-                ))}
+            <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl lg:text-[4rem] xl:text-[4.5rem] font-bold tracking-tighter text-foreground mb-6 leading-[1.05]">
+              <span className="lg:block lg:whitespace-nowrap opacity-60">Let your customers</span>
+              <span className="lg:flex lg:items-center lg:gap-4 lg:whitespace-nowrap mt-1">
+                <span className="inline-flex items-center -space-x-4 align-middle transform translate-y-[-2px]">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Avatar key={i} className="w-10 h-10 md:w-14 lg:w-16 border-4 border-background ring-1 ring-primary/20 overflow-hidden">
+                      <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" />
+                      <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-black uppercase">U{i}</AvatarFallback>
+                    </Avatar>
+                  ))}
+                </span>
+                selling
               </span>
-              <span className="ml-2 text-primary">testimonials.</span>
+              <span className="lg:block lg:whitespace-nowrap mt-1">
+                <> </>for <span className="text-primary">you.</span>
+              </span>
             </motion.h1>
 
             {/* Subhead */}
             <motion.p variants={fadeIn} className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-light">
-              Send a link. Get testimonials. Embed it anywhere. <br className="hidden md:block" />
-              Turn your happy customers into your best marketing team.
+              High-fidelity video and text proof that turns skeptical <br className="hidden md:block" />
+              visitors into confident buyers automatically.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -145,7 +150,7 @@ export default function Hero() {
                       </div>
                     </div>
 
-                    <p className="text-sm font-medium text-muted-foreground leading-relaxed italic">
+                    <p className="text-sm font-medium text-muted-foreground leading-relaxed">
                       "We embedded the React component, and our conversion rate jumped by 14% overnight. Best decision we made this quarter."
                     </p>
 

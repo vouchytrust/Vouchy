@@ -13,8 +13,8 @@ const ProductShowcase = () => {
   const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section className="relative py-24 lg:py-32 px-6 overflow-hidden bg-background border-y border-border" ref={containerRef}>
-      <div className="container mx-auto max-w-7xl">
+    <section className="relative py-12 lg:py-16 px-6 overflow-hidden bg-background border-y border-border min-h-screen flex flex-col justify-center" ref={containerRef}>
+      <div className="container mx-auto max-w-7xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
           {/* Left: Minimal Copy */}
@@ -23,46 +23,52 @@ const ProductShowcase = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-foreground"
+              transition={{ duration: 0.8, ease: "easeOut" as const }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter mb-4 text-foreground leading-[1.1]"
             >
-              Build trust <br />
-              <span className="text-primary">on autopilot.</span>
+              Stop chasing <br />
+              <span className="text-primary font-medium">reviews.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground leading-relaxed font-medium"
+              className="text-base text-muted-foreground leading-relaxed font-medium max-w-xs"
             >
-              Forget chasing clients for reviews. Vouchy automates the entire process so you can focus on building.
+              Send a link, and Vouchy takes care of the rest — reminders, collection, and display, all handled for you.
             </motion.p>
           </div>
 
           {/* Right: Storytelling Visual */}
-          <div className="relative h-[450px] flex items-center justify-center">
+          <div className="relative h-[360px] flex items-center justify-center">
 
             {/* The Dashboard Card */}
             <motion.div
               style={{ y }}
-              className="relative w-full max-w-[400px] bg-card rounded-3xl shadow-2xl border border-border overflow-hidden"
+              className="relative w-full max-w-[400px] rounded-2xl group/card bg-card/40 border border-border/50 backdrop-blur-sm shadow-2xl"
             >
+              {/* Architecture Corners */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
 
               {/* Header */}
-              <div className="border-b border-border p-4 flex items-center justify-between bg-muted/40 backdrop-blur-sm">
+              <div className="border-b border-primary/10 p-4 flex items-center justify-between bg-card/10 backdrop-blur-sm relative z-10">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-destructive/40" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/40" />
-                  <div className="w-3 h-3 rounded-full bg-primary/40" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/40" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/40" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary/40" />
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black text-primary tracking-widest">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                   AUTOPILOT ON
                 </div>
               </div>
 
               {/* Dashboard Content */}
-              <div className="p-6">
+              <div className="p-8 relative z-10">
 
                 {/* Trust Score Gauge */}
                 <div className="flex items-center justify-between mb-8">

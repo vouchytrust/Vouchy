@@ -27,7 +27,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { fetchSpaces, fetchTestimonialsBySpace } from "@/lib/api";
+import { fetchSpaces, fetchTestimonialsBySpace, upsertWidget } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 /* ── Layout definitions ── */
 interface Layout {
@@ -53,340 +54,7 @@ const devices = [
   { id: "mobile", icon: Smartphone },
 ];
 
-interface TestimonialItem {
-  name: string;
-  company: string;
-  rating: number;
-  content: string;
-  initials: string;
-  avatar?: string | null;
-  type: "text" | "video";
-  video_url?: string | null;
-}
-
-/* ── Card config ── */
-interface CardConfig {
-  layout: string;
-  darkMode: boolean;
-  radius: number;
-  padding: number;
-  shadow: string;
-  font: string;
-  accent: string;
-  cardBg: string;
-  nameColor: string;
-  companyColor: string;
-  bodyColor: string;
-  starColor: string;
-  showStars: boolean;
-  showAvatar: boolean;
-  showCompany: boolean;
-}
-
-const shadowMap: Record<string, string> = { none: "", sm: "shadow-sm", md: "shadow-md", lg: "shadow-lg" };
-const fontMap: Record<string, string> = { system: "font-sans", inter: "font-sans", georgia: "font-serif", mono: "font-mono" };
-
-function TestimonialCard({ t, config, index }: { t: TestimonialItem; config: CardConfig; index: number }) {
-  const { layout, darkMode, radius, padding, font, cardBg, nameColor, companyColor, bodyColor, starColor, showStars, showAvatar, showCompany, shadow } = config;
-
-  const stars = showStars && (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, j) => (
-        <Star key={j} className="h-2.5 w-2.5" style={{ color: j < t.rating ? starColor : "#e5e7eb", fill: j < t.rating ? starColor : "none" }} />
-      ))}
-    </div>
-  );
-
-  const avatarSmall = showAvatar && (
-    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6" }}>
-      {t.avatar ? (
-        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
-      ) : (
-        <span className="text-2xs font-semibold" style={{ color: companyColor }}>{t.initials}</span>
-      )}
-    </div>
-  );
-
-  const avatarLarge = showAvatar && (
-    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: starColor + "20" }}>
-      {t.avatar ? (
-        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
-      ) : (
-        <span className="text-sm font-bold" style={{ color: starColor }}>{t.initials}</span>
-      )}
-    </div>
-  );
-
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const [isTextOpen, setIsTextOpen] = useState(false);
-
-  const isLongText = t.content.length > 100;
-  const displayText = isLongText ? t.content.slice(0, 95) + "..." : t.content;
-
-  const contentRenderer = (text: string, isItalic = false, centered = false, isMasonry = false) => (
-    <div className={`relative h-full flex flex-col ${centered ? 'items-center' : ''}`}>
-      <p
-        className={`text-[12.5px] leading-relaxed opacity-90 ${isItalic ? 'italic' : ''} ${centered ? 'text-center' : ''} ${isMasonry ? '' : 'line-clamp-3'}`}
-        style={{ color: bodyColor }}
-      >
-        {isItalic ? `"${t.content}"` : t.content}
-      </p>
-      {isLongText && !isMasonry && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setIsTextOpen(true); }}
-          className="mt-1 text-primary hover:underline font-bold text-[10.5px] inline-flex items-center gap-0.5 w-fit"
-        >
-          Read more
-        </button>
-      )}
-
-      <Dialog open={isTextOpen} onOpenChange={setIsTextOpen}>
-        <DialogContent className="max-w-md p-6 sm:rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-              {avatarSmall}
-              <div className="flex flex-col text-left">
-                <span className="text-sm font-bold leading-tight">{t.name}</span>
-                {showCompany && <span className="text-[10px] font-medium opacity-50">{t.company}</span>}
-              </div>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/10">
-              {stars}
-              {t.type === "video" && (
-                <div className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">Video</div>
-              )}
-            </div>
-            <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap">
-              {t.content}
-            </p>
-            {t.type === "video" && videoButton}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-
-  const videoButton = t.type === "video" && t.video_url && (
-    <div className="flex">
-      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-        <DialogTrigger asChild>
-          <button className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-primary/[0.08] hover:bg-primary/[0.12] text-primary text-[11px] font-bold transition-all group/vbtn active:scale-95 border border-primary/20 shadow-sm">
-            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-              <Play className="h-2 w-2 fill-current" />
-            </div>
-            Watch Video
-          </button>
-        </DialogTrigger>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-black border-none ring-0 sm:rounded-2xl">
-          <div className="aspect-video w-full h-full">
-            <video
-              src={t.video_url}
-              className="w-full h-full object-contain"
-              controls
-              autoPlay
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-
-  const anim = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { delay: index * 0.05, duration: 0.35 } };
-
-  if (layout === "minimal") {
-    return (
-      <motion.div
-        {...anim}
-        className={`${fontMap[font]} border-b border-border/30 transition-all duration-300 hover:bg-black/[0.01] dark:hover:bg-white/[0.01]`}
-        style={{ padding: `${padding}px 0` }}
-      >
-        <div className="flex items-start gap-4">
-          {avatarSmall}
-          <div className="flex-1 min-w-0 space-y-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[12.5px] font-semibold tracking-tight" style={{ color: nameColor }}>{t.name}</span>
-                {showCompany && <span className="text-[10.5px] opacity-60" style={{ color: companyColor }}>· {t.company}</span>}
-              </div>
-              <div className="mt-1">{stars}</div>
-            </div>
-
-            {t.type === "text" ? (
-              contentRenderer(t.content)
-            ) : (
-              <div className="space-y-2.5">
-                {t.content && contentRenderer(t.content)}
-                {videoButton}
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (layout === "editorial") {
-    return (
-      <motion.div {...anim} className={`${fontMap[font]} border-l-[3px] ${shadowMap[shadow]} transition-all hover:-translate-y-0.5 flex flex-col h-[220px]`} style={{ padding: `${padding}px`, backgroundColor: cardBg, borderColor: starColor }}>
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="overflow-hidden mb-2">
-            {contentRenderer(t.content, true)}
-          </div>
-          {t.type === "video" && <div className="mt-auto shrink-0 pb-1">{videoButton}</div>}
-        </div>
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/10 shrink-0">
-          {avatarSmall}
-          <div className="min-w-0">
-            <div className="text-[11px] font-bold truncate" style={{ color: nameColor }}>{t.name}</div>
-            {showCompany && <div className="text-[9px] opacity-50 truncate" style={{ color: companyColor }}>{t.company}</div>}
-          </div>
-          <div className="ml-auto shrink-0">{stars}</div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (layout === "bubble") {
-    return (
-      <motion.div
-        {...anim}
-        className={`${fontMap[font]} transition-all duration-300 group/bubble hover:-translate-y-1 h-full`}
-      >
-        <div
-          className="relative rounded-[24px] border p-4 shadow-sm transition-all duration-300 group-hover/bubble:shadow-xl border-border/40 flex flex-col h-[260px]"
-          style={{
-            backgroundColor: cardBg,
-            borderColor: darkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
-            boxShadow: darkMode ? "0 10px 30px -10px rgba(0,0,0,0.5)" : "0 10px 30px -10px rgba(0,0,0,0.05)"
-          }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-2.5 shrink-0">
-            {stars}
-            <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-vouchy-success/10 border border-vouchy-success/20">
-              <div className="w-1 h-1 rounded-full bg-vouchy-success animate-pulse" />
-              <span className="text-[8.5px] font-bold uppercase tracking-wider text-vouchy-success">Verified</span>
-            </div>
-          </div>
-
-          {/* Content Area */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="mt-2 overflow-hidden relative z-10">
-              {contentRenderer(t.content)}
-            </div>
-            {t.type === "video" && <div className="mt-auto pt-2 shrink-0">{videoButton}</div>}
-          </div>
-
-          {/* Profile Section */}
-          <div className="flex items-center gap-2.5 pt-2.5 mt-2.5 border-t border-border/10 shrink-0">
-            <div className="shrink-0">{avatarSmall}</div>
-            <div className="flex flex-col min-w-0">
-              <div className="text-[11.5px] font-bold tracking-tight truncate" style={{ color: nameColor }}>{t.name}</div>
-              {showCompany && <div className="text-[9.5px] font-medium opacity-50 truncate" style={{ color: companyColor }}>{t.company}</div>}
-            </div>
-          </div>
-
-          {/* Tail */}
-          <div className="absolute -bottom-2 left-8 w-4 h-4 overflow-hidden rotate-45 pointer-events-none">
-            <div
-              className="w-full h-full border-r border-b"
-              style={{ backgroundColor: cardBg, borderColor: darkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)" }}
-            />
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (layout === "avatar-wall") {
-    return (
-      <motion.div
-        {...anim}
-        className={`${fontMap[font]} text-center ${shadowMap[shadow]} border transition-all hover:-translate-y-0.5 flex flex-col h-[260px] overflow-hidden`}
-        style={{ borderRadius: `${radius}px`, padding: `${padding + 2}px`, backgroundColor: cardBg, borderColor: darkMode ? "#333" : "#e5e7eb" }}
-      >
-        <div className="shrink-0 flex flex-col items-center">
-          <div className="mb-1.5">{avatarLarge}</div>
-          <div className="text-[11.5px] font-bold tracking-tight truncate w-full px-2" style={{ color: nameColor }}>{t.name}</div>
-          {showCompany && <div className="text-[9.5px] opacity-50 mb-1 truncate w-full px-2" style={{ color: companyColor }}>{t.company}</div>}
-          <div className="mb-2">{stars}</div>
-        </div>
-
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="overflow-hidden">
-            {contentRenderer(t.content, false, true)}
-          </div>
-          {t.type === "video" && <div className="mt-auto pt-1 flex justify-center shrink-0">{videoButton}</div>}
-        </div>
-      </motion.div>
-    );
-  }
-
-
-  if (layout === "masonry") {
-    return (
-      <motion.div
-        {...anim}
-        className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all duration-300 hover:shadow-lg break-inside-avoid mb-4 flex flex-col`}
-        style={{
-          borderRadius: `${radius}px`,
-          padding: `${padding}px`,
-          backgroundColor: cardBg,
-          borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)"
-        }}
-      >
-        <div className="flex items-center gap-2.5 mb-2.5 shrink-0">
-          {avatarSmall}
-          <div className="min-w-0">
-            <div className="text-[12px] font-bold tracking-tight truncate" style={{ color: nameColor }}>{t.name}</div>
-            {showCompany && <div className="text-[9.5px] opacity-50 truncate" style={{ color: companyColor }}>{t.company}</div>}
-          </div>
-        </div>
-        <div className="flex-1">
-          {contentRenderer(t.content, false, false, true)}
-          {t.type === "video" && <div className="mt-2 shrink-0">{videoButton}</div>}
-        </div>
-        <div className="mt-3 pt-2.5 border-t border-border/10 shrink-0">
-          {stars}
-        </div>
-      </motion.div>
-    );
-  }
-
-
-  // Default: Clean
-  return (
-    <motion.div
-      {...anim}
-      className={`${fontMap[font]} border ${shadowMap[shadow]} transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group/card flex flex-col h-[220px]`}
-      style={{
-        borderRadius: `${radius}px`,
-        padding: `${padding}px`,
-        backgroundColor: cardBg,
-        borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)"
-      }}
-    >
-      <div className="flex items-center gap-2.5 mb-2.5 shrink-0">
-        {avatarSmall}
-        <div className="min-w-0">
-          <div className="text-[12px] font-bold tracking-tight truncate" style={{ color: nameColor }}>{t.name}</div>
-          {showCompany && <div className="text-[9.5px] opacity-50 truncate" style={{ color: companyColor }}>{t.company}</div>}
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="overflow-hidden relative">
-          {contentRenderer(t.content)}
-        </div>
-        {t.type === "video" && <div className="mt-auto shrink-0 pt-1">{videoButton}</div>}
-      </div>
-      <div className="mt-2 pt-2 border-t border-border/10 shrink-0">
-        {stars}
-      </div>
-    </motion.div>
-  );
-}
+import { TestimonialCard, CardConfig, TestimonialItem, fontMap, shadowMap } from "@/components/TestimonialCard";
 
 /* ── Marquee row ── */
 function MarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
@@ -410,6 +78,8 @@ function MarqueeRow({ testimonials, config, reverse }: { testimonials: Testimoni
 
 /* ── Main ── */
 export default function WidgetLabPage() {
+  const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
   const [selectedLayout, setSelectedLayout] = useState("clean");
   const [device, setDevice] = useState("desktop");
   const [darkMode, setDarkMode] = useState(false);
@@ -455,42 +125,31 @@ export default function WidgetLabPage() {
 
   const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
-  const [accentColor, setAccentColor] = useState("#3b82f6");
-  const [cardBg, setCardBg] = useState("#ffffff");
-  const [nameColor, setNameColor] = useState("#1a1a1a");
-  const [companyColor, setCompanyColor] = useState("#888888");
-  const [bodyColor, setBodyColor] = useState("#666666");
-  const [starColor, setStarColor] = useState("#f59e0b");
+  const [editingTheme, setEditingTheme] = useState<"light" | "dark">("light");
+
+  const [fontFamily, setFontFamily] = useState("system");
+  const [cardShadow, setCardShadow] = useState("sm");
   const [showStars, setShowStars] = useState(true);
   const [showAvatar, setShowAvatar] = useState(true);
   const [showCompany, setShowCompany] = useState(true);
-  const [fontFamily, setFontFamily] = useState("system");
-  const [cardShadow, setCardShadow] = useState("sm");
-  const [navIconColor, setNavIconColor] = useState("#1a1a1a");
-  const [navBgColor, setNavBgColor] = useState("#ffffff");
-  const [primaryBtnColor, setPrimaryBtnColor] = useState("#3b82f6");
   const { toast } = useToast();
 
-  // Auto-apply dark/light color palette when dark mode is toggled
-  useEffect(() => {
-    if (darkMode) {
-      setCardBg("#1c1c1e");
-      setNameColor("#f5f5f7");
-      setCompanyColor("#8e8e93");
-      setBodyColor("#aeaeb2");
-      setNavIconColor("#ffffff");
-      setNavBgColor("#2c2c2e");
-      setPrimaryBtnColor("#ffffff");
-    } else {
-      setCardBg("#ffffff");
-      setNameColor("#1a1a1a");
-      setCompanyColor("#888888");
-      setBodyColor("#666666");
-      setNavIconColor("#1a1a1a");
-      setNavBgColor("#ffffff");
-      setPrimaryBtnColor("#1a1a1a");
-    }
-  }, [darkMode]);
+  const [lightColors, setLightColors] = useState({
+    accentColor: "#3b82f6", cardBg: "#ffffff", containerBg: "transparent", nameColor: "#1a1a1a",
+    companyColor: "#888888", bodyColor: "#666666", starColor: "#f59e0b",
+    navIconColor: "#1a1a1a", navBgColor: "#ffffff", primaryBtnColor: "#1a1a1a",
+  });
+  const [darkColors, setDarkColors] = useState({
+    accentColor: "#60a5fa", cardBg: "#1c1c1e", containerBg: "transparent", nameColor: "#f5f5f7",
+    companyColor: "#8e8e93", bodyColor: "#aeaeb2", starColor: "#f59e0b",
+    navIconColor: "#ffffff", navBgColor: "#2c2c2e", primaryBtnColor: "#ffffff",
+  });
+
+  const activeColors = editingTheme === "light" ? lightColors : darkColors;
+  const updateColor = (key: keyof typeof lightColors, value: string) => {
+    if (editingTheme === "light") setLightColors(prev => ({ ...prev, [key]: value }));
+    else setDarkColors(prev => ({ ...prev, [key]: value }));
+  };
 
   useEffect(() => {
     async function load() {
@@ -537,9 +196,9 @@ export default function WidgetLabPage() {
   }, [selectedSpaceId]);
 
   const cardConfig: CardConfig = {
-    layout: selectedLayout, darkMode, radius: cardRadius[0], padding: cardPadding[0],
-    shadow: cardShadow, font: fontFamily, accent: accentColor,
-    cardBg, nameColor, companyColor, bodyColor, starColor,
+    layout: selectedLayout, darkMode: editingTheme === "dark", radius: cardRadius[0], padding: cardPadding[0],
+    shadow: cardShadow, font: fontFamily, accent: activeColors.accentColor,
+    cardBg: activeColors.cardBg, containerBg: activeColors.containerBg, nameColor: activeColors.nameColor, companyColor: activeColors.companyColor, bodyColor: activeColors.bodyColor, starColor: activeColors.starColor,
     showStars, showAvatar, showCompany,
   };
 
@@ -555,16 +214,16 @@ export default function WidgetLabPage() {
     layout: selectedLayout,
     minRating: String(minRating),
     max: String(maxItems[0]),
-    darkMode: String(darkMode),
+    darkMode: String(editingTheme === "dark"),
     radius: String(cardRadius[0]),
     padding: String(cardPadding[0]),
     font: fontFamily,
-    accent: encodeURIComponent(accentColor),
-    cardBg: encodeURIComponent(cardBg),
-    nameColor: encodeURIComponent(nameColor),
-    companyColor: encodeURIComponent(companyColor),
-    bodyColor: encodeURIComponent(bodyColor),
-    starColor: encodeURIComponent(starColor),
+    accent: encodeURIComponent(activeColors.accentColor),
+    cardBg: encodeURIComponent(activeColors.cardBg),
+    nameColor: encodeURIComponent(activeColors.nameColor),
+    companyColor: encodeURIComponent(activeColors.companyColor),
+    bodyColor: encodeURIComponent(activeColors.bodyColor),
+    starColor: encodeURIComponent(activeColors.starColor),
     showStars: String(showStars),
     showAvatar: String(showAvatar),
     showCompany: String(showCompany),
@@ -574,23 +233,64 @@ export default function WidgetLabPage() {
     navStyle: navStyle,
     autoPlay: String(autoPlay),
     autoPlaySpeed: autoPlaySpeed,
-    navIconColor: encodeURIComponent(navIconColor),
-    navBgColor: encodeURIComponent(navBgColor),
-    primaryBtnColor: encodeURIComponent(primaryBtnColor),
+     navIconColor: encodeURIComponent(activeColors.navIconColor),
+    navBgColor: encodeURIComponent(activeColors.navBgColor),
+    primaryBtnColor: encodeURIComponent(activeColors.primaryBtnColor),
+    containerBg: encodeURIComponent(activeColors.containerBg),
   });
   
   const embedUrl = `${window.location.origin}/embed/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
   const viewUrl = `${window.location.origin}/view/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
-  const scriptCode = `<script src="${window.location.origin}/embed.js" data-workspace="ws_demo" data-space="${selectedSpace?.slug || ""}" data-layout="${selectedLayout}" data-min-rating="${minRating}" data-max="${maxItems[0]}" data-dark-mode="${darkMode}" data-radius="${cardRadius[0]}" data-padding="${cardPadding[0]}" data-font="${fontFamily}" data-accent="${encodeURIComponent(accentColor)}" data-card-bg="${encodeURIComponent(cardBg)}" data-name-color="${encodeURIComponent(nameColor)}" data-company-color="${encodeURIComponent(companyColor)}" data-body-color="${encodeURIComponent(bodyColor)}" data-star-color="${encodeURIComponent(starColor)}" data-show-stars="${showStars}" data-show-avatar="${showAvatar}" data-show-company="${showCompany}" data-shadow="${cardShadow}" data-display-mode="${displayMode}" data-carousel-visible="${carouselVisible[0]}" data-nav-style="${navStyle}" data-auto-play="${autoPlay}" data-auto-play-speed="${autoPlaySpeed}" data-nav-icon-color="${encodeURIComponent(navIconColor)}" data-nav-bg-color="${encodeURIComponent(navBgColor)}" data-primary-btn-color="${encodeURIComponent(primaryBtnColor)}"></script>`;
-  const iframeCode = `<iframe src="${embedUrl}" width="100%" height="${selectedLayout === 'marquee' ? '300' : '650'}" style="border:none;overflow:hidden;background:transparent;"></iframe>`;
 
-  const activeEmbedCode = embedType === "script" ? scriptCode : iframeCode;
+  const activeEmbedCode = embedType === "script" 
+    ? `<script src="${window.location.origin}/embed.js" data-widget-id="[WIDGET_ID_GENERATED_ON_COPY]"></script>`
+    : `<iframe src="${window.location.origin}/embed/[WIDGET_ID_GENERATED_ON_COPY]" width="100%" height="${selectedLayout === 'marquee' ? '300' : '650'}" style="border:none;overflow:hidden;background:transparent;"></iframe>`;
 
-  const copyEmbed = () => {
-    navigator.clipboard.writeText(activeEmbedCode);
-    setCopied(true);
-    toast({ title: "Embed code copied" });
-    setTimeout(() => setCopied(false), 2000);
+  const copyEmbed = async () => {
+    if (!user || !selectedSpaceId) return;
+    setSaving(true);
+    try {
+      const widget = await upsertWidget({
+        space_id: selectedSpaceId,
+        user_id: user.id,
+        name: `${selectedSpace?.name || "Space"} Widget`,
+        config: {
+          layout: selectedLayout,
+          minRating,
+          maxItems: maxItems[0],
+          darkMode: editingTheme === "dark",
+          radius: cardRadius[0],
+          padding: cardPadding[0],
+          font: fontFamily,
+          showStars,
+          showAvatar,
+          showCompany,
+          shadow: cardShadow,
+          displayMode,
+          carouselVisible: carouselVisible[0],
+          navStyle,
+          autoPlay,
+          autoPlaySpeed,
+          light: lightColors,
+          dark: darkColors,
+          ...activeColors
+        }
+      });
+      
+      const scriptCode = `<script src="${window.location.origin}/embed.js" data-widget-id="${widget.id}"></script>`;
+      const iframeCode = `<iframe src="${window.location.origin}/embed/${widget.id}" width="100%" height="${selectedLayout === 'marquee' ? '300' : '650'}" style="border:none;overflow:hidden;background:transparent;"></iframe>`;
+      const finalEmbedCode = embedType === "script" ? scriptCode : iframeCode;
+
+      await navigator.clipboard.writeText(finalEmbedCode);
+      setCopied(true);
+      toast({ title: "Widget saved & embed code copied!" });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Failed to save widget", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const copyViewUrl = () => {
@@ -701,33 +401,47 @@ export default function WidgetLabPage() {
           <div className="space-y-3.5 pt-3 border-t border-border">
             <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Appearance</p>
             <div className="flex items-center justify-between">
-              <span className="text-[12px] text-foreground">Dark mode</span>
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              <span className="text-[12px] text-foreground leading-tight">Editing Theme<br/><span className="text-[10px] text-muted-foreground font-normal">Switch to preview and edit custom colors</span></span>
+              <div className="flex items-center gap-1 p-0.5 bg-muted rounded-md border border-border">
+                <button onClick={() => setEditingTheme("light")} className={`px-2 py-1 rounded-[4px] text-[10px] font-bold ${editingTheme === "light" ? "bg-background text-foreground shadow-sm border border-border/50" : "text-muted-foreground hover:text-foreground"}`}>Light</button>
+                <button onClick={() => setEditingTheme("dark")} className={`px-2 py-1 rounded-[4px] text-[10px] font-bold ${editingTheme === "dark" ? "bg-background text-foreground shadow-sm border border-border/50" : "text-muted-foreground hover:text-foreground"}`}>Dark</button>
+              </div>
             </div>
           </div>
 
           {/* Colors */}
           <div className="space-y-3.5 pt-3 border-t border-border">
-            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Colors</p>
+            <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Colors ({editingTheme})</p>
             {([
-              { label: "Card background", value: cardBg, set: setCardBg },
-              { label: "Name", value: nameColor, set: setNameColor },
-              { label: "Company", value: companyColor, set: setCompanyColor },
-              { label: "Testimonial", value: bodyColor, set: setBodyColor },
-              { label: "Stars", value: starColor, set: setStarColor },
-              { label: "Nav arrows", value: navIconColor, set: setNavIconColor },
-              { label: "Nav background", value: navBgColor, set: setNavBgColor },
-              { label: "Main button", value: primaryBtnColor, set: setPrimaryBtnColor },
-            ] as const).map(({ label, value, set }) => (
-              <div key={label} className="flex items-center justify-between">
-                <Label className="text-[11px] text-muted-foreground">{label}</Label>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: value }} />
+              { label: "Accent / Icons", key: "accentColor" },
+              { label: "Card background", key: "cardBg" },
+              { label: "Container background", key: "containerBg" },
+              { label: "Name", key: "nameColor" },
+              { label: "Company", key: "companyColor" },
+              { label: "Testimonial", key: "bodyColor" },
+              { label: "Stars", key: "starColor" },
+              { label: "Nav arrows", key: "navIconColor" },
+              { label: "Nav background", key: "navBgColor" },
+              { label: "Main button", key: "primaryBtnColor" },
+            ] as const).map(({ label, key }) => (
+              <div key={label} className="flex items-center justify-between gap-3">
+                <Label className="text-[11px] text-muted-foreground whitespace-nowrap">{label}</Label>
+                <div className="flex items-center gap-1.5 flex-1 justify-end">
+                  <div className="relative group shrink-0">
+                    <div className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: activeColors[key as keyof typeof activeColors] }} />
+                    <input
+                      type="color"
+                      value={activeColors[key as keyof typeof activeColors] === 'transparent' ? '#ffffff' : activeColors[key as keyof typeof activeColors]}
+                      onChange={(e) => updateColor(key as keyof typeof lightColors, e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
                   <input
-                    type="color"
-                    value={value}
-                    onChange={(e) => set(e.target.value)}
-                    className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-0"
+                    type="text"
+                    value={activeColors[key as keyof typeof activeColors]}
+                    onChange={(e) => updateColor(key as keyof typeof lightColors, e.target.value)}
+                    className="w-16 h-6 px-1.5 text-[10px] font-mono bg-muted border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
+                    placeholder="#000000"
                   />
                 </div>
               </div>
@@ -1018,10 +732,16 @@ export default function WidgetLabPage() {
                 size="sm"
                 className="h-7 text-2xs gap-1 text-muted-foreground"
                 onClick={copyEmbed}
-                disabled={testimonials.length === 0}
+                disabled={testimonials.length === 0 || saving}
               >
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                Copy
+                {saving ? (
+                  <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                ) : copied ? (
+                  <Check className="h-3 w-3" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+                {saving ? "Saving..." : "Copy"}
               </Button>
               <a
                 href={selectedSpace ? viewUrl : undefined}
@@ -1059,7 +779,10 @@ export default function WidgetLabPage() {
               </div>
 
               {/* Content */}
-              <div className={`flex-1 overflow-y-auto transition-colors duration-300 ${darkMode ? "bg-[hsl(240_10%_4%)]" : "bg-background"}`}>
+              <div 
+                className={`flex-1 overflow-y-auto transition-colors duration-300`}
+                style={{ backgroundColor: activeColors.containerBg === 'transparent' ? (editingTheme === "dark" ? "hsl(240 10% 4%)" : "white") : activeColors.containerBg }}
+              >
                 {loadingTestimonials ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -1118,17 +841,17 @@ export default function WidgetLabPage() {
                               <CarouselPrevious
                                 className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm hover:brightness-110 active:scale-95 transition-all"
                                 style={{
-                                  color: navIconColor,
-                                  backgroundColor: navBgColor,
-                                  borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+                                  color: activeColors.navIconColor,
+                                  backgroundColor: activeColors.navBgColor,
+                                  borderColor: editingTheme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
                                 }}
                               />
                               <CarouselNext
                                 className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm hover:brightness-110 active:scale-95 transition-all"
                                 style={{
-                                  color: navIconColor,
-                                  backgroundColor: navBgColor,
-                                  borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+                                  color: activeColors.navIconColor,
+                                  backgroundColor: activeColors.navBgColor,
+                                  borderColor: editingTheme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
                                 }}
                               />
                             </div>
@@ -1137,14 +860,14 @@ export default function WidgetLabPage() {
                             <div className="flex items-center justify-center gap-2 mt-5">
                               <CarouselPrevious
                                 className="static translate-y-0 h-7 w-7 rounded-full border-0 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 p-0 shadow-none text-current"
-                                style={{ color: navIconColor }}
+                                style={{ color: activeColors.navIconColor }}
                               />
                               {visibleTestimonials.slice(0, Math.min(visibleTestimonials.length, 8)).map((_, i) => (
-                                <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: navIconColor, opacity: 0.3 }} />
+                                <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: activeColors.navIconColor, opacity: 0.3 }} />
                               ))}
                               <CarouselNext
                                 className="static translate-y-0 h-7 w-7 rounded-full border-0 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 p-0 shadow-none text-current"
-                                style={{ color: navIconColor }}
+                                style={{ color: activeColors.navIconColor }}
                               />
                             </div>
                           )}
@@ -1163,8 +886,8 @@ export default function WidgetLabPage() {
                               onClick={() => setIsExpanded(true)}
                               className="flex items-center gap-2 px-5 py-2 rounded-full border transition-all hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 text-[12px] font-semibold"
                               style={{
-                                color: primaryBtnColor,
-                                borderColor: primaryBtnColor + "40"
+                                color: activeColors.primaryBtnColor,
+                                borderColor: activeColors.primaryBtnColor + "40"
                               }}
                             >
                               <ChevronDown className="h-3.5 w-3.5" />
@@ -1177,7 +900,7 @@ export default function WidgetLabPage() {
                             <button
                               onClick={() => setIsExpanded(false)}
                               className="flex items-center gap-2 px-5 py-2 rounded-full border transition-all hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 text-[12px] font-semibold"
-                              style={{ color: primaryBtnColor, borderColor: primaryBtnColor + "40" }}
+                              style={{ color: activeColors.primaryBtnColor, borderColor: activeColors.primaryBtnColor + "40" }}
                             >
                               Show less
                             </button>

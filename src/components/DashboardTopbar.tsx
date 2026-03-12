@@ -180,7 +180,7 @@ export function DashboardTopbar() {
           {/* Left: brand + workspace */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
             <Link to="/dashboard" className="flex items-center gap-2 group hover:scale-105 transition-transform duration-200">
-              <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+              <img src="/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
             </Link>
 
             <div className="h-5 w-px bg-border/60" />
@@ -295,7 +295,7 @@ export function DashboardTopbar() {
                                   ))}
                                 </div>
                               </div>
-                              <p className="text-[11px] text-muted-foreground line-clamp-1 italic px-0.5">
+                              <p className="text-[11px] text-muted-foreground line-clamp-1 px-0.5">
                                 "{t.content}"
                               </p>
                               {t.spaces?.name && (
@@ -358,7 +358,7 @@ export function DashboardTopbar() {
                           <CommandItem key={t.id} value={t.author_name + " " + t.content} onSelect={() => { navigate(`/dashboard/testimonials?id=${t.id}`); setShowResults(false); }}>
                             <div className="flex flex-col">
                               <span className="font-semibold text-xs">{t.author_name}</span>
-                              <span className="text-[10px] text-muted-foreground line-clamp-1 italic">{t.content}</span>
+                              <span className="text-[10px] text-muted-foreground line-clamp-1">{t.content}</span>
                             </div>
                           </CommandItem>
                         ))}

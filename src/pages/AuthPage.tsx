@@ -73,7 +73,7 @@ export default function AuthPage() {
           className="w-full max-w-sm"
         >
           <Link to="/" className="flex items-center gap-2 mb-10 group hover:scale-105 transition-transform duration-200">
-            <img src="/src/assets/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
+            <img src="/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
           </Link>
 
           <AnimatePresence mode="wait">
@@ -163,29 +163,100 @@ export default function AuthPage() {
         </motion.div>
       </div>
 
-      {/* Right - Visual */}
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-background border-l border-border/40 p-12">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="max-w-md text-center"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-8 border border-primary/20">
-            <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-10 w-10 object-contain" />
+      {/* Right - Visual Panel */}
+      <div className="hidden lg:flex flex-1 relative overflow-hidden bg-background border-l border-border/40">
+        
+        {/* Subtle grid pattern - Brand consistent */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{ 
+            backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px" 
+          }} 
+        />
+
+        {/* Brand Glow - Very subtle corner light */}
+        <div className="absolute -top-[20%] -right-[20%] w-[60%] h-[60%] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-[20%] -left-[20%] w-[60%] h-[60%] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+
+        {/* Corner accents */}
+        <div className="absolute top-6 left-6 w-10 h-10 border-t-2 border-l-2 border-primary/20" />
+        <div className="absolute top-6 right-6 w-10 h-10 border-t-2 border-r-2 border-primary/20" />
+        <div className="absolute bottom-6 left-6 w-10 h-10 border-b-2 border-l-2 border-primary/20" />
+        <div className="absolute bottom-6 right-6 w-10 h-10 border-b-2 border-r-2 border-primary/20" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-between w-full p-14">
+
+          {/* Top — logo + headline */}
+          <div>
+            <div className="flex items-center gap-3 mb-10">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/25">
+                <img src="/logo-icon.svg" alt="Vouchy" className="h-5 w-5" />
+              </div>
+              <span className="text-[15px] font-black tracking-[-0.03em] text-foreground">
+                Vouch<span className="text-primary">y</span>
+              </span>
+            </div>
+
+            <h2 className="text-4xl font-bold tracking-tighter text-foreground leading-[1.1] mb-4">
+              Turn happy customers<br />
+              into <span className="text-primary italic">your best asset.</span>
+            </h2>
+            <p className="text-[14px] text-muted-foreground font-medium leading-relaxed max-w-xs">
+              Collect video and text testimonials, polish them with AI, and embed them anywhere in minutes.
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-foreground mb-4 tracking-[-0.04em]">Social proof <br /><span className="text-primary italic">that converts.</span></h2>
-          <p className="text-muted-foreground text-[14px] leading-relaxed font-medium">Collect stunning video and text testimonials, enhance with AI, and embed beautiful widgets on your website.</p>
-          <div className="mt-12 h-[1px] w-12 bg-border mx-auto mb-12" />
-          <div className="grid grid-cols-3 gap-8">
-            {["247+", "4.8★", "62%"].map((v, i) => (
-              <div key={i} className="text-center">
-                <div className="text-xl font-bold text-foreground tracking-tight">{v}</div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mt-1">{["Testimonials", "Avg Rating", "Video Rate"][i]}</div>
+
+          {/* Middle — floating testimonial cards */}
+          <div className="relative h-[260px] my-8">
+            {[
+              {
+                name: "Sarah M.", role: "Head of Marketing", avatar: "https://i.pravatar.cc/150?u=sm1",
+                quote: "We got 40+ video reviews in a month. Vouchy is a game-changer.",
+                delay: 0, y: 0, x: 0,
+              },
+              {
+                name: "James O.", role: "Founder, BuildFast", avatar: "https://i.pravatar.cc/150?u=jo2",
+                quote: "Conversion rate jumped 18% the week after embedding.",
+                delay: 0.15, y: 80, x: 60,
+              },
+              {
+                name: "Lena B.", role: "Growth Lead", avatar: "https://i.pravatar.cc/150?u=lb3",
+                quote: "Customers actually enjoy leaving reviews. Drop-off is zero.",
+                delay: 0.3, y: 165, x: 20,
+              },
+            ].map((t, i) => (
+              <div
+                key={i}
+                className="absolute bg-background/90 backdrop-blur-sm border border-border/60 rounded-2xl p-4 shadow-lg w-[280px]"
+                style={{ top: t.y, left: t.x }}
+              >
+                <div className="flex gap-0.5 mb-2">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="w-2.5 h-2.5 fill-yellow-500 text-yellow-500" />
+                  ))}
+                </div>
+                <p className="text-[11px] text-foreground/80 font-medium leading-relaxed mb-3 line-clamp-2">"{t.quote}"</p>
+                <div className="flex items-center gap-2">
+                  <img src={t.avatar} alt={t.name} className="w-6 h-6 rounded-full border border-border" />
+                  <div>
+                    <p className="text-[10px] font-bold text-foreground leading-none">{t.name}</p>
+                    <p className="text-[9px] text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </motion.div>
+
+          {/* Bottom — brand strip */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/30">
+              Vouchy — Social Proof Platform
+            </p>
+          </div>
+
+        </div>
       </div>
     </div>
   );

@@ -1,215 +1,232 @@
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Sparkles, Link2, Mic2, Terminal, Settings2, ShieldCheck, Wand2, Globe2 } from "lucide-react";
 
-const AnimatedLink = () => (
-    <div className="w-full h-24 flex items-center justify-center relative">
-        <div className="w-full max-w-[140px] h-10 bg-muted/30 rounded-full border border-border/50 flex items-center px-3 gap-2 overflow-hidden shadow-sm">
-            <div className="w-2 h-2 rounded-full bg-primary/40 flex-shrink-0" />
-            <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: "100%" }}
-                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                className="h-2 w-full bg-foreground/10 rounded-full relative"
-            >
-                <motion.div
-                    animate={{ x: [0, 80] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                    className="absolute top-0 bottom-0 left-0 w-1 bg-primary/60"
-                />
-            </motion.div>
+/**
+ * MINI VISUAL COMPONENTS FOR THE 5-STEP PROTOCOL
+ */
+
+const VisualArchitect = () => (
+  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden p-3">
+    <div className="w-full h-full border border-dashed border-primary/20 rounded-lg bg-primary/[0.02] flex flex-col p-2">
+      <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center mb-3">
+        <Settings2 className="w-3.5 h-3.5 text-primary" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-1 w-full bg-primary/20 rounded-full" />
+        <div className="h-1 w-2/3 bg-primary/20 rounded-full" />
+        <div className="pt-2 flex gap-1">
+          <div className="w-2 h-2 rounded bg-primary/30" />
+          <div className="w-2 h-2 rounded bg-muted" />
         </div>
-        <motion.div
-            animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-primary/5 blur-2xl rounded-full"
+      </div>
+    </div>
+  </div>
+);
+
+const VisualLink = () => (
+  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden flex flex-col items-center justify-center">
+    <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center mb-3 border border-primary/10">
+      <Link2 className="w-5 h-5 text-primary" />
+    </div>
+    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[7px] font-mono text-muted-foreground">
+      vouchy.app/ref/081
+    </div>
+    <motion.div 
+      animate={{ x: [0, 4, -4, 0] }}
+      transition={{ duration: 3, repeat: Infinity }}
+      className="absolute top-4 right-4"
+    >
+      <div className="w-2 h-2 rounded-full bg-primary/40 animate-ping" />
+    </motion.div>
+  </div>
+);
+
+const VisualCapture = () => (
+  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-[#0a0a0a] overflow-hidden flex flex-col items-center justify-center">
+    <div className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
+      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+    </div>
+    <div className="flex gap-0.5 h-6 items-end">
+      {[1, 2, 3, 4, 5].map(i => (
+        <motion.div 
+          key={i}
+          animate={{ height: [4, 16, 4] }}
+          transition={{ duration: 0.6, delay: i * 0.1, repeat: Infinity }}
+          className="w-1 bg-primary/40 rounded-full"
         />
+      ))}
     </div>
+    <Mic2 className="w-3 w-3 text-primary/40 mt-3" />
+  </div>
 );
 
-const AnimatedCapture = () => (
-    <div className="w-full h-24 flex items-center justify-center relative">
-        <div className="relative">
-            <div className="w-12 h-12 rounded-full border-2 border-primary/20 flex items-center justify-center">
-                <motion.div
-                    animate={{ scale: [1, 0.8, 1], opacity: [1, 0.6, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="w-4 h-4 bg-primary rounded-sm"
-                />
-            </div>
-            <motion.div
-                animate={{ scale: [1, 1.5], opacity: [1, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="absolute inset-0 border-2 border-primary rounded-full"
-            />
-            <div className="absolute -top-4 -right-4 flex gap-1">
-                {[...Array(3)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        animate={{ height: [4, 12, 4] }}
-                        transition={{ duration: 0.8, delay: i * 0.1, repeat: Infinity }}
-                        className="w-0.5 bg-primary/40 rounded-full"
-                    />
-                ))}
-            </div>
-        </div>
+const VisualRefine = () => (
+  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden p-3 flex flex-col justify-center">
+    <div className="space-y-2 relative">
+      <div className="h-1.5 w-full bg-muted rounded-full" />
+      <div className="h-1.5 w-full bg-muted rounded-full opacity-40" />
+      <div className="h-1.5 w-3/4 bg-primary/20 rounded-full" />
+      <Wand2 className="absolute -top-4 -right-2 w-4 h-4 text-primary animate-bounce" />
     </div>
+    <div className="mt-4 flex justify-between items-center px-1">
+      <ShieldCheck className="w-3 h-3 text-green-500/50" />
+      <div className="text-[6px] font-bold text-primary/60 uppercase tracking-tighter">AI Polished</div>
+    </div>
+  </div>
 );
 
-const AnimatedAI = () => (
-    <div className="w-full h-24 flex items-center justify-center relative">
-        <div className="grid grid-cols-3 gap-2 relative">
-            {[...Array(9)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    animate={{
-                        scale: [1, 1.5, 1],
-                        backgroundColor: i === 4 ? ["rgba(var(--primary), 0.1)", "rgba(var(--primary), 1)", "rgba(var(--primary), 0.1)"] : "rgba(var(--foreground), 0.05)"
-                    }}
-                    transition={{ duration: 2, delay: i * 0.1, repeat: Infinity }}
-                    className="w-2 h-2 rounded-full"
-                />
-            ))}
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-4 border border-dashed border-primary/20 rounded-full"
-            />
-        </div>
+const VisualDeploy = () => (
+  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-background overflow-hidden p-2 pt-6 flex flex-col">
+    <div className="absolute top-0 left-0 right-0 h-4 border-b border-primary/10 bg-muted/30 flex items-center px-2">
+      <Terminal className="w-2 h-2 text-primary/30" />
     </div>
-);
-
-const AnimatedEmbed = () => (
-    <div className="w-full h-24 flex items-center justify-center relative">
-        <div className="w-20 h-16 bg-muted/20 border border-border rounded-lg relative overflow-hidden p-2">
-            <div className="flex gap-1 mb-2">
-                <div className="w-1 h-1 rounded-full bg-red-400" />
-                <div className="w-1 h-1 rounded-full bg-amber-400" />
-                <div className="w-1 h-1 rounded-full bg-emerald-400" />
-            </div>
-            <div className="space-y-1">
-                <div className="w-full h-1 bg-foreground/10 rounded-full" />
-                <div className="w-2/3 h-1 bg-foreground/10 rounded-full" />
-            </div>
-            <motion.div
-                initial={{ y: 0 }}
-                animate={{ y: [40, -10, 40] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-x-0 bottom-0 flex justify-center"
-            >
-                <div className="w-10 h-10 bg-primary/20 backdrop-blur-sm border border-primary/20 rounded-lg flex items-center justify-center shadow-lg shadow-primary/10">
-                    <ArrowRight className="text-primary w-4 h-4 rotate-[-45deg]" />
-                </div>
-            </motion.div>
-        </div>
+    <div className="font-mono text-[7px] space-y-2 opacity-80 pt-2">
+      <div className="text-primary/60">TRUST_INJECT: OK</div>
+      <div className="p-1.5 rounded bg-primary/5 border border-primary/10 text-primary/80 line-clamp-2">
+        &lt;vouch-widget id="ref-master" /&gt;
+      </div>
     </div>
+    <Globe2 className="w-12 h-12 text-primary/5 absolute -bottom-4 -right-4" />
+  </div>
 );
 
 const steps = [
-    { id: "01", title: "Generate", desc: "Launch your custom hub link.", visual: <AnimatedLink /> },
-    { id: "02", title: "Record", desc: "Capture pure video magic.", visual: <AnimatedCapture /> },
-    { id: "03", title: "Process", desc: "AI synthesizes every word.", visual: <AnimatedAI /> },
-    { id: "04", title: "Deploy", desc: "Go live with a single snippet.", visual: <AnimatedEmbed /> },
+  {
+    id: "01",
+    tag: "Init",
+    title: "Set up your space",
+    desc: "Create a collector, add your questions, and make it look like yours.",
+    visual: <VisualArchitect />,
+    bullets: []
+  },
+  {
+    id: "02",
+    tag: "Route",
+    title: "Share a link",
+    desc: "Send a simple link to your customers — by email, SMS, or QR code.",
+    visual: <VisualLink />,
+    bullets: []
+  },
+  {
+    id: "03",
+    tag: "Intake",
+    title: "They record or write",
+    desc: "Customers leave a video or text review right in their browser. No app needed.",
+    visual: <VisualCapture />,
+    bullets: []
+  },
+  {
+    id: "04",
+    tag: "Sync",
+    title: "Review and approve",
+    desc: "AI cleans up the text. You approve what goes live.",
+    visual: <VisualRefine />,
+    bullets: []
+  },
+  {
+    id: "05",
+    tag: "Push",
+    title: "Embed anywhere",
+    desc: "Paste one line of code and your testimonials show up on your site instantly.",
+    visual: <VisualDeploy />,
+    bullets: []
+  },
 ];
 
 export default function HowItWorks() {
-    return (
-        <section id="how-it-works" className="py-32 bg-background relative overflow-hidden">
-            <div className="container mx-auto px-6 max-w-7xl relative z-10">
+  return (
+    <section id="how-it-works" className="py-8 lg:py-12 bg-background relative overflow-hidden flex flex-col justify-center">
+      {/* Background Decor */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-primary" />
+        <div className="absolute top-1/4 left-0 w-full h-px bg-primary" />
+        <div className="absolute top-2/4 left-0 w-full h-px bg-primary" />
+        <div className="absolute top-3/4 left-0 w-full h-px bg-primary" />
+      </div>
 
-                {/* Minimal Header */}
-                <div className="text-center mb-24">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-8"
-                    >
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Workflow</span>
-                    </motion.div>
-                    <motion.h2
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-black text-foreground tracking-tighter mb-4"
-                    >
-                        How <span className="text-primary italic font-medium">Vouchy</span> Works.
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        className="text-muted-foreground text-lg font-medium"
-                    >
-                        Engineered for simplicity. Optimized for conversion.
-                    </motion.p>
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 lg:mb-8 max-w-7xl mx-auto">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-2"
+            >
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">How it works</span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-foreground leading-[1.1]"
+            >
+              Simple from start <br className="hidden md:block" />
+              to <span className="text-primary">finish.</span>
+            </motion.h2>
+          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-base text-muted-foreground leading-relaxed max-w-sm font-light lg:text-right"
+          >
+            Go from zero to a live testimonial wall in minutes, not days.
+          </motion.p>
+        </div>
+
+        {/* 5-Step Row Grid */}
+        <div className="relative">
+          {/* Horizontal Connection Bar */}
+          <div className="absolute top-24 left-0 w-full h-px bg-primary/10 hidden lg:block -z-10" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-4 xl:gap-6">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="group relative flex flex-col p-4 rounded-2xl transition-all duration-500 bg-card/40 border border-border/50 backdrop-blur-sm"
+              >
+                {/* Corner Accents */}
+                <div className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-primary/30 group-hover:border-primary/70 transition-all duration-500 group-hover:w-9 group-hover:h-9" />
+                <div className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-primary/30 group-hover:border-primary/70 transition-all duration-500 group-hover:w-9 group-hover:h-9" />
+                <div className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-primary/30 group-hover:border-primary/70 transition-all duration-500 group-hover:w-9 group-hover:h-9" />
+                <div className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-primary/30 group-hover:border-primary/70 transition-all duration-500 group-hover:w-9 group-hover:h-9" />
+                
+                {/* Visual Header */}
+                <div className="mb-4 relative">
+                  <div className="transition-all duration-700 group-hover:scale-[1.05]">
+                    {step.visual}
+                  </div>
+                  {/* Phase Marker */}
+                  <div className="absolute -top-3 -left-2 px-2 py-0.5 rounded-md bg-background border border-primary/20 text-[8px] font-black text-primary uppercase tracking-widest shadow-xl">
+                    Phase {step.id}
+                  </div>
                 </div>
 
-                {/* 4-Column Minimal Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4">
-                    {steps.map((step, index) => (
-                        <motion.div
-                            key={step.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{ delay: index * 0.1, duration: 0.8 }}
-                            className="relative group h-full"
-                        >
-                            <div className="bg-card/40 border border-border/50 rounded-[40px] p-10 flex flex-col items-center text-center h-full transition-all duration-500 hover:bg-card hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 overflow-hidden">
-
-                                {/* Visual Area */}
-                                <div className="mb-10 w-full">
-                                    {step.visual}
-                                </div>
-
-                                {/* Content */}
-                                <div className="space-y-3 relative z-10">
-                                    <div className="flex items-center justify-center gap-2 mb-1">
-                                        <span className="text-[10px] font-black text-primary/40 tracking-widest uppercase">sys_{step.id}</span>
-                                    </div>
-                                    <h3 className="text-2xl font-black text-foreground tracking-tight">{step.title}</h3>
-                                    <p className="text-sm text-muted-foreground font-medium leading-relaxed max-w-[200px] mx-auto opacity-70">
-                                        {step.desc}
-                                    </p>
-                                </div>
-
-                                {/* Background Decor */}
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
-                            </div>
-
-                            {/* Connecting Line (Desktop) */}
-                            {index < steps.length - 1 && (
-                                <div className="hidden lg:block absolute top-[50%] right-[-10px] w-5 h-px bg-border/20 z-0" />
-                            )}
-                        </motion.div>
-                    ))}
+                {/* Content */}
+                <div className="flex-1 flex flex-col relative z-10">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-foreground tracking-tight group-hover:text-primary transition-colors leading-tight">
+                      {step.title}
+                    </h3>
+                    <p className="text-[12px] text-muted-foreground leading-relaxed font-light line-clamp-3">
+                      {step.desc}
+                    </p>
+                  </div>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
 
-                {/* Final CTA Strip */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="mt-24 pt-12 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-8 opacity-60 hover:opacity-100 transition-opacity"
-                >
-                    <div className="flex items-center gap-6">
-                        <div className="flex -space-x-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="w-10 h-10 rounded-full border-4 border-background bg-muted overflow-hidden">
-                                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" className="w-full h-full object-cover" />
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-sm font-bold text-foreground">Join 400+ brands building trust.</p>
-                    </div>
-                    <button className="h-14 px-8 bg-foreground text-background rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-transform hover:scale-105 active:scale-95 flex items-center gap-3">
-                        Start Collecting <ArrowRight size={14} />
-                    </button>
-                </motion.div>
 
-            </div>
-        </section>
-    );
+      </div>
+    </section>
+  );
 }

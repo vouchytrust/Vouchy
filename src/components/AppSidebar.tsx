@@ -44,7 +44,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2">
         <div className={`flex items-center gap-2.5 px-3 pt-5 pb-6 ${collapsed ? "justify-center" : ""}`}>
           <Link to="/dashboard" className="flex items-center gap-2.5 group hover:scale-105 transition-transform duration-200">
-            <img src="/src/assets/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 object-contain" />
+            <img src="/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 object-contain" />
             {!collapsed && (
               <span className="text-[15px] font-semibold tracking-tight text-foreground">
                 Vouchy
@@ -107,7 +107,7 @@ export function AppSidebar() {
               {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-medium text-foreground truncate">{displayName}</div>
-                  <div className="text-2xs text-muted-foreground truncate italic">{plan}</div>
+                  <div className="text-2xs text-muted-foreground truncate">{plan}</div>
                 </div>
               )}
               {!collapsed && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />}

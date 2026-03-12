@@ -21,6 +21,8 @@ import ViewTestimonialsPage from "./pages/ViewTestimonialsPage";
 import ShortEmbedRedirect from "./pages/ShortEmbedRedirect";
 import NotFound from "./pages/NotFound";
 
+import { useLocation } from "react-router-dom";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,35 +33,51 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+function AppRoutes() {
+  const location = useLocation();
+  const isEmbed = location.pathname.startsWith('/embed/');
+
+  if (isEmbed) {
+    return (
+      <Routes>
+        <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
+      </Routes>
+    );
+  }
+
+  return (
     <ThemeProvider>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/collect/:slug" element={<CollectionPage />} />
-              <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
-              <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
-              <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                <Route index element={<DashboardHome />} />
-                <Route path="testimonials" element={<TestimonialsPage />} />
-                <Route path="spaces" element={<SpacesPage />} />
-                <Route path="widgets" element={<WidgetLabPage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/collect/:slug" element={<CollectionPage />} />
+            <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
+            <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              <Route index element={<DashboardHome />} />
+              <Route path="testimonials" element={<TestimonialsPage />} />
+              <Route path="spaces" element={<SpacesPage />} />
+              <Route path="widgets" element={<WidgetLabPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
