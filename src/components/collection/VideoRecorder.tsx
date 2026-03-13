@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Mic, Play, Square, RotateCcw, Sparkles, RotateCw, Maximize2, Type, Zap, X, Send, Check, Quote } from "lucide-react";
 import { useVideoRecorder } from "@/hooks/useVideoRecorder";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToR2 } from "@/lib/storage";
 
 interface Props {
   spaceId: string; spaceUserId: string; accentColor: string;
@@ -13,6 +14,8 @@ interface Props {
 export default function VideoRecorder({ spaceId, spaceUserId, accentColor, workspaceName, logoUrl, questions, onBack, onSuccess }: Props) {
   const recorder = useVideoRecorder(120);
   const [form, setForm] = useState({ name: "", email: "" });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -82,20 +85,51 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
   };
 
   const handleSubmit = async () => {
+    console.log("[SUBMIT] Button clicked. Blob:", !!recorder.videoBlob, "Name:", form.name);
     if (!recorder.videoBlob || !form.name.trim()) return;
     setSubmitting(true); setSubmitError(null);
     try {
-      const fileName = `${spaceId}/${Date.now()}.webm`;
-      const { error: upErr } = await supabase.storage.from("videos").upload(fileName, recorder.videoBlob!, { contentType: "video/webm" });
-      if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("videos").getPublicUrl(fileName);
-      await supabase.from("testimonials").insert({
-        space_id: spaceId, user_id: spaceUserId, author_name: form.name,
-        author_email: form.email || null, content: "(video testimonial)",
-        rating: 5, type: "video", video_url: urlData.publicUrl, video_duration: fmt(recorder.elapsed),
+      let avatarUrl = null;
+      if (avatarFile) {
+        const ext = avatarFile.name.split('.').pop();
+        const path = `avatars/${spaceId}/${Date.now()}.${ext}`;
+        avatarUrl = await uploadToR2(avatarFile, path);
+      }
+
+      // Ensure we have a valid mime type for R2
+      // Ensure we have a valid mime type for R2
+      const videoExt = 'webm';
+      const fileName = `videos/${spaceId}/${Date.now()}.${videoExt}`;
+      const videoFile = new File([recorder.videoBlob], `video.${videoExt}`, { type: 'video/webm' });
+      
+      console.log(`[SUBMIT] Uploading video to R2: ${fileName}`);
+      
+      // 2. Upload to Cloudflare R2
+      const publicUrl = await uploadToR2(videoFile, fileName);
+      console.log(`[SUBMIT] Video Uploaded successfully. URL: ${publicUrl}`);
+      
+      // 3. Submit to database with correct columns
+      const { error: dbError } = await supabase.from("testimonials").insert({
+        space_id: spaceId,
+        user_id: spaceUserId,
+        author_name: form.name,
+        author_email: form.email || null,
+        content: "(Video Testimonial)",
+        author_avatar_url: avatarUrl,
+        rating: 5,
+        type: "video",
+        video_url: publicUrl,
+        video_duration: fmt(recorder.elapsed),
       });
-      recorder.reset(); onSuccess();
-    } catch (e: any) { setSubmitError(e.message); }
+
+      if (dbError) throw dbError;
+
+      recorder.reset(); 
+      onSuccess();
+    } catch (e: any) { 
+      console.error("[SUBMIT-ERROR]", e);
+      setSubmitError(e.message || "Upload failed. Please try again."); 
+    }
     finally { setSubmitting(false); }
   };
 
@@ -296,18 +330,48 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
                 </div>
               </div>
 
-              <div className="space-y-10 mb-12 relative z-10">
+              <div className="space-y-6 mb-12 relative z-10 w-full overflow-y-auto max-h-[40vh] pr-2 no-scrollbar">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-slate-100/50 shadow-sm shrink-0 hover:border-slate-300 transition-colors">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <span className="text-[8px] uppercase font-black tracking-widest leading-none mt-1">Photo</span>
+                      </div>
+                    )}
+                    <input type="file" accept="image/*" onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        setAvatarFile(file);
+                        const reader = new FileReader();
+                        reader.onload = () => setAvatarPreview(reader.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Photo / Logo</p>
+                    <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Optional. Helps build trust.</p>
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Your Full Name</label>
-                  <input placeholder="Jane Doe" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full h-16 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-base font-bold" />
+                  <input placeholder="Jane Doe" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold" />
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Email (Optional)</label>
-                  <input placeholder="jane@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full h-16 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-base font-bold" />
+                  <input placeholder="jane@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-4 relative z-10">
+                {submitError && (
+                  <div className="p-3 mb-2 rounded-xl bg-red-50 border border-red-100 text-red-600 text-[10px] font-bold text-center">
+                    {submitError}
+                  </div>
+                )}
                 <button 
                   onClick={handleSubmit} 
                   disabled={submitting || !form.name.trim()} 

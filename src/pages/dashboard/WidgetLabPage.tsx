@@ -5,6 +5,7 @@ import {
   Copy, Check, LayoutGrid, Rows3, GalleryHorizontalEnd,
   MessageCircle, Users, Layers3, Quote,
   FolderOpen, Play, ChevronDown, Columns2, ChevronLeft, ChevronRight, Circle,
+  Twitter, Facebook, Linkedin, Mail, Link2
 } from "lucide-react";
 import {
   Carousel,
@@ -26,6 +27,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { fetchSpaces, fetchTestimonialsBySpace, upsertWidget } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -298,6 +304,29 @@ export default function WidgetLabPage() {
     setCopied(true);
     toast({ title: "Full view URL copied" });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareUrl = `${window.location.origin}/trust/${selectedSpace?.slug || ""}`;
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setShareCopied(true);
+    toast({ title: "Trust page link copied!" });
+    setTimeout(() => setShareCopied(false), 2000);
+  };
+
+  const shareSocial = (platform: string) => {
+    const text = encodeURIComponent(`Check out what people say about ${selectedSpace?.name || "us"}!`);
+    const url = encodeURIComponent(shareUrl);
+    let shareHref = "";
+    
+    if (platform === "twitter") shareHref = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+    if (platform === "linkedin") shareHref = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+    if (platform === "facebook") shareHref = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    if (platform === "email") shareHref = `mailto:?subject=${text}&body=${url}`;
+    
+    if (shareHref) window.open(shareHref, "_blank", "width=600,height=400");
   };
 
   const currentLayout = layouts.find(l => l.id === selectedLayout);
@@ -727,10 +756,58 @@ export default function WidgetLabPage() {
             </div>
 
             <div className="flex items-center gap-1.5">
+              {/* Share Page Button & Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-2xs gap-1.5 px-2 bg-background border border-border shadow-sm text-foreground hover:bg-muted font-medium transition-all"
+                    disabled={!selectedSpace}
+                  >
+                    <Link2 className="h-3 w-3" />
+                    Share Website
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[280px] p-4 rounded-xl shadow-xl z-50 border border-border/60 backdrop-blur-md" align="end" sideOffset={8}>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-foreground">Share Trust Page</p>
+                      <p className="text-xs text-muted-foreground leading-snug">Share your beautiful public testimonials page with your audience.</p>
+                    </div>
+                    
+                    {/* Social Buttons Row */}
+                    <div className="grid grid-cols-4 gap-2">
+                       <Button variant="outline" className="h-10 w-full hover:bg-[#1DA1F2]/10 hover:text-[#1DA1F2] hover:border-[#1DA1F2]/30 transition-colors bg-background" onClick={() => shareSocial('twitter')} title="Share on Twitter"><Twitter className="h-4 w-4" /></Button>
+                       <Button variant="outline" className="h-10 w-full hover:bg-[#0A66C2]/10 hover:text-[#0A66C2] hover:border-[#0A66C2]/30 transition-colors bg-background" onClick={() => shareSocial('linkedin')} title="Share on LinkedIn"><Linkedin className="h-4 w-4" /></Button>
+                       <Button variant="outline" className="h-10 w-full hover:bg-[#1877F2]/10 hover:text-[#1877F2] hover:border-[#1877F2]/30 transition-colors bg-background" onClick={() => shareSocial('facebook')} title="Share on Facebook"><Facebook className="h-4 w-4" /></Button>
+                       <Button variant="outline" className="h-10 w-full hover:bg-muted transition-colors bg-background" onClick={() => shareSocial('email')} title="Share via Email"><Mail className="h-4 w-4" /></Button>
+                    </div>
+
+                    <div className="relative pt-1 flex items-center group">
+                      <div className="absolute left-2.5 flex items-center pointer-events-none mt-1">
+                        <Link2 className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      </div>
+                      <input 
+                        readOnly 
+                        value={shareUrl} 
+                        className="w-full text-[11px] h-9 pl-8 pr-16 bg-muted border border-border rounded-lg text-foreground font-mono focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-shadow" 
+                      />
+                      <button 
+                        onClick={copyShareLink}
+                        className="absolute right-1.5 h-6 px-2 bg-background border border-border hover:bg-accent hover:text-foreground text-muted-foreground rounded text-[10px] font-bold transition-all mt-1"
+                      >
+                         {shareCopied ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-2xs gap-1 text-muted-foreground"
+                className="h-7 text-2xs gap-1 text-muted-foreground hidden sm:flex"
                 onClick={copyEmbed}
                 disabled={testimonials.length === 0 || saving}
               >
@@ -741,18 +818,8 @@ export default function WidgetLabPage() {
                 ) : (
                   <Copy className="h-3 w-3" />
                 )}
-                {saving ? "Saving..." : "Copy"}
+                {saving ? "Saving..." : "Embed"}
               </Button>
-              <a
-                href={selectedSpace ? viewUrl : undefined}
-                target="_blank"
-                rel="noreferrer"
-                aria-disabled={!selectedSpace}
-                className={`flex items-center gap-1 h-7 px-2 text-2xs font-medium rounded-md transition-colors ${selectedSpace ? "text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer" : "text-muted-foreground/30 cursor-not-allowed pointer-events-none"}`}
-              >
-                <ExternalLink className="h-3 w-3" />
-                Open
-              </a>
             </div>
           </div>
 

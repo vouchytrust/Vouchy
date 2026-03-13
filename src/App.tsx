@@ -19,6 +19,7 @@ import CollectionPage from "./pages/CollectionPage";
 import EmbedWidgetPage from "./pages/EmbedWidgetPage";
 import ViewTestimonialsPage from "./pages/ViewTestimonialsPage";
 import ShortEmbedRedirect from "./pages/ShortEmbedRedirect";
+import TrustPage from "./pages/TrustPage";
 import NotFound from "./pages/NotFound";
 
 import { useLocation } from "react-router-dom";
@@ -48,6 +49,7 @@ function AppRoutes() {
             <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
             <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
             <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
+            <Route path="/trust/:slug" element={<TrustPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<DashboardHome />} />
               <Route path="testimonials" element={<TestimonialsPage />} />

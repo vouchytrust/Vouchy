@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToR2 } from "@/lib/storage";
 
 const brandColors = [
   { name: "Ocean", value: "#1a3f64" },
@@ -61,17 +62,13 @@ export default function OnboardingPage() {
     try {
       let logoUrl: string | null = null;
 
-      // Upload logo if provided
+      // Upload logo if provided to Cloudflare R2
       if (logoFile) {
         const ext = logoFile.name.split(".").pop();
-        const path = `${session.user.id}/logo.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("logos")
-          .upload(path, logoFile, { upsert: true });
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage.from("logos").getPublicUrl(path);
-        logoUrl = urlData.publicUrl;
+        const path = `logos/${session.user.id}.${ext}`;
+        
+        // Use R2 instead of Supabase Storage
+        logoUrl = await uploadToR2(logoFile, path);
       }
 
       // Update profile

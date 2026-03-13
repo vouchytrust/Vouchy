@@ -5,6 +5,7 @@ import { Star, Video, MessageSquareText, Check, Send, Cpu, ChevronLeft, Sparkles
 import VideoRecorder from "@/components/collection/VideoRecorder";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToR2 } from "@/lib/storage";
 
 /** * UI COMPONENT: Precision Field
  * High-impact but vertically compact.
@@ -58,6 +59,8 @@ export default function CollectionPage() {
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
   const [aiEnhancing, setAiEnhancing] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -99,15 +102,23 @@ export default function CollectionPage() {
     if (!agreed) return toast({ title: "Quick Check", description: "Confirm your feedback." });
     setSubmitting(true);
     try {
+      let avatarUrl = null;
+      if (avatarFile) {
+        const ext = avatarFile.name.split('.').pop();
+        const path = `avatars/${space.id}/${Date.now()}.${ext}`;
+        avatarUrl = await uploadToR2(avatarFile, path);
+      }
+
       const { error } = await supabase.from("testimonials").insert({
         space_id: space.id, user_id: space.user_id,
         author_name: form.name, author_email: form.email,
         author_company: form.company, author_title: form.title,
+        author_avatar_url: avatarUrl,
         content: form.content, rating: form.rating, type: "text",
       });
       if (error) throw error;
       setMode("success");
-    } catch (err: any) { toast({ title: "Error", variant: "destructive" }); } finally { setSubmitting(false); }
+    } catch (err: any) { toast({ title: "Error", variant: "destructive", description: err.message }); } finally { setSubmitting(false); }
   };
 
   if (loading) return null;
@@ -117,7 +128,7 @@ export default function CollectionPage() {
     return (
       <VideoRecorder
         spaceId={space!.id} spaceUserId={space!.user_id} accentColor={accentColor}
-        workspaceName={workspaceName} logoUrl={space.profiles?.logo_url}
+        workspaceName={workspaceName} logoUrl={null}
         questions={[]} onBack={() => setMode("choose")} onSuccess={() => setMode("success")}
       />
     );
@@ -131,41 +142,9 @@ export default function CollectionPage() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-slate-100/30 rounded-full blur-[120px]" />
       </div>
 
-      {/* CONSOLIDATED 3-ROW HEADER */}
-      <div className="w-full pt-12 pb-4 flex flex-col items-center relative z-10 shrink-0">
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="flex flex-col items-center gap-4 text-center"
-        >
-          {/* ROW 1: BRAND IDENTITY */}
-          <div className="flex items-center justify-center">
-            {space.profiles?.logo_url ? (
-              <img 
-                src={space.profiles.logo_url} 
-                alt={workspaceName} 
-                className="h-10 lg:h-12 w-auto object-contain drop-shadow-sm" 
-              />
-            ) : (
-              <span className="text-lg font-black tracking-tighter uppercase text-slate-950 italic">{workspaceName}</span>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            {/* ROW 2: PRIMARY ACTION */}
-            <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-slate-950">
-              Share your <span className="text-slate-400">story.</span>
-            </h1>
 
-            {/* ROW 3: CONTEXT */}
-            <p className="text-slate-500 font-bold text-sm lg:text-base tracking-tight">
-              Tell us about your experience with <span className="text-slate-900">{workspaceName}</span>
-            </p>
-          </div>
-        </motion.div>
-      </div>
-
-      <main className="w-full max-w-5xl flex-1 flex flex-col items-center justify-start px-6 py-2 relative z-10 min-h-0">
+      <main className="w-full max-w-5xl flex-1 flex flex-col items-center justify-start px-6 pt-12 pb-12 relative z-10 min-h-0">
         <AnimatePresence mode="wait">
 
           {mode === "choose" && (
@@ -176,6 +155,27 @@ export default function CollectionPage() {
               exit={{ opacity: 0, scale: 1.02 }} 
               className="w-full flex flex-col items-center justify-center text-center py-4"
             >
+              <div className="mb-10 space-y-6">
+                <div className="flex items-center justify-center">
+                  {space.profiles?.logo_url ? (
+                    <img 
+                      src={space.profiles.logo_url} 
+                      alt={workspaceName} 
+                      className="h-10 lg:h-12 w-auto object-contain drop-shadow-sm" 
+                    />
+                  ) : (
+                    <span className="text-lg font-black tracking-tighter uppercase text-slate-950 italic">{workspaceName}</span>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-slate-950">
+                    Share your <span className="text-slate-400">story.</span>
+                  </h1>
+                  <p className="text-slate-500 font-bold text-sm lg:text-base tracking-tight">
+                    Tell us about your experience with <span className="text-slate-900">{workspaceName}</span>
+                  </p>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 w-full max-w-xl mx-auto items-stretch">
                 <MethodCard accentColor={accentColor} icon={<Video className="w-8 h-8 md:w-9 md:h-9" />} label="Video" description="Record a quick, authentic message." onClick={() => setMode("video")} />
                 <MethodCard accentColor={accentColor} icon={<MessageSquareText className="w-8 h-8 md:w-9 md:h-9" />} label="Writing" description="Classic, clear, and curated story." onClick={() => setMode("text")} />
@@ -200,8 +200,7 @@ export default function CollectionPage() {
               <form onSubmit={submitText} className="grid grid-cols-12 gap-4 lg:gap-8 items-stretch h-full">
                 <div className="col-span-12 lg:col-span-12 xl:col-span-8 flex flex-col">
                   <div className="bg-white border border-slate-100 rounded-[2.5rem] p-6 lg:p-8 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.02)] flex flex-col h-full group focus-within:border-slate-900 transition-all duration-500">
-                    <div className="flex items-center justify-between mb-6 shrink-0">
-                      <h2 className="text-xl font-black tracking-tight text-slate-950">The Review</h2>
+                    <div className="flex items-center justify-end mb-6 shrink-0">
                       <div className="flex gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-100/50">
                         {[1, 2, 3, 4, 5].map(i => (
                           <button key={i} type="button" onClick={() => setForm({ ...form, rating: i })} className="p-0.5 transition-transform hover:scale-125">
@@ -236,6 +235,31 @@ export default function CollectionPage() {
                   <div className="bg-white border border-slate-100 rounded-[2rem] p-6 lg:p-8 space-y-6 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.02)] flex-1">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-950">About You</h3>
                     <div className="space-y-4">
+                      <div className="flex items-center gap-4 mb-2">
+                        <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-slate-100/50 shadow-sm shrink-0 hover:border-slate-300 transition-colors">
+                          {avatarPreview ? (
+                            <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center text-slate-400">
+                              <span className="text-[8px] uppercase font-black tracking-widest leading-none mt-1">Photo</span>
+                            </div>
+                          )}
+                          <input type="file" accept="image/*" onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const file = e.target.files[0];
+                              setAvatarFile(file);
+                              const reader = new FileReader();
+                              reader.onload = () => setAvatarPreview(reader.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Photo / Logo</p>
+                          <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Optional. Helps build trust.</p>
+                        </div>
+                      </div>
+
                       <MinimalField label="Full Name" placeholder="Jane Doe" value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} required />
                       <MinimalField label="Email Address" type="email" placeholder="jane@example.com" value={form.email} onChange={(e: any) => setForm({ ...form, email: e.target.value })} required />
                       <div className="grid grid-cols-2 gap-3">

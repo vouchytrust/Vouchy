@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageSquareText, Video, Settings2 } from "lucide-react";
+import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageSquareText, Video, Settings2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,7 +54,12 @@ export default function SpacesPage() {
 
   const copyLink = (slug: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/collect/${slug}`);
-    toast({ title: "Link copied to clipboard" });
+    toast({ title: "Collection link copied" });
+  };
+
+  const copyTrustLink = (slug: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/trust/${slug}`);
+    toast({ title: "Trust link copied!", description: "Share it anywhere — email, bio, DMs." });
   };
 
   const handleToggleActive = async (id: string, current: boolean) => {
@@ -201,7 +206,7 @@ export default function SpacesPage() {
                     <span className="ml-auto">{new Date(space.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                   </div>
 
-                  <div className="flex items-center gap-1 pt-2 border-t border-border/60">
+                  <div className="flex items-center gap-1 pt-2 border-t border-border/60 flex-wrap">
                     <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground" onClick={() => handleToggleActive(space.id, space.is_active)}>
                       {space.is_active ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
                       {space.is_active ? "Pause" : "Activate"}
@@ -218,6 +223,15 @@ export default function SpacesPage() {
                       <Settings2 className="h-3 w-3" /> Edit
                     </Button>
                     <div className="flex-1" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-2xs gap-1 px-2 text-primary hover:text-primary hover:bg-primary/10 font-semibold"
+                      onClick={() => copyTrustLink(space.slug)}
+                      title="Copy Trust Link — shareable testimonial page"
+                    >
+                      <Shield className="h-3 w-3" /> Trust Link
+                    </Button>
                     <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(space.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>

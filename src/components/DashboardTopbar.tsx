@@ -193,10 +193,6 @@ export function DashboardTopbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem className="text-[12px]">{companyName}</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-[12px]" onClick={() => navigate("/dashboard/spaces")}>
-                  <Plus className="h-3.5 w-3.5 mr-2" /> New Collector
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -486,15 +482,6 @@ export function DashboardTopbar() {
               ) : (
                 <Moon className="h-4 w-4" />
               )}
-            </Button>
-
-            <div className="h-5 w-px bg-border/60 mx-0.5 hidden sm:block" />
-
-            {/* New Collector button — hidden on mobile (use bottom nav instead) */}
-            <Button size="sm" className="h-7 text-[11px] gap-1 px-2.5 hidden sm:flex" onClick={() => navigate("/dashboard/spaces")}>
-              <Plus className="h-3 w-3" />
-              <span className="hidden lg:inline">New Collector</span>
-              <span className="lg:hidden">New</span>
             </Button>
 
             <div className="h-5 w-px bg-border/60 mx-0.5 hidden sm:block" />
