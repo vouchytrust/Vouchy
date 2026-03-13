@@ -16,7 +16,6 @@ export async function fetchSpaceBySlug(slug: string) {
     .from("spaces")
     .select("*")
     .eq("slug", slug)
-    .eq("is_active", true)
     .single();
   if (error) throw error;
 

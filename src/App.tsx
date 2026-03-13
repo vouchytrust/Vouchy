@@ -34,17 +34,6 @@ const queryClient = new QueryClient({
 });
 
 function AppRoutes() {
-  const location = useLocation();
-  const isEmbed = location.pathname.startsWith('/embed/');
-
-  if (isEmbed) {
-    return (
-      <Routes>
-        <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
-      </Routes>
-    );
-  }
-
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -56,6 +45,7 @@ function AppRoutes() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/collect/:slug" element={<CollectionPage />} />
+            <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
             <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
             <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
