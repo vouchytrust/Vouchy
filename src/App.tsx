@@ -22,6 +22,7 @@ import ShortEmbedRedirect from "./pages/ShortEmbedRedirect";
 import TrustPage from "./pages/TrustPage";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import { useLocation } from "react-router-dom";
 
@@ -61,6 +62,7 @@ function AppRoutes() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Analytics />
+          <SpeedInsights />
         </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
