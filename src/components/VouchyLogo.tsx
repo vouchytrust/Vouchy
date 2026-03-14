@@ -21,7 +21,7 @@ export function VouchyLogo({ variant = "header", className = "", link = true }: 
             />
           </div>
           <span className="text-[14px] md:text-[15px] font-black tracking-[-0.03em] text-foreground group-hover:text-primary transition-colors duration-300">
-            Vouch<span className="text-primary">y</span>
+            Vouchy
           </span>
         </>
       )}
@@ -38,7 +38,7 @@ export function VouchyLogo({ variant = "header", className = "", link = true }: 
         <>
           <img src="/logo-icon.svg" alt="" className="h-4 w-4 md:h-5 md:w-5 opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
           <span className="text-[13px] md:text-[14px] font-black tracking-[-0.03em] text-foreground/80 group-hover:text-foreground transition-all duration-300">
-            Vouch<span className="text-primary">y</span>
+            Vouchy
           </span>
         </>
       )}

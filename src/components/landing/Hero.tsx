@@ -51,7 +51,7 @@ export default function Hero() {
 
             {/* Headline */}
             <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl lg:text-[4rem] xl:text-[4.5rem] font-bold tracking-tighter text-foreground mb-6 leading-[1.05]">
-              <span className="lg:block lg:whitespace-nowrap opacity-60">Let your customers</span>
+              <span className="lg:block lg:whitespace-nowrap">Let your customers</span>
               <span className="lg:flex lg:items-center lg:gap-4 lg:whitespace-nowrap mt-1">
                 <span className="inline-flex items-center -space-x-4 align-middle transform translate-y-[-2px]">
                   {[1, 2, 3, 4].map((i) => (

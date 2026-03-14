@@ -85,25 +85,7 @@ export default function LandingPage() {
 
             {/* ── CENTER: Nav pills ─────────────────────────── */}
             <div className="hidden md:flex flex-1 items-center justify-center">
-              <div className="relative flex items-center gap-0.5 px-1.5 py-1">
-                {/* Sliding indicator */}
-                <AnimatePresence>
-                  {navLinks.map(({ label }) =>
-                    label === activeLink ? (
-                      <motion.div
-                        key="indicator"
-                        layoutId="nav-indicator"
-                        className="absolute inset-y-1 rounded-full bg-primary/12 border border-primary/20"
-                        style={{
-                          left: `${navLinks.findIndex((l) => l.label === activeLink) * (100 / navLinks.length)}%`,
-                          width: `calc(${100 / navLinks.length}% - 4px)`,
-                        }}
-                        transition={{ type: "spring", stiffness: 380, damping: 36 }}
-                      />
-                    ) : null
-                  )}
-                </AnimatePresence>
-
+              <div className="relative flex items-center gap-1.5 px-1.5 py-1">
                 {navLinks.map(({ label, href }) => (
                   <a
                     key={label}
@@ -116,14 +98,21 @@ export default function LandingPage() {
                       setActiveLink(label);
                     }}
                     className={`
-                      relative z-10 px-4 py-1.5 rounded-full text-[10.5px] font-bold uppercase tracking-[0.18em]
-                      transition-colors duration-250 whitespace-nowrap select-none
+                      relative px-4 py-2 text-[10.5px] font-bold uppercase tracking-[0.2em]
+                      transition-colors duration-300 whitespace-nowrap select-none
                       ${activeLink === label
                         ? "text-primary"
-                        : "text-muted-foreground/70 hover:text-foreground"
+                        : "text-muted-foreground/60 hover:text-foreground"
                       }
                     `}
                   >
+                    {activeLink === label && (
+                      <motion.div
+                        layoutId="nav-pill"
+                        className="absolute inset-0 rounded-xl bg-primary/[0.05] border border-primary/15 shadow-[0_2px_10px_-3px_rgba(10,169,57,0.1)] -z-10"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
                     {label}
                   </a>
                 ))}
