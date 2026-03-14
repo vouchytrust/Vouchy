@@ -85,7 +85,7 @@ export default function LandingPage() {
 
             {/* ── CENTER: Nav pills ─────────────────────────── */}
             <div className="hidden md:flex flex-1 items-center justify-center">
-              <div className="relative flex items-center gap-0.5 bg-primary/[0.04] dark:bg-primary/[0.06] border border-primary/10 rounded-full px-1.5 py-1">
+              <div className="relative flex items-center gap-0.5 px-1.5 py-1">
                 {/* Sliding indicator */}
                 <AnimatePresence>
                   {navLinks.map(({ label }) =>
