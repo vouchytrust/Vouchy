@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadToR2 } from "@/lib/storage";
+import { VouchyLogo } from "@/components/VouchyLogo";
 
 const brandColors = [
   { name: "Ocean", value: "#1a3f64" },
@@ -100,9 +101,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex">
       {/* Left - Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 max-w-lg mx-auto">
-        <Link to="/" className="flex items-center gap-2 mb-12 group hover:scale-105 transition-transform duration-200">
-          <img src="/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
-        </Link>
+        <VouchyLogo className="mb-12" />
 
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8">

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { VouchyLogo } from "@/components/VouchyLogo";
 
 export default function AuthPage() {
   const [searchParams] = useSearchParams();
@@ -72,9 +73,7 @@ export default function AuthPage() {
           transition={{ duration: 0.4 }}
           className="w-full max-w-sm"
         >
-          <Link to="/" className="flex items-center gap-2 mb-10 group hover:scale-105 transition-transform duration-200">
-            <img src="/logo-horizontal.svg" alt="Vouchy Logo" className="h-8 w-auto object-contain" />
-          </Link>
+          <VouchyLogo className="mb-10" />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -190,14 +189,7 @@ export default function AuthPage() {
 
           {/* Top — logo + headline */}
           <div>
-            <div className="flex items-center gap-3 mb-10">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/25">
-                <img src="/logo-icon.svg" alt="Vouchy" className="h-5 w-5" />
-              </div>
-              <span className="text-[15px] font-black tracking-[-0.03em] text-foreground">
-                Vouch<span className="text-primary">y</span>
-              </span>
-            </div>
+            <VouchyLogo className="mb-10" />
 
             <h2 className="text-4xl font-bold tracking-tighter text-foreground leading-[1.1] mb-4">
               Turn happy customers<br />

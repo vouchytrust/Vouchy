@@ -15,6 +15,7 @@ import {
 } from "@/components/landing";
 
 import { TbStarFilled, TbSparkles } from "react-icons/tb";
+import { VouchyLogo } from "@/components/VouchyLogo";
 
 
 
@@ -80,23 +81,7 @@ export default function LandingPage() {
             `}
           >
             {/* ── LEFT: Logo + Wordmark ─────────────────────── */}
-            <Link
-              to="/"
-              aria-label="Vouchy home"
-              className="flex items-center gap-2.5 shrink-0 group mr-4"
-            >
-              <div className="relative w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/25 overflow-hidden transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_16px_rgba(10,169,57,0.3)]">
-                <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <img
-                  src="/logo-icon.svg"
-                  alt=""
-                  className="h-5 w-5 md:h-[22px] md:w-[22px] relative z-10 transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <span className="hidden sm:block text-[15px] font-black tracking-[-0.03em] text-foreground group-hover:text-primary transition-colors duration-300">
-                Vouch<span className="text-primary">y</span>
-              </span>
-            </Link>
+            <VouchyLogo variant="header" className="mr-4" />
 
             {/* ── CENTER: Nav pills ─────────────────────────── */}
             <div className="hidden md:flex flex-1 items-center justify-center">
@@ -373,13 +358,7 @@ export default function LandingPage() {
       <footer className="border-t border-border/50">
         <div className="container max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-6">
 
-          {/* Logo + wordmark */}
-          <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <img src="/logo-icon.svg" alt="Vouchy" className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="text-[12px] font-black tracking-[-0.02em] text-muted-foreground/50 group-hover:text-foreground transition-colors duration-300">
-              Vouch<span className="text-primary">y</span>
-            </span>
-          </Link>
+          <VouchyLogo variant="minimal" />
 
           {/* Links + copyright */}
           <div className="flex items-center gap-6">

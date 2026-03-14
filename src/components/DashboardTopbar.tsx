@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { updateTestimonialStatus, fetchSpaces, fetchTestimonials } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { VouchyLogo } from "@/components/VouchyLogo";
 import {
   Command,
   CommandDialog,
@@ -179,9 +180,7 @@ export function DashboardTopbar() {
         <div className="flex items-center h-[52px] px-4 md:px-6 gap-2">
           {/* Left: brand + workspace */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <Link to="/dashboard" className="flex items-center gap-2 group hover:scale-105 transition-transform duration-200">
-              <img src="/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
-            </Link>
+            <VouchyLogo variant="icon" />
 
             <div className="h-5 w-px bg-border/60" />
 
