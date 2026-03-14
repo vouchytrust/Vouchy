@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Play, Quote, Shield, ExternalLink, ChevronLeft, ChevronRight, Link2, Copy, CheckCheck, TrendingUp, Users, Award, Sun, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -508,9 +508,15 @@ export default function TrustPage() {
           </>
         )}
 
-        <div className="mt-20 flex flex-col items-center gap-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground/50">Powered by</span>
-          <VouchyLogo variant="minimal" />
+        <div className="mt-20 flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-2.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground/50">Powered by</span>
+            <VouchyLogo variant="minimal" />
+          </div>
+          <div className="flex gap-6 opacity-40">
+            <Link to="/privacy" className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
+            <Link to="/terms" className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+          </div>
         </div>
       </div>
     </div>

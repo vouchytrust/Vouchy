@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Video, MessageSquareText, Check, Send, Cpu, ChevronLeft, Sparkles, Quote } from "lucide-react";
 import VideoRecorder from "@/components/collection/VideoRecorder";
+import { fetchSpaceBySlug } from "@/lib/api";
+import { VouchyLogo } from "@/components/VouchyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadToR2 } from "@/lib/storage";
@@ -322,17 +324,15 @@ export default function CollectionPage() {
         </AnimatePresence>
       </main>
 
-      <footer className="w-full flex justify-center py-8 shrink-0">
-        <a 
-          href="/" 
-          className="flex items-center gap-3 transition-transform active:scale-95 cursor-pointer no-underline"
-        >
+      <footer className="w-full flex flex-col items-center gap-4 py-8 shrink-0">
+        <div className="flex items-center gap-3">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400/60 pb-0.5">Powered by</span>
-          <div className="flex items-center gap-2.5">
-            <img src="/logo-icon.svg" alt="" className="h-7 w-7 object-contain" />
-            <span className="text-xl font-black tracking-tight text-slate-950">Vouchy</span>
-          </div>
-        </a>
+          <VouchyLogo variant="minimal" />
+        </div>
+        <div className="flex gap-6 opacity-40">
+          <Link to="/privacy" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">Privacy</Link>
+          <Link to="/terms" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">Terms</Link>
+        </div>
       </footer>
     </div>
   );

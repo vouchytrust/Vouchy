@@ -362,15 +362,26 @@ export default function LandingPage() {
 
           {/* Links + copyright */}
           <div className="flex items-center gap-6">
-            {["Privacy", "Terms", "Twitter"].map((label) => (
-              <a
-                key={label}
-                href="#"
-                className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
-              >
-                {label}
-              </a>
-            ))}
+            <Link
+              to="/privacy"
+              className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
+            >
+              Privacy
+            </Link>
+            <Link
+              to="/terms"
+              className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
+            >
+              Terms
+            </Link>
+            <a
+              href="https://twitter.com/vouchytrust"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
+            >
+              Twitter
+            </a>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/25 whitespace-nowrap">
               © 2026 Vouchy Labs
             </span>

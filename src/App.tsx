@@ -20,6 +20,8 @@ import EmbedWidgetPage from "./pages/EmbedWidgetPage";
 import ViewTestimonialsPage from "./pages/ViewTestimonialsPage";
 import ShortEmbedRedirect from "./pages/ShortEmbedRedirect";
 import TrustPage from "./pages/TrustPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -52,6 +54,8 @@ function AppRoutes() {
             <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
             <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
             <Route path="/trust/:slug" element={<TrustPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index element={<DashboardHome />} />
               <Route path="testimonials" element={<TestimonialsPage />} />
