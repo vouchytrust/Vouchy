@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
         }
 
         // ── Check Credits & Plan ──
-        const { data: profile, error: pError } = await sb.from('profiles').select('ai_credits_used, plan').eq('user_id', spaceOwnerId).single();
+        const { data: profile, error: pError } = await sb.from('profiles').select('ai_credits_used, ai_scripts_used, ai_text_used, plan').eq('user_id', spaceOwnerId).single();
         if (pError || !profile) {
             return json({ error: 'Profile not found. Owner must create a profile to use AI.' }, 404);
         }
@@ -89,8 +89,9 @@ Deno.serve(async (req: Request) => {
         // ── Build Prompts ──
         let prompt = '';
         const nAction = action.replace(/_/g, '-');
+        const isScriptAction = nAction === 'generate-script';
 
-        if (nAction === 'generate-script') {
+        if (isScriptAction) {
             const context = payload.keywords || payload.mainIdea || '';
             const questions = payload.questions || [];
             prompt = `Generate a natural conversational script for a video testimonial.\nContext: ${context}\nQuestions: ${questions.join(', ')}\n\nFormat: VERY SHORT (15s). Return ONLY the script text.`;
@@ -114,7 +115,12 @@ Deno.serve(async (req: Request) => {
         const resultText = await callAI(prompt);
 
         // ── Increment Usage ──
-        const { error: updateError } = await sb.from('profiles').update({ ai_credits_used: used + 1 }).eq('user_id', spaceOwnerId);
+        const updateData = { 
+            ai_credits_used: used + 1,
+            ai_scripts_used: isScriptAction ? (profile.ai_scripts_used || 0) + 1 : (profile.ai_scripts_used || 0),
+            ai_text_used: !isScriptAction ? (profile.ai_text_used || 0) + 1 : (profile.ai_text_used || 0)
+        };
+        const { error: updateError } = await sb.from('profiles').update(updateData).eq('user_id', spaceOwnerId);
 
         if (updateError) {
             console.error('Usage update failed:', updateError);

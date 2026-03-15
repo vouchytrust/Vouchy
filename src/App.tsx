@@ -23,6 +23,12 @@ import TrustPage from "./pages/TrustPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminOverview from "./pages/admin/AdminOverview";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSpaces from "./pages/admin/AdminSpaces";
+import AdminTestimonials from "./pages/admin/AdminTestimonials";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -63,6 +69,14 @@ function AppRoutes() {
               <Route path="widgets" element={<WidgetLabPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
+
+            <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+              <Route index element={<AdminOverview />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="spaces" element={<AdminSpaces />} />
+              <Route path="testimonials" element={<AdminTestimonials />} />
+            </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Analytics />

@@ -16,6 +16,7 @@ import {
   X,
   Sun,
   Moon,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -494,13 +495,25 @@ export function DashboardTopbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
                 <div className="px-2 py-1.5">
-                  <div className="text-[12px] font-medium text-foreground">{userName}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-[12px] font-medium text-foreground">{userName}</div>
+                    {profile?.is_admin && (
+                      <span className="px-1.5 py-0.5 bg-indigo-500/10 text-indigo-600 rounded-md text-[8px] font-black uppercase tracking-widest border border-indigo-500/20">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-muted-foreground">{userEmail}</div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-[12px]" onClick={() => navigate("/dashboard/settings")}>
                   <Settings className="h-3.5 w-3.5 mr-2" /> Settings
                 </DropdownMenuItem>
+                {profile?.is_admin && (
+                  <DropdownMenuItem className="text-[12px] text-indigo-600 font-bold" onClick={() => navigate("/admin")}>
+                    <ShieldCheck className="h-3.5 w-3.5 mr-2" /> Super Admin
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-[12px] text-destructive" onClick={handleSignOut}>
                   <LogOut className="h-3.5 w-3.5 mr-2" /> Log out

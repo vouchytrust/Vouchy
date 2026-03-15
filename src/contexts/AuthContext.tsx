@@ -13,6 +13,7 @@ interface Profile {
   onboarding_completed: boolean;
   ai_credits_used: number | null;
   ai_credits_reset_at: string | null;
+  is_admin: boolean | null;
 }
 
 interface AuthContextType {

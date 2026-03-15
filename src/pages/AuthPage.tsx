@@ -28,7 +28,11 @@ export default function AuthPage() {
       if (profile && !profile.onboarding_completed) {
         navigate("/onboarding", { replace: true });
       } else if (profile) {
-        navigate("/dashboard", { replace: true });
+        if (profile.is_admin) {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
       }
     }
   }, [session, profile, navigate]);
@@ -98,7 +102,7 @@ export default function AuthPage() {
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: "google",
                     options: {
-                      redirectTo: `${window.location.origin}/dashboard`,
+                      redirectTo: `${window.location.origin}/auth`,
                     },
                   });
                   if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });

@@ -16,11 +16,13 @@ import {
 
 import { TbStarFilled, TbSparkles } from "react-icons/tb";
 import { VouchyLogo } from "@/components/VouchyLogo";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 
 export default function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const { session, profile } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState("Home");
@@ -143,12 +145,12 @@ export default function LandingPage() {
               {/* Divider */}
               <div className="hidden md:block h-5 w-px bg-border/60 mx-1" />
 
-              {/* Sign In */}
+              {/* Sign In / Dashboard */}
               <Link
-                to="/auth"
+                to={session ? (profile?.is_admin ? "/admin" : "/dashboard") : "/auth"}
                 className="hidden md:flex items-center gap-1.5 px-3.5 h-9 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground/80 hover:text-primary hover:bg-primary/5 border border-transparent hover:border-primary/15 transition-all duration-250 whitespace-nowrap"
               >
-                Sign In
+                {session ? (profile?.is_admin ? "Admin Panel" : "Dashboard") : "Sign In"}
               </Link>
 
               {/* Get Access CTA */}
