@@ -138,7 +138,13 @@ export default function OnboardingPage() {
             {step === 1 && (
               <div>
                 <h2 className="text-3xl font-bold text-foreground mb-2 tracking-[-0.04em]">Choose your brand color</h2>
-                <p className="text-[14px] text-muted-foreground mb-8 font-medium">This color will be applied across your collection pages and widgets.</p>
+                <p className="text-[14px] text-muted-foreground mb-6 font-medium">
+                  This color defines the <span className="text-primary font-bold">DNA of your brand</span>. It will be the primary accent for your public collection pages, video studio, and trust showcase.
+                </p>
+                <div className="p-3 mb-6 rounded-lg bg-primary/5 border border-primary/10 flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <p className="text-[11px] font-bold text-primary uppercase tracking-widest">Applied to: Collection Pages · Trust Links · Video HUD · Success Screens</p>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                   {brandColors.map((c) => (
                     <button

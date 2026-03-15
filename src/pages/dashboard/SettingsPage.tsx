@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ExternalLink, Sparkles, Crown, Zap } from "lucide-react";
+import { Check, ExternalLink, Sparkles, Crown, Zap, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,7 +116,7 @@ export default function SettingsPage() {
           {/* Brand Color */}
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Brand Color</h2>
-            <div className="flex gap-2.5 flex-wrap">
+            <div className="flex gap-2.5 flex-wrap items-center">
               {brandColors.map((c) => (
                 <button key={c} onClick={() => setBrandColor(c)} className="relative">
                   <div
@@ -132,6 +132,22 @@ export default function SettingsPage() {
                   </AnimatePresence>
                 </button>
               ))}
+              
+              {/* Custom Color Picker */}
+              <div className="relative group">
+                <input 
+                  type="color" 
+                  value={brandColor} 
+                  onChange={(e) => setBrandColor(e.target.value)}
+                  className="absolute inset-0 w-8 h-8 opacity-0 cursor-pointer z-10"
+                />
+                <div 
+                  className={`w-8 h-8 rounded-full border border-border flex items-center justify-center transition-all duration-200 ${!brandColors.includes(brandColor) ? "ring-2 ring-offset-3 ring-offset-background ring-primary scale-110" : "hover:scale-105"}`}
+                  style={{ backgroundColor: !brandColors.includes(brandColor) ? brandColor : 'white' }}
+                >
+                  <Plus className={`h-3.5 w-3.5 ${!brandColors.includes(brandColor) ? 'text-white' : 'text-muted-foreground'}`} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -189,6 +205,7 @@ export default function SettingsPage() {
                     <li>• Up to 10 testimonials</li>
                     <li>• 1 collector space</li>
                     <li>• Text testimonials only</li>
+                    <li>• No AI features</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -243,8 +260,8 @@ export default function SettingsPage() {
             {/* AI Credits meter — visible for everyone to show usage */}
             {(() => {
               const plan = profile?.plan?.toLowerCase() || 'free';
-              const limits: Record<string, number> = { free: 5, pro: 200, agency: 2000 };
-              const limit = limits[plan] || 5;
+              const limits: Record<string, number> = { free: 0, pro: 200, agency: 2000 };
+              const limit = limits[plan] ?? 0;
               const used = liveCredits?.used ?? 0;
               const pct = Math.min(100, Math.round((used / limit) * 100));
 

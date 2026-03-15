@@ -47,6 +47,7 @@ export default function DashboardHome() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasSpaces, setHasSpaces] = useState(true);
+  const [hasMoreThanOneSpace, setHasMoreThanOneSpace] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -59,6 +60,7 @@ export default function DashboardHome() {
         setStats(statsData);
         setRecentTestimonials((testimonials as any[]).slice(0, 4));
         setHasSpaces((spaces as any[]).length > 0);
+        setHasMoreThanOneSpace((spaces as any[]).length >= 1);
 
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const now = new Date();
@@ -139,11 +141,25 @@ export default function DashboardHome() {
           </p>
         </div>
         <div className="flex gap-2">
-          {quickActions.map((a) => (
-            <Button key={a.label} size="sm" className="h-8 text-xs gap-1.5 font-medium bg-primary hover:bg-primary/90" asChild>
-              <Link to={a.to}><a.icon className="h-3.5 w-3.5" />{a.label}</Link>
-            </Button>
-          ))}
+          {quickActions.map((a) => {
+            const isFree = (profile?.plan || "free").toLowerCase() === "free";
+            const isDisabled = a.label === "New Collector" && isFree && hasMoreThanOneSpace;
+            return (
+              <Button 
+                key={a.label} 
+                size="sm" 
+                className={`h-8 text-xs gap-1.5 font-medium ${isDisabled ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary hover:bg-primary/90"}`} 
+                asChild={!isDisabled}
+                disabled={isDisabled}
+              >
+                {isDisabled ? (
+                  <span className="flex items-center gap-1.5"><a.icon className="h-3.5 w-3.5" />Limit Reached</span>
+                ) : (
+                  <Link to={a.to}><a.icon className="h-3.5 w-3.5" />{a.label}</Link>
+                )}
+              </Button>
+            );
+          })}
         </div>
       </motion.div>
 

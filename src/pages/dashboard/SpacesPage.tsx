@@ -30,7 +30,7 @@ export default function SpacesPage() {
   const [selectedSpace, setSelectedSpace] = useState<any>(null);
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const loadData = async () => {
     try {
@@ -47,6 +47,15 @@ export default function SpacesPage() {
   useEffect(() => { loadData(); }, []);
 
   const openCreateEditor = () => {
+    const isFree = (profile?.plan || "free").toLowerCase() === "free";
+    if (isFree && spaces.length >= 1) {
+      toast({
+        title: "Collector limit reached",
+        description: "Free users can create only 1 collector. Upgrade to Pro for unlimited!",
+        variant: "destructive"
+      });
+      return;
+    }
     setSelectedSpace(null);
     setIsCreating(true);
     setEditorOpen(true);
@@ -147,7 +156,12 @@ export default function SpacesPage() {
           <h1 className="text-[22px] font-semibold text-foreground">Collectors</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">Collection pages for gathering testimonials.</p>
         </div>
-        <Button size="sm" className="h-8 text-xs gap-1.5" onClick={openCreateEditor}>
+        <Button 
+          size="sm" 
+          className="h-8 text-xs gap-1.5" 
+          onClick={openCreateEditor}
+          disabled={(profile?.plan || "free").toLowerCase() === "free" && spaces.length >= 1}
+        >
           <Plus className="h-3.5 w-3.5" /> New Collector
         </Button>
       </motion.div>

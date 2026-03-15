@@ -9,9 +9,10 @@ interface Props {
   spaceId: string; spaceUserId: string; accentColor: string;
   workspaceName: string; logoUrl?: string | null; spaceName?: string;
   questions: string[]; onBack: () => void; onSuccess: () => void;
+  plan?: string;
 }
 
-export default function VideoRecorder({ spaceId, spaceUserId, accentColor, workspaceName, logoUrl, questions, onBack, onSuccess }: Props) {
+export default function VideoRecorder({ spaceId, spaceUserId, accentColor, workspaceName, logoUrl, questions, onBack, onSuccess, plan }: Props) {
   const recorder = useVideoRecorder(120);
   const [form, setForm] = useState({ name: "", email: "" });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -191,10 +192,12 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
               {activeTab === 'script' ? (
                 <div className="flex-1 flex flex-col min-h-0 space-y-6">
                   <div className="flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950 text-white text-[9px] font-black uppercase tracking-widest">
-                      <Sparkles className="h-2 w-2" /> {aiCallsLeft} / {MAX_AI}
-                    </div>
-                    {script.length > 5 && (
+                    {plan !== 'free' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950 text-white text-[9px] font-black uppercase tracking-widest">
+                        <Sparkles className="h-2 w-2" /> {aiCallsLeft} / {MAX_AI}
+                      </div>
+                    )}
+                    {plan !== 'free' && script.length > 5 && (
                       <div className="flex gap-4">
                         {['Punchy', 'Natural'].map(st => (
                           <button key={st} onClick={() => enhanceScript(st.toLowerCase())} disabled={!!enhancing} className="text-[9px] font-black text-slate-900/40 hover:text-slate-900 uppercase tracking-widest border-b border-transparent hover:border-slate-900 pb-0.5 transition-all outline-none">
@@ -209,9 +212,18 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
                     <textarea value={script} onChange={e => setScript(e.target.value)} className="relative z-10 w-full flex-1 p-0 text-lg font-medium text-slate-900 bg-transparent border-none outline-none resize-none no-scrollbar placeholder:text-slate-200 leading-relaxed pt-2" placeholder="Write ideas here..." />
                     <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between relative z-10 shrink-0">
                       <p className="text-[9px] font-bold text-slate-200 uppercase tracking-widest">AI Suite</p>
-                      <button onClick={() => generateScript()} disabled={generating || !script.trim()} className="h-10 px-5 bg-slate-950 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 disabled:opacity-20 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-                        {generating ? <RotateCw className="h-3 w-3 animate-spin text-emerald-400" /> : <><Sparkles className="h-3 w-3 text-emerald-400" /> Magic</>}
-                      </button>
+                      {plan !== 'free' ? (
+                        <button 
+                          onClick={() => generateScript()} 
+                          disabled={generating || !script.trim()} 
+                          className="h-10 px-5 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 disabled:opacity-20 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                          style={{ backgroundColor: accentColor }}
+                        >
+                          {generating ? <RotateCw className="h-3 w-3 animate-spin text-white" /> : <><Sparkles className="h-3 w-3 text-white" /> Magic</>}
+                        </button>
+                      ) : (
+                        <div className="text-[8px] font-black text-slate-300 uppercase tracking-widest italic">PRO Feature</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -249,7 +261,10 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 flex flex-col pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.6) 100%)' }}>
                   <div className="flex items-center justify-between p-6 lg:p-10 shrink-0">
                     <div className="flex items-center gap-3 bg-black/40 backdrop-blur-2xl px-4 py-2 rounded-xl border border-white/10">
-                      <div className={`w-2 h-2 rounded-full ${recorder.state === 'recording' ? 'bg-red-500 animate-pulse' : 'bg-emerald-400'}`} />
+                      <div 
+                        className={`w-2 h-2 rounded-full ${recorder.state === 'recording' ? 'bg-red-500 animate-pulse' : ''}`} 
+                        style={{ backgroundColor: recorder.state !== 'recording' ? accentColor : undefined }}
+                      />
                       <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{recorder.state === 'recording' ? 'Live' : 'Ready'}</span>
                       {recorder.state === 'recording' && <span className="text-sm font-mono font-black text-white pl-4 border-l border-white/10 ml-3">{fmt(recorder.elapsed)}</span>}
                     </div>
@@ -287,8 +302,12 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
           <div className="mt-10 shrink-0 flex items-center justify-center w-full px-6">
             <div className="bg-white border border-slate-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-3 flex items-center gap-4 lg:gap-6 lg:ring-[12px] ring-slate-100/40">
               {recorder.state === "idle" && (
-                <button onClick={recorder.startPreview} className="h-14 lg:h-18 px-10 lg:px-14 flex items-center gap-3 rounded-[1.5rem] bg-slate-950 text-white font-black text-[11px] lg:text-xs uppercase tracking-[0.3em] transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl shadow-slate-950/20">
-                  <Mic className="h-5 lg:h-6 w-5 lg:w-6 text-emerald-400" />
+                <button 
+                  onClick={recorder.startPreview} 
+                  className="h-14 lg:h-18 px-10 lg:px-14 flex items-center gap-3 rounded-[1.5rem] text-white font-black text-[11px] lg:text-xs uppercase tracking-[0.3em] transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl"
+                  style={{ background: accentColor, boxShadow: `0 20px 40px -12px ${accentColor}33` }}
+                >
+                  <Mic className="h-5 lg:h-6 w-5 lg:w-6 text-white" />
                   Activate Studio
                 </button>
               )}
@@ -317,22 +336,30 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
       <AnimatePresence>
         {isReview && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[110] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6">
-            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} className="bg-white rounded-[3rem] w-full max-w-xl p-10 md:p-14 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-50 rounded-full blur-[80px] pointer-events-none" />
+            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} className="bg-white rounded-[2.5rem] lg:rounded-[3rem] w-full max-w-xl p-6 md:p-14 shadow-2xl relative overflow-hidden">
+              <div 
+                className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[80px] pointer-events-none opacity-[0.15]" 
+                style={{ backgroundColor: accentColor }}
+              />
               
               <button onClick={() => recorder.retake()} className="absolute top-10 right-10 text-slate-300 hover:text-slate-950 transition-colors z-10"><X className="h-7 w-7" /></button>
               
-              <div className="flex items-center gap-5 mb-12 relative z-10">
-                <div className="w-16 h-16 rounded-[1.5rem] bg-slate-950 flex items-center justify-center text-white shadow-2xl"><Send className="h-7 w-7" /></div>
+              <div className="flex items-center gap-4 lg:gap-5 mb-6 lg:mb-12 relative z-10">
+                <div 
+                  className="w-12 h-12 lg:w-16 lg:h-16 rounded-[1.2rem] lg:rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shrink-0"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <Send className="h-5 w-5 lg:h-7 lg:w-7" />
+                </div>
                 <div>
-                  <h3 className="text-2xl font-black text-slate-950 tracking-tight">Final Details</h3>
-                  <p className="text-slate-400 text-sm font-medium">Add your credentials to finish.</p>
+                  <h3 className="text-xl lg:text-2xl font-black text-black tracking-tight">Final Details</h3>
+                  <p className="text-slate-400 text-xs lg:text-sm font-medium">Add your credentials to finish.</p>
                 </div>
               </div>
 
-              <div className="space-y-6 mb-12 relative z-10 w-full overflow-y-auto max-h-[40vh] pr-2 no-scrollbar">
+              <div className="space-y-4 lg:space-y-6 mb-6 lg:mb-12 relative z-10 w-full overflow-y-auto max-h-[50vh] lg:max-h-[40vh] pr-2 no-scrollbar">
                 <div className="flex items-center gap-4 mb-2">
-                  <div className="relative w-14 h-14 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-slate-100/50 shadow-sm shrink-0 hover:border-slate-300 transition-colors">
+                  <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-slate-100/50 shadow-sm shrink-0 hover:border-slate-300 transition-colors">
                     {avatarPreview ? (
                       <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
@@ -351,18 +378,17 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
                     }} className="absolute inset-0 opacity-0 cursor-pointer" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] font-bold text-slate-900 uppercase tracking-wider">Photo / Logo</p>
+                    <p className="text-[10px] font-bold text-black uppercase tracking-wider">Photo / Logo</p>
                     <p className="text-[9px] font-semibold text-slate-400 mt-0.5">Optional. Helps build trust.</p>
                   </div>
                 </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Your Full Name</label>
-                  <input placeholder="Jane Doe" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold" />
+                <div className="space-y-2 lg:space-y-3">
+                  <label className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Your Full Name</label>
+                  <input placeholder="Jane Doe" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full h-12 lg:h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold text-black" />
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Email (Optional)</label>
-                  <input placeholder="jane@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold" />
+                <div className="space-y-2 lg:space-y-3">
+                  <label className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1">Email (Optional)</label>
+                  <input placeholder="jane@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full h-12 lg:h-14 px-6 rounded-2xl bg-slate-50 border border-slate-50 outline-none focus:ring-4 ring-slate-900/5 focus:bg-white transition-all text-sm font-bold text-black" />
                 </div>
               </div>
 
@@ -375,10 +401,12 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
                 <button 
                   onClick={handleSubmit} 
                   disabled={submitting || !form.name.trim()} 
-                  className="group w-full h-20 rounded-[1.5rem] text-white font-black text-xs uppercase tracking-[0.4em] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-20 flex items-center justify-center gap-4" 
-                  style={{ background: accentColor }}
+                  className="group w-full h-14 lg:h-20 rounded-[1.2rem] lg:rounded-[1.5rem] text-white font-black text-[10px] lg:text-xs uppercase tracking-[0.2em] lg:tracking-[0.4em] shadow-2xl transition-all active:scale-[0.98] disabled:opacity-20 flex items-center justify-center gap-3 lg:gap-4 px-4 overflow-hidden" 
+                  style={{ background: accentColor, boxShadow: `0 20px 40px -12px ${accentColor}33` }}
                 >
-                  {submitting ? 'Sharing story...' : <><Check className="h-5 w-5" /> Post Recommendation</>}
+                  <span className="truncate">
+                    {submitting ? 'Sharing story...' : <><Check className="h-4 w-4 lg:h-5 lg:w-5 inline-block mr-2" /> Post Recommendation</>}
+                  </span>
                 </button>
                 <button onClick={() => recorder.retake()} className="w-full h-14 rounded-2xl text-slate-300 hover:text-slate-900 font-black text-[10px] uppercase tracking-[0.3em] transition-all">Not happy? Retake</button>
               </div>

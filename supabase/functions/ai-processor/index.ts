@@ -77,9 +77,9 @@ Deno.serve(async (req: Request) => {
             return json({ error: 'Profile not found. Owner must create a profile to use AI.' }, 404);
         }
 
-        const limits: Record<string, number> = { free: 5, pro: 200, agency: 2000 };
+        const limits: Record<string, number> = { free: 0, pro: 200, agency: 2000 };
         const userPlan = profile.plan?.toLowerCase() || 'free';
-        const limit = limits[userPlan] || 5;
+        const limit = limits[userPlan] ?? 0;
         const used = profile.ai_credits_used || 0;
 
         if (used >= limit) {

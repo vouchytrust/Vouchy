@@ -267,6 +267,11 @@ export default function TrustPage() {
 
   return (
     <div className="min-h-screen bg-background font-sans transition-colors duration-300">
+      {/* TOP ACCENT BAR */}
+      <div 
+        className="w-full h-1.5 shrink-0 relative z-[110] shadow-sm"
+        style={{ backgroundColor: accent }}
+      />
 
       {/* ── THEME TOGGLE ── */}
       <div className="absolute top-6 right-6 z-[100]">

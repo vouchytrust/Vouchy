@@ -18,7 +18,10 @@ function MinimalField({ label, ...props }: any) {
       <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">{label}</label>
       <input
         {...props}
-        className="w-full h-11 px-4 text-sm text-slate-900 bg-white border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all duration-300 font-semibold placeholder:text-slate-300 shadow-sm"
+        className="w-full h-11 px-4 text-sm text-slate-900 bg-white border border-slate-200 rounded-xl outline-none focus:ring-4 transition-all duration-300 font-semibold placeholder:text-slate-300 shadow-sm"
+        style={{ '--focus-ring': `${props.accentColor || '#000'}22` } as any}
+        onFocus={(e) => e.target.style.borderColor = props.accentColor || '#000'}
+        onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
       />
     </div>
   );
@@ -38,12 +41,19 @@ function MethodCard({ icon, label, description, onClick, accentColor }: any) {
         className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
         style={{ backgroundColor: accentColor }}
       />
-      <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-700 transform group-hover:rotate-6 shadow-sm">
-        {icon}
+      <div 
+        className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 text-slate-400 group-hover:text-white transition-all duration-700 transform group-hover:rotate-6 shadow-sm"
+        style={{ '--hover-bg': accentColor } as any}
+      >
+        <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ backgroundColor: accentColor }} />
+        <div className="relative z-10">{icon}</div>
       </div>
       <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tighter">{label}</h3>
       <p className="text-slate-600 text-xs font-bold leading-relaxed max-w-[200px]">{description}</p>
-      <div className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">
+      <div 
+        className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 text-[9px] font-black uppercase tracking-[0.3em]"
+        style={{ color: accentColor }}
+      >
         Start Now →
       </div>
     </button>
@@ -132,6 +142,7 @@ export default function CollectionPage() {
         spaceId={space!.id} spaceUserId={space!.user_id} accentColor={accentColor}
         workspaceName={workspaceName} logoUrl={null}
         questions={[]} onBack={() => setMode("choose")} onSuccess={() => setMode("success")}
+        plan={space.profiles?.plan}
       />
     );
   }
@@ -140,9 +151,27 @@ export default function CollectionPage() {
       
       {/* BACKGROUND DECOR */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-slate-100/50 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-slate-100/30 rounded-full blur-[120px]" />
+        {/* Dynamic Brand Orbs */}
+        <motion.div 
+          animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[-15%] right-[-10%] w-[50%] h-[50%] rounded-full blur-[140px] opacity-[0.08]" 
+          style={{ backgroundColor: accentColor }}
+        />
+        <motion.div 
+          animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[140px] opacity-[0.05]" 
+          style={{ backgroundColor: accentColor }}
+        />
+        <div className="absolute inset-0 bg-slate-100/10 pointer-events-none" />
       </div>
+
+      {/* TOP ACCENT BAR */}
+      <div 
+        className="w-full h-1.5 shrink-0 relative z-50 shadow-sm"
+        style={{ backgroundColor: accentColor }}
+      />
 
 
 
@@ -170,16 +199,18 @@ export default function CollectionPage() {
                   )}
                 </div>
                 <div className="space-y-3">
-                  <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-slate-950">
-                    Share your <span className="text-slate-400">story.</span>
+                  <h1 className="text-4xl lg:text-7xl font-black tracking-tighter text-slate-950 leading-[0.9]">
+                    Share your <span style={{ color: accentColor }}>story.</span>
                   </h1>
                   <p className="text-slate-500 font-bold text-sm lg:text-base tracking-tight">
-                    Tell us about your experience with <span className="text-slate-900">{workspaceName}</span>
+                    Tell us about your experience with <span className="font-black" style={{ color: accentColor }}>{workspaceName}</span>
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 w-full max-w-xl mx-auto items-stretch">
-                <MethodCard accentColor={accentColor} icon={<Video className="w-8 h-8 md:w-9 md:h-9" />} label="Video" description="Record a quick, authentic message." onClick={() => setMode("video")} />
+              <div className={`grid grid-cols-1 ${space.profiles?.plan !== 'free' ? 'md:grid-cols-2' : 'max-w-xs'} gap-3 lg:gap-4 w-full max-w-xl mx-auto items-stretch justify-center`}>
+                {space.profiles?.plan !== 'free' && (
+                  <MethodCard accentColor={accentColor} icon={<Video className="w-8 h-8 md:w-9 md:h-9" />} label="Video" description="Record a quick, authentic message." onClick={() => setMode("video")} />
+                )}
                 <MethodCard accentColor={accentColor} icon={<MessageSquareText className="w-8 h-8 md:w-9 md:h-9" />} label="Writing" description="Classic, clear, and curated story." onClick={() => setMode("text")} />
               </div>
             </motion.div>
@@ -220,16 +251,21 @@ export default function CollectionPage() {
                       onChange={(e) => setForm({ ...form, content: e.target.value })} 
                     />
 
-                    <div className="mt-6 pt-6 border-t border-slate-50 flex flex-wrap gap-2 items-center shrink-0">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest mr-0.5">
+                    {space.profiles?.plan !== 'free' && (
+                      <div className="mt-6 pt-6 border-t border-slate-50 flex flex-wrap gap-2 items-center shrink-0">
+                      <div 
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-[8px] font-black uppercase tracking-widest mr-0.5"
+                        style={{ backgroundColor: accentColor }}
+                      >
                         <Sparkles className="w-3 h-3" strokeWidth={3} /> AI Magic
                       </div>
-                      {['Polish', 'Punchy', 'Professional'].map(style => (
-                        <button key={style} type="button" onClick={() => handleAiEnhance(style.toLowerCase())} disabled={!!aiEnhancing || !form.content} className="px-5 py-2 rounded-full border border-slate-100 bg-white text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:border-slate-900 hover:text-slate-900 transition-all">
-                          {aiEnhancing === style.toLowerCase() ? "..." : style}
-                        </button>
-                      ))}
-                    </div>
+                        {['Polish', 'Punchy', 'Professional'].map(style => (
+                          <button key={style} type="button" onClick={() => handleAiEnhance(style.toLowerCase())} disabled={!!aiEnhancing || !form.content} className="px-5 py-2 rounded-full border border-slate-100 bg-white text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:border-slate-900 hover:text-slate-900 transition-all">
+                            {aiEnhancing === style.toLowerCase() ? "..." : style}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -262,15 +298,18 @@ export default function CollectionPage() {
                         </div>
                       </div>
 
-                      <MinimalField label="Full Name" placeholder="Jane Doe" value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} required />
-                      <MinimalField label="Email Address" type="email" placeholder="jane@example.com" value={form.email} onChange={(e: any) => setForm({ ...form, email: e.target.value })} required />
+                      <MinimalField label="Full Name" placeholder="Jane Doe" value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} required accentColor={accentColor} />
+                      <MinimalField label="Email Address" type="email" placeholder="jane@example.com" value={form.email} onChange={(e: any) => setForm({ ...form, email: e.target.value })} required accentColor={accentColor} />
                       <div className="grid grid-cols-2 gap-3">
-                        <MinimalField label="Company" placeholder="Acme Inc." value={form.company} onChange={(e: any) => setForm({ ...form, company: e.target.value })} />
-                        <MinimalField label="Role" placeholder="CEO" value={form.title} onChange={(e: any) => setForm({ ...form, title: e.target.value })} />
+                        <MinimalField label="Company" placeholder="Acme Inc." value={form.company} onChange={(e: any) => setForm({ ...form, company: e.target.value })} accentColor={accentColor} />
+                        <MinimalField label="Role" placeholder="CEO" value={form.title} onChange={(e: any) => setForm({ ...form, title: e.target.value })} accentColor={accentColor} />
                       </div>
                     </div>
                     <label className="flex items-start gap-3 cursor-pointer group pt-2">
-                      <div className={`mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0 ${agreed ? 'bg-slate-950 border-slate-950' : 'bg-white border-slate-200'}`}>
+                      <div 
+                        className={`mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0 ${agreed ? 'border-transparent' : 'bg-white border-slate-200'}`}
+                        style={{ backgroundColor: agreed ? accentColor : 'white' }}
+                      >
                         {agreed && <Check className="w-3 h-3 text-white" strokeWidth={5} />}
                         <input type="checkbox" className="hidden" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
                       </div>
@@ -283,10 +322,13 @@ export default function CollectionPage() {
                   <button 
                     type="submit" 
                     disabled={submitting || !agreed} 
-                    className="group relative w-full h-16 bg-slate-900 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-20 shadow-xl shadow-slate-900/10 shrink-0"
+                    className="group relative w-full h-14 lg:h-16 text-white rounded-[1.2rem] lg:rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] lg:tracking-[0.4em] flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-20 shadow-xl shrink-0 px-4"
+                    style={{ backgroundColor: accentColor, boxShadow: `0 20px 40px -12px ${accentColor}33` }}
                   >
-                    {submitting ? "Sharing..." : "Post Review"}
-                    <Send className="w-3.5 h-3.5" />
+                    <span className="truncate">
+                      {submitting ? "Sharing..." : "Post Review"}
+                    </span>
+                    <Send className="w-3.5 h-3.5 shrink-0" />
                   </button>
                 </div>
               </form>
@@ -301,10 +343,13 @@ export default function CollectionPage() {
               className="text-center space-y-8"
             >
               <div className="relative">
-                <div className="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-slate-200">
-                  <Check className="w-10 h-10" strokeWidth={6} />
+                <div 
+                  className="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.5rem] flex items-center justify-center mx-auto text-white shadow-xl transition-all duration-500"
+                  style={{ backgroundColor: accentColor, boxShadow: `0 32px 64px -16px ${accentColor}66` }}
+                >
+                  <Check className="w-8 h-8 lg:w-10 lg:h-10" strokeWidth={6} />
                 </div>
-                <div className="absolute inset-0 bg-slate-900/10 blur-3xl rounded-full scale-125 -z-0" />
+                <div className="absolute inset-0 blur-3xl rounded-full scale-150 -z-10" style={{ backgroundColor: `${accentColor}15` }} />
               </div>
               <div className="space-y-3">
                 <h2 className="text-5xl lg:text-7xl font-black tracking-tightest leading-none">Thank you.</h2>
