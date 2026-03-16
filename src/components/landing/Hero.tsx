@@ -61,7 +61,7 @@ export default function Hero() {
                     </Avatar>
                   ))}
                 </span>
-                selling
+                sell
               </span>
               <span className="lg:block lg:whitespace-nowrap mt-1">
                 <> </>for <span className="text-primary">you.</span>

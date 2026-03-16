@@ -47,7 +47,7 @@ export function AppSidebar() {
             <img src="/logo-icon.svg" alt="Vouchy Logo Icon" className="h-7 w-7 object-contain" />
             {!collapsed && (
               <span className="text-[15px] font-semibold tracking-tight text-foreground">
-                Vouchy
+                vouchy
               </span>
             )}
           </Link>

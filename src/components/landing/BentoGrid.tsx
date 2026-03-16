@@ -213,7 +213,7 @@ const BentoGrid = () => {
               {/* "Powered by" strip */}
               <div className="absolute bottom-0 inset-x-0 h-5 bg-primary/[0.03] border-t border-primary/5 flex items-center justify-center gap-1">
                 <img src="/logo-icon.svg" alt="" className="h-2.5 w-2.5 opacity-30" />
-                <span className="text-[7px] font-black text-primary/30 uppercase tracking-[0.3em]">Powered by Vouchy</span>
+                <span className="text-[7px] font-black text-primary/30 uppercase tracking-[0.3em]">Powered by vouchy</span>
               </div>
             </div>
             <div className="relative z-10">

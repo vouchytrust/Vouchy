@@ -205,7 +205,7 @@ export default function LandingPage() {
                   <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-primary/8">
                     <div className="flex items-center gap-2">
                       <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-50" />
-                      <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">Vouchy Navigation</span>
+                      <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">vouchy Navigation</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
