@@ -46,14 +46,8 @@ const ProductShowcase = () => {
             {/* The Dashboard Card */}
             <motion.div
               style={{ y }}
-              className="relative w-full max-w-[400px] rounded-2xl group/card bg-card/40 border border-border/50 backdrop-blur-sm shadow-2xl"
+              className="relative w-full max-w-[400px] rounded-2xl group/card bg-card/40 border border-border/50 backdrop-blur-sm shadow-2xl overflow-hidden"
             >
-              {/* Architecture Corners */}
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30 group-hover/card:border-primary/70 transition-all duration-500 group-hover/card:w-10 group-hover/card:h-10" />
-
               {/* Header */}
               <div className="border-b border-primary/10 p-4 flex items-center justify-between bg-card/10 backdrop-blur-sm relative z-10">
                 <div className="flex items-center gap-2">
@@ -140,38 +134,15 @@ const ProductShowcase = () => {
                 transition={{ duration: 4, repeat: Infinity }}
               />
 
+              {/* Precision Corners - Perfectly aligned with brand radius and placed LAST to be on top */}
+              <div className="absolute top-0 left-0 w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl z-50 pointer-events-none group-hover/card:border-primary transition-all duration-500" />
+              <div className="absolute top-0 right-0 w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl z-50 pointer-events-none group-hover/card:border-primary transition-all duration-500" />
+              <div className="absolute bottom-0 left-0 w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl z-50 pointer-events-none group-hover/card:border-primary transition-all duration-500" />
+              <div className="absolute bottom-0 right-0 w-10 h-10 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl z-50 pointer-events-none group-hover/card:border-primary transition-all duration-500" />
+
             </motion.div>
 
-            {/* Floating Elements */}
-            <div className="absolute top-0 right-0 bottom-0 left-0 pointer-events-none overflow-hidden">
-              {[1, 2, 3, 4].map(i => (
-                <motion.div
-                  key={i}
-                  className="absolute bg-card p-2 rounded-xl shadow-lg border border-border text-yellow-500"
-                  initial={{
-                    x: Math.random() > 0.5 ? 400 : -400,
-                    y: Math.random() * 200 - 100,
-                    opacity: 0,
-                    scale: 0.5
-                  }}
-                  whileInView={{
-                    x: Math.random() * 40 - 20,
-                    y: Math.random() * 40 - 20,
-                    opacity: [0, 1, 0],
-                    scale: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 3,
-                    delay: i * 0.8,
-                    repeat: Infinity,
-                    repeatDelay: 2
-                  }}
-                >
-                  <TbStarFilled className="w-4 h-4" />
-                </motion.div>
-              ))}
-            </div>
-
+            {/* Floating Elements removed per request */}
           </div>
 
         </div>

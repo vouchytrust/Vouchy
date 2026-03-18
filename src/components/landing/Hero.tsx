@@ -104,11 +104,11 @@ export default function Hero() {
           >
             <div className="relative w-full max-w-[460px]">
               <div className="relative p-8 md:p-10 flex flex-col gap-6 z-10">
-                {/* Decorative architectural borders */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-primary/40" />
-                <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-primary/40" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-primary/40" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-primary/40" />
+                {/* Precision Counters - Perfectly aligned with brand radius */}
+                <div className="absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
+                <div className="absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
+                <div className="absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
+                <div className="absolute -bottom-px -right-px w-10 h-10 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
 
                 {/* Conceptual Quote */}
                 <motion.div

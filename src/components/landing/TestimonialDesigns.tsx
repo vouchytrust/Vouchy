@@ -186,7 +186,18 @@ export default function TestimonialDesigns() {
   return (
     <section id="design-showcase" className='py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center'>
       {/* Blueprint Grid Background - Slightly more visible for the "architect" feel */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--primary)/0.06)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.06)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_90%)]"></div>
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '80px 80px' 
+        }} 
+      />
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '20px 20px' 
+        }} 
+      />
 
       <div className='container mx-auto px-6 relative z-10 max-w-7xl font-sans'>
 
@@ -244,11 +255,11 @@ export default function TestimonialDesigns() {
                   >
                     <div className="flex-1 relative rounded-2xl p-8 flex items-center justify-center transition-all duration-500 group">
                       
-                      {/* Architecture Corners */}
-                      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
-                      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
-                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
-                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30 group-hover:border-primary/70 group-hover:w-10 group-hover:h-10 transition-all duration-500" />
+                      {/* Precision Corners - Perfectly aligned with parent radius */}
+                      <div className="absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
+                      <div className="absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
+                      <div className="absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
+                      <div className="absolute -bottom-px -right-px w-10 h-10 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
 
                       {/* Metric lines - Purely decorative architect feel */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.04]" />
@@ -290,11 +301,11 @@ export default function TestimonialDesigns() {
           className="mt-16 group relative"
         >
           <div className="relative rounded-2xl border border-white/5 bg-card/40 backdrop-blur-sm overflow-hidden">
-            {/* Corner accents — Branded Green with matching rounding */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
+            {/* Precise Branded Green Corners */}
+            <div className="absolute -top-px -left-px w-14 h-14 border-t-[2px] border-l-[2px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute -top-px -right-px w-14 h-14 border-t-[2px] border-r-[2px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute -bottom-px -left-px w-14 h-14 border-b-[2px] border-l-[2px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
+            <div className="absolute -bottom-px -right-px w-14 h-14 border-b-[2px] border-r-[2px] border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
 
             {/* Crosshair lines — Subtle light accents on dark */}
             <div className="absolute top-0 right-[28%] h-full w-[1px] bg-white/[0.03]" />

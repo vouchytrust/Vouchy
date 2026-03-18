@@ -9,11 +9,27 @@ export default function CTA() {
 
   return (
     <section className="py-12 lg:py-16 px-4 md:px-6 relative overflow-hidden bg-background min-h-screen flex flex-col justify-center">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--primary)/0.03)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" />
+      {/* Blueprint Grid Background */}
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '80px 80px' 
+        }} 
+      />
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '20px 20px' 
+        }} 
+      />
 
       <div className="container mx-auto max-w-5xl relative z-10">
-        <div className="relative px-8 py-10 md:py-16 text-center bg-card/30 border border-border/50 backdrop-blur-md rounded-2xl">
+        <div className="group relative px-8 py-10 md:py-16 text-center bg-card/30 border border-border/50 backdrop-blur-md rounded-2xl">
+          {/* Precision Corners */}
+          <div className="absolute -top-px -left-px w-14 h-14 border-t-[2px] border-l-[2px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
+          <div className="absolute -top-px -right-px w-14 h-14 border-t-[2px] border-r-[2px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
+          <div className="absolute -bottom-px -left-px w-14 h-14 border-b-[2px] border-l-[2px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
+          <div className="absolute -bottom-px -right-px w-14 h-14 border-b-[2px] border-r-[2px] border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
 
           {/* Floating Element */}
           <motion.div

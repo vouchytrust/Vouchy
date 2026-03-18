@@ -114,13 +114,18 @@ const Pricing = () => {
   return (
     <section id="pricing" className="relative py-12 lg:py-16 bg-background border-y border-border overflow-hidden min-h-screen flex flex-col justify-center" ref={ref}>
       {/* Background structural lines */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-px h-full bg-primary" />
-        <div className="absolute top-0 left-2/4 w-px h-full bg-primary" />
-        <div className="absolute top-0 left-3/4 w-px h-full bg-primary" />
-        <div className="absolute top-1/3 left-0 w-full h-px bg-primary" />
-        <div className="absolute top-2/3 left-0 w-full h-px bg-primary" />
-      </div>
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '80px 80px' 
+        }} 
+      />
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '20px 20px' 
+        }} 
+      />
 
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         {/* Header Section */}
@@ -168,18 +173,15 @@ const Pricing = () => {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
             >
-              {/* Architecture Markers */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.01]" />
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1px] bg-primary/[0.01]" />
-              
-              <div className={`absolute top-0 left-0 w-8 h-8 border-t border-l ${plan.popular ? 'border-primary/40' : 'border-primary/20'} group-hover:border-primary/60 transition-colors duration-500`} />
-              <div className={`absolute top-0 right-0 w-8 h-8 border-t border-r ${plan.popular ? 'border-primary/40' : 'border-primary/20'} group-hover:border-primary/60 transition-colors duration-500`} />
-              <div className={`absolute bottom-0 left-0 w-8 h-8 border-b border-l ${plan.popular ? 'border-primary/40' : 'border-primary/20'} group-hover:border-primary/60 transition-colors duration-500`} />
-              <div className={`absolute bottom-0 right-0 w-8 h-8 border-b border-r ${plan.popular ? 'border-primary/40' : 'border-primary/20'} group-hover:border-primary/60 transition-colors duration-500`} />
+              {/* Precision Corners - Perfectly aligned with brand radius */}
+              <div className={`absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] rounded-tl-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
+              <div className={`absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] rounded-tr-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
+              <div className={`absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] rounded-bl-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
+              <div className={`absolute -bottom-px -right-px w-10 h-10 border-b-[1.5px] border-r-[1.5px] rounded-br-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
 
               {/* Tier Marker */}
               <div className="inline-flex items-center gap-2 mb-8 relative z-10">
-                <div className={`px-2 py-0.5 rounded bg-foreground text-[8px] font-black uppercase tracking-widest ${plan.popular ? "text-primary-foreground" : "text-background"}`}>
+                <div className={`px-2 py-0.5 rounded bg-foreground text-[8px] font-black uppercase tracking-widest ${plan.popular ? "text-background" : "text-background"}`}>
                   Tier 0{index + 1}
                 </div>
                 {plan.popular && (
