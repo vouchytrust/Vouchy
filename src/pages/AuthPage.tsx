@@ -99,13 +99,13 @@ export default function AuthPage() {
                 variant="outline"
                 className="w-full h-11 mb-4"
                 onClick={async () => {
-                  const { error } = await supabase.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                      redirectTo: `${window.location.origin}/auth`,
-                    },
-                  });
-                  if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: "google",
+                      options: {
+                        redirectTo: `${window.location.origin}/onboarding`,
+                      },
+                    });
+                    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
                 }}
               >
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
