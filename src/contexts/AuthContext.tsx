@@ -61,27 +61,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const handleAuthStateChange = async (_event: any, session: Session | null) => {
+    let mounted = true;
+
+    const loadData = async (activeSession: Session | null) => {
       try {
         setLoading(true);
-        setSession(session);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+        setSession(activeSession);
+        if (activeSession?.user) {
+          await fetchProfile(activeSession.user.id);
         } else {
           setProfile(null);
         }
+      } catch (err) {
+        console.error("AuthContext init error:", err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-
+    // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      handleAuthStateChange("initial", session);
+      if (mounted) loadData(session);
     });
 
-    return () => subscription.unsubscribe();
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
+      // We only want to trigger a full load on specific events to avoid loops
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        loadData(session);
+      } else if (event === "SIGNED_OUT") {
+        setSession(null);
+        setProfile(null);
+        setLoading(false);
+      } else {
+        // For other events just update the session
+        setSession(session);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
