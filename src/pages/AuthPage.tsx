@@ -18,16 +18,22 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { session, profile } = useAuth();
+  const { session, profile, loading: authLoading } = useAuth();
 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   // Redirect if already logged in
   useEffect(() => {
-    if (session) {
-      if (profile && !profile.onboarding_completed) {
+    if (session && !authLoading) {
+      // If no profile exists yet, assume it's a new user and go to onboarding
+      if (!profile) {
         navigate("/onboarding", { replace: true });
-      } else if (profile) {
+        return;
+      }
+
+      if (!profile.onboarding_completed) {
+        navigate("/onboarding", { replace: true });
+      } else {
         if (profile.is_admin) {
           navigate("/admin", { replace: true });
         } else {
@@ -35,7 +41,7 @@ export default function AuthPage() {
         }
       }
     }
-  }, [session, profile, navigate]);
+  }, [session, profile, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +72,14 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+  if (session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -102,7 +116,7 @@ export default function AuthPage() {
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: "google",
                       options: {
-                        redirectTo: `${window.location.origin}/onboarding`,
+                        redirectTo: `${window.location.origin}/auth`,
                       },
                     });
                     if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
