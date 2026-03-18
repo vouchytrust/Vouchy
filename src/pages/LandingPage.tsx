@@ -77,8 +77,8 @@ export default function LandingPage() {
               mt-4 md:mt-5 flex items-center h-[58px] md:h-[62px] px-3 md:px-4
               rounded-2xl border transition-all duration-500
               ${scrolled
-                ? "bg-background/80 dark:bg-card/70 backdrop-blur-2xl border-primary/20 shadow-[0_16px_48px_-12px_rgba(10,169,57,0.18),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                : "bg-background/40 dark:bg-card/30 backdrop-blur-xl border-primary/10 shadow-none"
+                ? "bg-background border-primary/20 shadow-sm"
+                : "bg-background border-transparent shadow-none"
               }
             `}
           >
@@ -194,12 +194,12 @@ export default function LandingPage() {
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className="md:hidden mt-2 pb-safe"
               >
-                <div className="relative bg-background/96 dark:bg-card/92 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-[0_30px_70px_-20px_rgba(10,169,57,0.18)] overflow-hidden">
-                  {/* Vouchy corner accents */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-[1.5px] border-l-[1.5px] border-primary/50 rounded-tl-[4px]" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-[1.5px] border-r-[1.5px] border-primary/50 rounded-tr-[4px]" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[1.5px] border-l-[1.5px] border-primary/50 rounded-bl-[4px]" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[1.5px] border-r-[1.5px] border-primary/50 rounded-br-[4px]" />
+                <div className="relative bg-background border border-primary/20 rounded-2xl shadow-sm overflow-hidden">
+                  {/* Vouchy corner accents - Precision aligned */}
+                  <div className="absolute -top-px -left-px w-8 h-8 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl" />
+                  <div className="absolute -top-px -right-px w-8 h-8 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl" />
+                  <div className="absolute -bottom-px -left-px w-8 h-8 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl" />
+                  <div className="absolute -bottom-px -right-px w-8 h-8 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl" />
 
                   {/* Header strip */}
                   <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-primary/8">

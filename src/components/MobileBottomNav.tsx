@@ -18,8 +18,8 @@ export function MobileBottomNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden">
-      {/* Frosted glass background */}
-      <div className="absolute inset-0 bg-card/90 backdrop-blur-xl border-t border-border/40" />
+      {/* Solid background */}
+      <div className="absolute inset-0 bg-card/90 border-t border-border/40" />
 
       {/* Safe area + content */}
       <div className="relative flex items-end justify-around px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
