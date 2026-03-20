@@ -244,9 +244,9 @@ export default function TestimonialDesigns() {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-6">
+            <CarouselContent className="-ml-6" viewportClassName="overflow-visible">
               {layouts.map((layout, index) => (
-                <CarouselItem key={layout.id} className="pl-6 basis-full md:basis-1/2 lg:basis-1/3 h-[400px] sm:h-[380px] lg:h-[350px]">
+                <CarouselItem key={layout.id} className="pl-6 basis-full md:basis-1/2 lg:basis-1/3 h-[450px] sm:h-[420px] lg:h-[400px]">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -265,7 +265,7 @@ export default function TestimonialDesigns() {
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.04]" />
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1px] bg-primary/[0.04]" />
 
-                      <div className="relative z-10 w-full transform transition-all duration-500 group-hover:scale-[1.02]">
+                      <div className="relative z-10 w-full h-[280px] sm:h-[260px] transform transition-all duration-500 group-hover:scale-[1.02]">
                         <BlueprintCard layoutId={layout.id} />
                       </div>
 
@@ -300,7 +300,7 @@ export default function TestimonialDesigns() {
           viewport={{ once: true }}
           className="mt-16 group relative"
         >
-          <div className="relative rounded-2xl border border-white/5 bg-card/40 backdrop-blur-sm overflow-hidden">
+          <div className="relative rounded-2xl border border-white/5 bg-card/40 backdrop-blur-sm">
             {/* Precise Branded Green Corners */}
             <div className="absolute -top-px -left-px w-14 h-14 border-t-[2px] border-l-[2px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
             <div className="absolute -top-px -right-px w-14 h-14 border-t-[2px] border-r-[2px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />

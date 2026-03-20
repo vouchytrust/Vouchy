@@ -11,7 +11,14 @@ import {
 } from "@/components/ui/dialog";
 import { fetchSpaceBySlug, fetchTestimonialsBySpace, fetchWidgetById } from "@/lib/api";
 
-import { TestimonialCard, CardConfig, TestimonialItem, fontMap, shadowMap } from "@/components/TestimonialCard";
+import { TestimonialCard, CardConfig, TestimonialItem } from "@/components/TestimonialCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 function MarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
   const items = [...testimonials, ...testimonials];
@@ -55,6 +62,7 @@ export default function EmbedWidgetPage() {
 
   const baseSettings = dbConfig || {
     layout: searchParams.get("layout") || "clean",
+    mediaFilter: searchParams.get("mediaFilter") || "all",
     minRating: parseInt(searchParams.get("minRating") || "0", 10),
     maxItems: parseInt(searchParams.get("max") || "50", 10),
     darkMode: searchParams.get("darkMode") === "true",
@@ -132,7 +140,8 @@ export default function EmbedWidgetPage() {
     navIconColor: activeColorTheme.navIconColor || baseSettings.navIconColor,
     navBgColor: activeColorTheme.navBgColor || baseSettings.navBgColor,
     maxItems: baseSettings.maxItems || baseSettings.max || 50,
-    minRating: baseSettings.minRating || 0
+    minRating: baseSettings.minRating || 0,
+    mediaFilter: baseSettings.mediaFilter || "all"
   };
 
   useEffect(() => {
@@ -153,6 +162,7 @@ export default function EmbedWidgetPage() {
       try {
         let spaceIdToUse = "";
         let currentMinRating = layoutSettings.minRating;
+        let currentMediaFilter = layoutSettings.mediaFilter;
         let currentMax = layoutSettings.maxItems;
 
         const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slug);
@@ -169,6 +179,7 @@ export default function EmbedWidgetPage() {
             if (overrideTheme === "light") setActiveThemeOverride("light");
 
             currentMinRating = c.minRating !== undefined ? c.minRating : currentMinRating;
+            currentMediaFilter = c.mediaFilter !== undefined ? c.mediaFilter : currentMediaFilter;
             currentMax = c.maxItems !== undefined ? c.maxItems : currentMax;
           } catch (e) {
             console.error("Failed to load widget config, falling back", e);
@@ -185,6 +196,11 @@ export default function EmbedWidgetPage() {
         const data = await fetchTestimonialsBySpace(spaceIdToUse);
         const mapped = (data as any[])
           .filter(t => t.status === "approved" && t.rating >= currentMinRating)
+          .filter(t => {
+            if (currentMediaFilter === "video") return t.type === "video";
+            if (currentMediaFilter === "text") return t.type === "text";
+            return true;
+          })
           .slice(0, currentMax)
           .map(t => ({
             name: t.author_name,
@@ -266,16 +282,68 @@ export default function EmbedWidgetPage() {
           ))}
         </div>
       ) : layoutSettings.displayMode === "carousel" ? (
-        <CarouselView 
-          testimonials={testimonials} 
-          config={config}
-          carouselVisible={layoutSettings.carouselVisible}
-          navStyle={layoutSettings.navStyle}
-          navIconColor={layoutSettings.navIconColor}
-          navBgColor={layoutSettings.navBgColor}
-          autoPlay={layoutSettings.autoPlay}
-          autoPlaySpeed={layoutSettings.autoPlaySpeed}
-        />
+        <div className="px-4">
+          <Carousel
+            orientation={(baseSettings.carouselOrientation || "horizontal") as "horizontal" | "vertical"}
+            opts={{ 
+              align: (baseSettings.carouselAlign || "start") as "start" | "center", 
+              loop: baseSettings.carouselLoop !== false
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {testimonials.map((t, i) => (
+                <CarouselItem
+                  key={i}
+                  className={`pl-4 ${
+                    layoutSettings.carouselVisible === 1 ? "basis-full" :
+                    layoutSettings.carouselVisible === 2 ? "basis-full sm:basis-1/2" :
+                    layoutSettings.carouselVisible === 3 ? "basis-full sm:basis-1/2 lg:basis-1/3" : 
+                    "basis-full sm:basis-1/2 lg:basis-1/4"
+                  }`}
+                >
+                  <TestimonialCard t={t} config={config} index={i} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            {layoutSettings.navStyle === "arrows" && (
+              <div className="flex items-center justify-center gap-3 mt-6">
+                <CarouselPrevious
+                  className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm transition-all hover:scale-105 active:scale-95"
+                  style={{
+                    color: layoutSettings.navIconColor,
+                    backgroundColor: layoutSettings.navBgColor,
+                    borderColor: `${layoutSettings.navIconColor}20`
+                  }}
+                />
+                <CarouselNext
+                  className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm transition-all hover:scale-105 active:scale-95"
+                  style={{
+                    color: layoutSettings.navIconColor,
+                    backgroundColor: layoutSettings.navBgColor,
+                    borderColor: `${layoutSettings.navIconColor}20`
+                  }}
+                />
+              </div>
+            )}
+            {layoutSettings.navStyle === "dots" && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <CarouselPrevious
+                  className="static translate-y-0 h-7 w-7 rounded-full border-0 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 p-0 shadow-none text-current"
+                  style={{ color: layoutSettings.navIconColor }}
+                />
+                {testimonials.slice(0, Math.min(testimonials.length, 8)).map((_, i) => (
+                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: layoutSettings.navIconColor, opacity: 0.3 }} />
+                ))}
+                <CarouselNext
+                  className="static translate-y-0 h-7 w-7 rounded-full border-0 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 p-0 shadow-none text-current"
+                  style={{ color: layoutSettings.navIconColor }}
+                />
+              </div>
+            )}
+          </Carousel>
+        </div>
       ) : (
         <>
           {testimonials.length === 0 ? (
@@ -319,70 +387,4 @@ export default function EmbedWidgetPage() {
   );
 }
 
-function CarouselView({ testimonials, config, carouselVisible, navStyle, navIconColor, navBgColor, autoPlay, autoPlaySpeed }: {
-  testimonials: TestimonialItem[];
-  config: CardConfig;
-  carouselVisible: number;
-  navStyle: string;
-  navIconColor: string;
-  navBgColor: string;
-  autoPlay: boolean;
-  autoPlaySpeed: number;
-}) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (autoPlay && testimonials.length > 0) {
-      intervalRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % Math.ceil(testimonials.length / carouselVisible));
-      }, autoPlaySpeed);
-    }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [autoPlay, autoPlaySpeed, testimonials.length, carouselVisible]);
-
-  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % Math.ceil(testimonials.length / carouselVisible));
-  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + Math.ceil(testimonials.length / carouselVisible)) % Math.ceil(testimonials.length / carouselVisible));
-
-  const visible = testimonials.slice(currentIndex * carouselVisible, (currentIndex + 1) * carouselVisible);
-
-  return (
-    <div className="relative group/carousel">
-      <div className="grid gap-4 px-4 transition-all duration-500" style={{ gridTemplateColumns: `repeat(${carouselVisible}, minmax(0, 1fr))` }}>
-        {visible.map((t, i) => <TestimonialCard key={i} t={t} config={config} index={i} />)}
-      </div>
-      
-      {navStyle !== "none" && (
-        <div className="flex items-center justify-center gap-4 mt-6">
-          <button 
-            onClick={prevSlide} 
-            className="w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm overflow-hidden relative group/btn" 
-            style={{ backgroundColor: navBgColor, color: navIconColor, borderColor: `${navIconColor}20` }}
-          >
-            <div className="absolute inset-0 bg-current opacity-0 group-hover/btn:opacity-5 transition-opacity" />
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          
-          <div className="flex gap-1.5">
-            {Array.from({ length: Math.ceil(testimonials.length / carouselVisible) }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentIndex ? "w-6" : "w-1.5"}`}
-                style={{ backgroundColor: i === currentIndex ? config.accent : `${navIconColor}20` }}
-              />
-            ))}
-          </div>
-
-          <button 
-            onClick={nextSlide} 
-            className="w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm overflow-hidden relative group/btn" 
-            style={{ backgroundColor: navBgColor, color: navIconColor, borderColor: `${navIconColor}20` }}
-          >
-            <div className="absolute inset-0 bg-current opacity-0 group-hover/btn:opacity-5 transition-opacity" />
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}

@@ -48,14 +48,6 @@ function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-const CardArchitecture = () => (
-  <>
-    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-primary/20 rounded-tl-sm pointer-events-none" />
-    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-primary/20 rounded-tr-sm pointer-events-none" />
-    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-primary/20 rounded-bl-sm pointer-events-none" />
-    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-primary/20 rounded-br-sm pointer-events-none" />
-  </>
-);
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -249,7 +241,6 @@ export default function TestimonialsPage() {
                   layout
                   className="group relative break-inside-avoid bg-card border border-border/60 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]"
                 >
-                  <CardArchitecture />
 
                   {/* Header: Avatar + Info */}
                   <div className="flex items-start justify-between mb-5">

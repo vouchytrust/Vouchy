@@ -56,10 +56,12 @@ function AppRoutes() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/collect/:slug" element={<CollectionPage />} />
+            <Route path="/c/:slug" element={<CollectionPage />} />
             <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
             <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
             <Route path="/view/:slug" element={<ViewTestimonialsPage />} />
             <Route path="/trust/:slug" element={<TrustPage />} />
+            <Route path="/t/:slug" element={<TrustPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

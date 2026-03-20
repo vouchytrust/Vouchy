@@ -42,7 +42,7 @@ export default function LandingPage() {
 
     const script = document.createElement('script');
     script.src = window.location.origin + "/embed.js";
-    script.setAttribute("data-widget-id", "f5618c3c-22a1-40d6-b9b4-114fc7abb53b");
+    script.setAttribute("data-widget-id", "c2fef0f4-0357-4a6b-b183-f774481deee6");
     script.async = true;
 
     container.appendChild(script);

@@ -5,7 +5,7 @@ import {
   Copy, Check, LayoutGrid, Rows3, GalleryHorizontalEnd,
   MessageCircle, Users, Layers3, Quote,
   FolderOpen, Play, ChevronDown, Columns2, ChevronLeft, ChevronRight, Circle,
-  Twitter, Facebook, Linkedin, Mail, Link2
+  Twitter, Facebook, Linkedin, Mail, Link2, AlignCenter, Type
 } from "lucide-react";
 import {
   Carousel,
@@ -47,11 +47,14 @@ interface Layout {
 const layouts: Layout[] = [
   { id: "clean", name: "Clean", icon: <LayoutGrid className="h-3.5 w-3.5" />, free: true },
   { id: "minimal", name: "Minimal", icon: <Rows3 className="h-3.5 w-3.5" />, free: true },
+  { id: "centered", name: "Centered", icon: <AlignCenter className="h-3.5 w-3.5" />, free: true },
+  { id: "modern", name: "Modern", icon: <Type className="h-3.5 w-3.5" />, free: false },
   { id: "editorial", name: "Editorial", icon: <Quote className="h-3.5 w-3.5" />, free: false },
   { id: "bubble", name: "Bubble", icon: <MessageCircle className="h-3.5 w-3.5" />, free: false },
   { id: "avatar-wall", name: "Avatar Wall", icon: <Users className="h-3.5 w-3.5" />, free: false },
   { id: "marquee", name: "Marquee", icon: <GalleryHorizontalEnd className="h-3.5 w-3.5" />, free: false },
   { id: "masonry", name: "Masonry", icon: <Layers3 className="h-3.5 w-3.5" />, free: false },
+  { id: "video", name: "Video", icon: <Play className="h-3.5 w-3.5" />, free: false },
 ];
 
 const devices = [
@@ -99,7 +102,11 @@ export default function WidgetLabPage() {
   const [navStyle, setNavStyle] = useState<"arrows" | "dots" | "none">("arrows");
   const [autoPlay, setAutoPlay] = useState(false);
   const [autoPlaySpeed, setAutoPlaySpeed] = useState("3000");
+  const [carouselLoop, setCarouselLoop] = useState(true);
+  const [carouselOrientation, setCarouselOrientation] = useState<"horizontal" | "vertical">("horizontal");
+  const [carouselAlign, setCarouselAlign] = useState<"start" | "center">("start");
   const [minRating, setMinRating] = useState(0);
+  const [mediaFilter, setMediaFilter] = useState("all");
   const [maxItems, setMaxItems] = useState([50]);
   const carouselApiRef = useRef<any>(null);
   const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -131,6 +138,13 @@ export default function WidgetLabPage() {
 
   const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
+
+  // Handle auto-selection for Video Layout
+  useEffect(() => {
+    if (selectedLayout === "video") {
+      setMediaFilter("video");
+    }
+  }, [selectedLayout]);
   const [editingTheme, setEditingTheme] = useState<"light" | "dark">("light");
 
   const [fontFamily, setFontFamily] = useState("system");
@@ -213,11 +227,17 @@ export default function WidgetLabPage() {
   // Derived: apply filter + cap
   const visibleTestimonials = testimonials
     .filter(t => t.rating >= minRating)
+    .filter(t => {
+      if (mediaFilter === "video") return t.type === "video";
+      if (mediaFilter === "text") return t.type === "text";
+      return true;
+    })
     .slice(0, maxItems[0]);
 
   // Using window.location.origin so embedded links work locally and in production
   const embedParams = new URLSearchParams({
     layout: selectedLayout,
+    mediaFilter: mediaFilter,
     minRating: String(minRating),
     max: String(maxItems[0]),
     darkMode: String(editingTheme === "dark"),
@@ -262,6 +282,7 @@ export default function WidgetLabPage() {
         name: `${selectedSpace?.name || "Space"} Widget`,
         config: {
           layout: selectedLayout,
+          mediaFilter,
           minRating,
           maxItems: maxItems[0],
           darkMode: editingTheme === "dark",
@@ -276,7 +297,10 @@ export default function WidgetLabPage() {
           carouselVisible: carouselVisible[0],
           navStyle,
           autoPlay,
-          autoPlaySpeed,
+          autoPlaySpeed: parseInt(autoPlaySpeed),
+          carouselLoop,
+          carouselOrientation,
+          carouselAlign,
           light: lightColors,
           dark: darkColors,
           ...activeColors
@@ -306,19 +330,60 @@ export default function WidgetLabPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const shareUrl = `${window.location.origin}/trust/${selectedSpace?.slug || ""}`;
+  const shareUrl = `${window.location.origin}/trust/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
   const [shareCopied, setShareCopied] = useState(false);
 
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setShareCopied(true);
-    toast({ title: "Trust page link copied!" });
-    setTimeout(() => setShareCopied(false), 2000);
+  const copyShareLink = async () => {
+    if (!user || !selectedSpaceId) return;
+    setSaving(true);
+    try {
+      await upsertWidget({
+        space_id: selectedSpaceId,
+        user_id: user.id,
+        name: `${selectedSpace?.name || "Space"} Widget`,
+        config: {
+          layout: selectedLayout,
+          mediaFilter,
+          minRating,
+          maxItems: maxItems[0],
+          darkMode: editingTheme === "dark",
+          radius: cardRadius[0],
+          padding: cardPadding[0],
+          font: fontFamily,
+          showStars,
+          showAvatar,
+          showCompany,
+          shadow: cardShadow,
+          displayMode,
+          carouselVisible: carouselVisible[0],
+          navStyle,
+          autoPlay,
+          autoPlaySpeed: parseInt(autoPlaySpeed),
+          carouselLoop,
+          carouselOrientation,
+          carouselAlign,
+          light: lightColors,
+          dark: darkColors,
+          ...activeColors
+        }
+      });
+      const shortUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}`;
+      await navigator.clipboard.writeText(shortUrl);
+      setShareCopied(true);
+      toast({ title: "Design saved & short link copied!" });
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Failed to save design", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const shareSocial = (platform: string) => {
+    const shortUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}`;
     const text = encodeURIComponent(`Check out what people say about ${selectedSpace?.name || "us"}!`);
-    const url = encodeURIComponent(shareUrl);
+    const url = encodeURIComponent(shortUrl);
     let shareHref = "";
     
     if (platform === "twitter") shareHref = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
@@ -330,6 +395,9 @@ export default function WidgetLabPage() {
   };
 
   const currentLayout = layouts.find(l => l.id === selectedLayout);
+  
+  // Preview URL for live editing
+  const previewUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
 
   return (
     <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-7rem)]">
@@ -596,6 +664,29 @@ export default function WidgetLabPage() {
           <div className="space-y-3 pt-3 border-t border-border">
             <p className="text-2xs font-medium text-muted-foreground uppercase tracking-wider">Filter</p>
             <div>
+              <Label className="text-[11px] text-muted-foreground mb-2 block">Media format</Label>
+              <div className="flex items-center gap-1 p-1 bg-muted rounded-lg mb-4">
+                <button
+                  onClick={() => { setMediaFilter("all"); setIsExpanded(false); }}
+                  className={`flex-1 flex items-center justify-center py-1 rounded-md text-[10px] font-semibold transition-all ${mediaFilter === "all" ? "bg-background text-foreground shadow-sm border border-border/60" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Both
+                </button>
+                <button
+                  onClick={() => { setMediaFilter("video"); setIsExpanded(false); }}
+                  className={`flex-1 flex items-center justify-center py-1 rounded-md text-[10px] font-semibold transition-all ${mediaFilter === "video" ? "bg-background text-foreground shadow-sm border border-border/60" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Video Only
+                </button>
+                <button
+                  onClick={() => { setMediaFilter("text"); setIsExpanded(false); }}
+                  className={`flex-1 flex items-center justify-center py-1 rounded-md text-[10px] font-semibold transition-all ${mediaFilter === "text" ? "bg-background text-foreground shadow-sm border border-border/60" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Text Only
+                </button>
+              </div>
+            </div>
+            <div>
               <Label className="text-[11px] text-muted-foreground mb-2 block">Minimum star rating</Label>
               <div className="flex items-center gap-1">
                 {[0, 1, 2, 3, 4, 5].map(r => (
@@ -688,18 +779,25 @@ export default function WidgetLabPage() {
                 {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied!" : "Copy Embed Code"}
               </Button>
-              <Button onClick={copyViewUrl} variant="outline" className="w-full h-9 text-[13px] mt-2 gap-1.5">
-                <ExternalLink className="h-3.5 w-3.5" />
-                Copy Full View URL
+              <Button onClick={copyShareLink} variant="outline" className="w-full h-9 text-[13px] mt-2 gap-1.5 border-primary/20 hover:bg-primary/5 hover:text-primary transition-all">
+                {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                {shareCopied ? "Copied Link!" : "Copy Trust Page Link"}
               </Button>
-              <a 
-                href={viewUrl} 
-                target="_blank" 
-                rel="noreferrer"
-                className="w-full flex items-center justify-center h-9 text-[13px] mt-2 gap-1.5 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-center"
-              >
-                Open Full View Page
-              </a>
+              <div className="flex gap-2 mt-2">
+                <Button onClick={copyViewUrl} variant="ghost" className="flex-1 h-9 text-[12px] gap-1.5 opacity-70 hover:opacity-100">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View Widget URL
+                </Button>
+                <a 
+                  href={previewUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex-1 flex items-center justify-center h-9 text-[12px] gap-1.5 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-center opacity-70 hover:opacity-100"
+                >
+                  <Monitor className="h-3.5 w-3.5" />
+                  Open Trust Page
+                </a>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -876,27 +974,38 @@ export default function WidgetLabPage() {
                         <MarqueeRow testimonials={visibleTestimonials.slice(Math.ceil(visibleTestimonials.length / 2))} config={cardConfig} reverse />
                       </div>
                     ) : selectedLayout === "masonry" ? (
-                      <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
+                      <div className={`gap-4 ${
+                        device === 'mobile' ? 'columns-1' :
+                        device === 'tablet' ? 'columns-2' :
+                        'columns-1 md:columns-2 lg:columns-3'
+                      }`}>
                         {visibleTestimonials.map((t, i) => (
                           <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
                         ))}
                       </div>
-                    ) : displayMode === "carousel" ? (
+                    ) : (displayMode === "carousel" || device === "mobile") ? (
                       <div className="space-y-4">
                         <Carousel
-                          opts={{ align: "start", loop: true }}
+                          orientation={carouselOrientation}
+                          opts={{ 
+                            align: carouselAlign, 
+                            loop: carouselLoop
+                          }}
                           setApi={(api) => { carouselApiRef.current = api; }}
                           onMouseEnter={() => { isHoveringCarousel.current = true; }}
                           onMouseLeave={() => { isHoveringCarousel.current = false; }}
+                          className={`w-full ${carouselOrientation === "vertical" ? "h-[500px]" : ""}`}
                         >
                           <CarouselContent className="-ml-3">
                             {visibleTestimonials.map((t, i) => (
                               <CarouselItem
                                 key={i}
-                                className={`pl-3 ${carouselVisible[0] === 1 ? "basis-full" :
-                                  carouselVisible[0] === 2 ? "basis-1/2" :
-                                    carouselVisible[0] === 3 ? "basis-1/3" : "basis-1/4"
-                                  }`}
+                                className={`pl-3 ${
+                                  (device === "mobile" ? 1 : carouselVisible[0]) === 1 ? "basis-full" :
+                                  (device === "mobile" ? 1 : carouselVisible[0]) === 2 ? "basis-full sm:basis-1/2" :
+                                  (device === "mobile" ? 1 : carouselVisible[0]) === 3 ? "basis-full sm:basis-1/2 lg:basis-1/3" : 
+                                  "basis-full sm:basis-1/2 lg:basis-1/4"
+                                }`}
                               >
                                 <TestimonialCard t={t} config={cardConfig} index={i} />
                               </CarouselItem>
@@ -904,7 +1013,7 @@ export default function WidgetLabPage() {
                           </CarouselContent>
 
                           {navStyle === "arrows" && (
-                            <div className="flex items-center justify-center gap-3 mt-5">
+                            <div className="flex items-center justify-center gap-3 mt-8">
                               <CarouselPrevious
                                 className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm hover:brightness-110 active:scale-95 transition-all"
                                 style={{
@@ -942,7 +1051,11 @@ export default function WidgetLabPage() {
                       </div>
                     ) : (
                       <div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className={`grid gap-4 ${
+                          device === 'mobile' ? 'grid-cols-1' :
+                          device === 'tablet' ? 'grid-cols-2' :
+                          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                        }`}>
                           {(isExpanded ? visibleTestimonials : visibleTestimonials.slice(0, gridLimit[0])).map((t, i) => (
                             <TestimonialCard key={i} t={t} config={cardConfig} index={i} />
                           ))}
@@ -985,4 +1098,3 @@ export default function WidgetLabPage() {
     </div>
   );
 }
-
