@@ -32,6 +32,7 @@ interface SpaceData {
     company_name: string | null;
     brand_color: string | null;
     logo_url: string | null;
+    plan?: string | null;
   } | null;
 }
 
@@ -112,8 +113,8 @@ export default function TrustPage() {
         if (spaceErr || !spaceData) { setNotFound(true); return; }
 
         const { data: profileData } = await supabase
-          .from("profiles")
-          .select("company_name, brand_color, logo_url")
+          .from("profile_branding")
+          .select("company_name, brand_color, logo_url, plan")
           .eq("user_id", spaceData.user_id)
           .single();
 
@@ -447,7 +448,7 @@ export default function TrustPage() {
         )}
 
         {/* Vouchy Public Footer */}
-        <PublicFooter theme={effectiveTheme as "light" | "dark"} />
+        <PublicFooter theme={effectiveTheme as "light" | "dark"} plan={space.profiles?.plan || "free"} />
       </div>
     </div>
   );

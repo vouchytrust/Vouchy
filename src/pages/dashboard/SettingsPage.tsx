@@ -191,42 +191,49 @@ export default function SettingsPage() {
           {/* Plan & Billing */}
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Plan & Billing</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Current Plan */}
-              <Card className="border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Starter (Free) */}
+              <Card className={`relative overflow-hidden ${(!profile?.plan || profile?.plan?.toLowerCase() === 'free') ? 'border-primary shadow-sm bg-primary/5' : 'border-border'}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-[13px] font-semibold text-foreground capitalize">
-                      {profile?.plan ?? "Free"} Plan
-                    </span>
+                    <span className="text-[13px] font-semibold text-foreground">Starter</span>
+                    <span className="ml-auto text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-slate-100/50 px-2 py-0.5 rounded">Free</span>
                   </div>
-                  <ul className="space-y-1 text-[12px] text-muted-foreground">
-                    <li>• Up to 10 testimonials</li>
+                  <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
+                    <li>• 50 text reviews</li>
                     <li>• 1 collector space</li>
-                    <li>• Text testimonials only</li>
-                    <li>• No AI features</li>
+                    <li>• No video reviews</li>
+                    <li>• Vouchy branding included</li>
                   </ul>
+                  <div className="w-full h-8 flex items-center justify-center">
+                    {(!profile?.plan || profile?.plan?.toLowerCase() === 'free') ? (
+                      <span className="text-[10px] font-black text-primary uppercase tracking-widest italic">✓ Your Plan</span>
+                    ) : (
+                      <span className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest italic">Included</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Upgrade card */}
-              <Card className="border-primary/50 bg-primary/5 relative overflow-hidden">
+              {/* Pro ($12) */}
+              <Card className={`relative overflow-hidden ${profile?.plan?.toLowerCase() === 'pro' ? 'border-primary shadow-sm bg-primary/5' : 'border-border'}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Crown className="h-4 w-4 text-primary" />
                     <span className="text-[13px] font-semibold text-foreground">Pro Plan</span>
+                    <span className="ml-auto text-[10px] font-black text-primary/80 uppercase tracking-widest bg-primary/10 px-2 py-0.5 rounded">$12/mo</span>
                   </div>
                   <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
-                    <li>• Unlimited testimonials</li>
-                    <li>• Video + text collection</li>
-                    <li>• AI enhancement (200 credits/mo)</li>
+                    <li>• Unlimited text reviews</li>
+                    <li>• 500 video reviews limit</li>
                     <li>• 3 collector spaces</li>
+                    <li>• No Vouchy branding</li>
                   </ul>
                   <Button
                     size="sm"
                     className="w-full h-8 text-xs"
-                    disabled={upgrading || profile?.plan === "pro" || profile?.plan === "agency"}
+                    disabled={upgrading || profile?.plan?.toLowerCase() === "pro" || profile?.plan?.toLowerCase() === "agency"}
                     onClick={async () => {
                       setUpgrading(true);
                       try {
@@ -249,9 +256,57 @@ export default function SettingsPage() {
                       }
                     }}
                   >
-                    {profile?.plan === "pro" || profile?.plan === "agency"
-                      ? "✓ Current plan"
-                      : upgrading ? "Redirecting…" : "Upgrade to Pro"}
+                    {profile?.plan?.toLowerCase() === "pro"
+                      ? "✓ Active"
+                      : profile?.plan?.toLowerCase() === "agency" 
+                         ? "✓ Pro included" 
+                         : upgrading ? "Redirecting…" : "Upgrade"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Agency ($45) */}
+              <Card className={`relative overflow-hidden ${profile?.plan?.toLowerCase() === 'agency' ? 'border-primary shadow-sm bg-primary/5' : 'border-border'}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-[13px] font-semibold text-foreground">Agency Plan</span>
+                    <span className="ml-auto text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded">$45/mo</span>
+                  </div>
+                  <ul className="space-y-1 text-[12px] text-muted-foreground mb-4">
+                    <li>• Unlimited text reviews</li>
+                    <li>• 1000 video reviews limit</li>
+                    <li>• 15 collector spaces</li>
+                    <li>• Full White-Labeling</li>
+                  </ul>
+                  <Button
+                    size="sm"
+                    className="w-full h-8 text-xs border-primary/20"
+                    variant={profile?.plan?.toLowerCase() === "agency" ? "default" : "outline"}
+                    disabled={upgrading || profile?.plan?.toLowerCase() === "agency"}
+                    onClick={async () => {
+                      setUpgrading(true);
+                      try {
+                        const res = await supabase.functions.invoke("create-checkout", {
+                          body: {
+                            productId: "pdt_0NVVmba1bevOgK6sfV8Wx",
+                            customerEmail: user?.email,
+                            customerName: displayName || user?.email?.split("@")[0],
+                            returnUrl: `${window.location.origin}/dashboard/settings`,
+                          },
+                        });
+                        if (res.error) throw new Error(res.error.message);
+                        const { paymentLink } = res.data;
+                        if (paymentLink) window.location.href = paymentLink;
+                        else throw new Error("No payment link returned");
+                      } catch (err: any) {
+                        toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setUpgrading(false);
+                      }
+                    }}
+                  >
+                    {profile?.plan?.toLowerCase() === "agency" ? "✓ Active" : upgrading ? "Redirecting…" : "Start Agency"}
                   </Button>
                 </CardContent>
               </Card>

@@ -19,6 +19,13 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userIp, setUserIp] = useState<string>("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUser(data?.user));
+    fetch("https://api64.ipify.org?format=json").then(r => r.json()).then(d => setUserIp(d.ip)).catch(() => {});
+  }, []);
 
   const [script, setScript] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -90,6 +97,42 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
     if (!recorder.videoBlob || !form.name.trim()) return;
     setSubmitting(true); setSubmitError(null);
     try {
+      const isFounderIp = userIp === '196.189.29.192' || userIp === '::1' || userIp === '127.0.0.1' || !userIp;
+      
+      console.log("[SUBMIT-DEBUG] User IP:", userIp, "Auth User ID:", currentUser?.id, "Space Owner ID:", spaceUserId, "isFounderIp:", isFounderIp);
+
+      if (currentUser?.id === spaceUserId && !isFounderIp) {
+        throw new Error("Founders cannot submit reviews for their own space!");
+      }
+
+      if (userIp && !isFounderIp) {
+        const { count: ipCount } = await supabase
+          .from("testimonials")
+          .select("*", { count: "exact", head: true })
+          .eq("space_id", spaceId)
+          .eq("ip_address", userIp);
+          
+        if (ipCount !== null && ipCount >= 3) {
+          throw new Error("Maximum review limit reached for this connection (3 reviews max).");
+        }
+      }
+
+      const planLower = plan?.toLowerCase() || 'free';
+      if (planLower === 'free') {
+        throw new Error("Video testimonials are not available on the free tier.");
+      }
+      
+      const { count } = await supabase
+        .from("testimonials")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", spaceUserId)
+        .eq("type", "video");
+        
+      const maxVideos = planLower === 'agency' ? 1000 : 500;
+      if (count !== null && count >= maxVideos) {
+        throw new Error(`This account has reached the maximum storage limit of ${maxVideos} video reviews.`);
+      }
+
       let avatarUrl = null;
       if (avatarFile) {
         const ext = avatarFile.name.split('.').pop();
@@ -121,6 +164,8 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
         type: "video",
         video_url: publicUrl,
         video_duration: fmt(recorder.elapsed),
+        ip_address: userIp,
+        status: "pending",
       });
 
       if (dbError) throw dbError;
@@ -412,10 +457,12 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
               </div>
 
               {/* TRUST BADGE */}
-              <div className="mt-8 flex items-center justify-center gap-3 opacity-30">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Securely processed by Vouchy Studios</span>
-              </div>
+              {(!plan || plan.toLowerCase() === 'free') && (
+                <div className="mt-8 flex items-center justify-center gap-3 opacity-30">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Securely processed by Vouchy Studios</span>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

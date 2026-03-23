@@ -31,32 +31,37 @@ function MinimalField({ label, ...props }: any) {
 /** * UI COMPONENT: Responsive Method Card
  * Tactile and bold, scales to fit.
  */
-function MethodCard({ icon, label, description, onClick, accentColor }: any) {
+function MethodCard({ icon, label, description, onClick, accentColor, disabled }: any) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="group relative p-8 lg:p-10 rounded-[3rem] bg-white border border-slate-200 hover:border-slate-900 hover:shadow-2xl transition-all duration-700 flex flex-col items-center text-center overflow-hidden h-full justify-center"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`group relative p-8 lg:p-10 rounded-[3rem] bg-white border flex flex-col items-center text-center overflow-hidden h-full justify-center
+        ${disabled ? 'opacity-50 cursor-not-allowed border-slate-100 grayscale' : 'border-slate-200 hover:border-slate-900 hover:shadow-2xl transition-all duration-700'}
+      `}
     >
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
-        style={{ backgroundColor: accentColor }}
+        className={`absolute inset-0 opacity-0 ${disabled ? '' : 'group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none'}`}
+        style={{ backgroundColor: disabled ? 'transparent' : accentColor }}
       />
       <div 
-        className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 text-slate-400 group-hover:text-white transition-all duration-700 transform group-hover:rotate-6 shadow-sm"
-        style={{ '--hover-bg': accentColor } as any}
+        className={`w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 text-slate-400 shadow-sm ${disabled ? '' : 'group-hover:text-white transition-all duration-700 transform group-hover:rotate-6'}`}
       >
-        <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ backgroundColor: accentColor }} />
+        <div className={`absolute inset-0 rounded-2xl opacity-0 ${disabled ? '' : 'group-hover:opacity-100 transition-opacity duration-700'}`} style={{ backgroundColor: disabled ? 'transparent' : accentColor }} />
         <div className="relative z-10">{icon}</div>
       </div>
       <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tighter">{label}</h3>
       <p className="text-slate-600 text-xs font-bold leading-relaxed max-w-[200px]">{description}</p>
-      <div 
-        className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 text-[9px] font-black uppercase tracking-[0.3em]"
-        style={{ color: accentColor }}
-      >
-        Start Now →
-      </div>
+      
+      {!disabled && (
+        <div 
+          className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 text-[9px] font-black uppercase tracking-[0.3em]"
+          style={{ color: accentColor }}
+        >
+          Start Now →
+        </div>
+      )}
     </button>
   );
 }
@@ -66,7 +71,7 @@ export default function CollectionPage() {
   const [space, setSpace] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [mode, setMode] = useState<"choose" | "text" | "video" | "success">("choose");
+  const [mode, setMode] = useState<"choose" | "text" | "video" | "success" | "limit_reached">("choose");
   const [form, setForm] = useState({ name: "", email: "", company: "", title: "", content: "", rating: 5 });
   const [submitting, setSubmitting] = useState(false);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
@@ -76,7 +81,14 @@ export default function CollectionPage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const [videoLimitReached, setVideoLimitReached] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userIp, setUserIp] = useState<string>("");
+
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUser(data?.user));
+    fetch("https://api64.ipify.org?format=json").then(r => r.json()).then(d => setUserIp(d.ip)).catch(() => {});
+
     async function loadSpace() {
       try {
         const { data: spaceData, error: spaceErr } = await supabase
@@ -86,11 +98,42 @@ export default function CollectionPage() {
           .single();
         if (spaceErr || !spaceData) { setNotFound(true); return; }
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("profile_branding")
           .select("company_name, brand_color, logo_url, plan")
           .eq("user_id", spaceData.user_id)
           .single();
+          
+        let limitHit = false;
+        let vLimitHit = false;
+        const plan = profileData?.plan?.toLowerCase() || 'free';
+        
+        if (plan === 'free') {
+          const { count } = await supabase
+            .from("testimonials")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", spaceData.user_id)
+            .eq("type", "text");
+          if (count !== null && count >= 50) {
+            limitHit = true;
+          }
+        } else {
+          const { count } = await supabase
+            .from("testimonials")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", spaceData.user_id)
+            .eq("type", "video");
+            
+          const maxVideos = plan === 'agency' ? 1000 : 500;
+          if (count !== null && count >= maxVideos) {
+            vLimitHit = true;
+          }
+        }
+        
         setSpace({ ...spaceData, profiles: profileData });
+        if (limitHit) {
+          setMode("limit_reached");
+        }
+        setVideoLimitReached(vLimitHit);
       } catch { setNotFound(true); } finally { setLoading(false); }
     }
     if (slug) loadSpace();
@@ -115,6 +158,39 @@ export default function CollectionPage() {
     if (!agreed) return toast({ title: "Quick Check", description: "Confirm your feedback." });
     setSubmitting(true);
     try {
+      const isFounderIp = userIp === '196.189.29.192' || userIp === '::1' || userIp === '127.0.0.1' || !userIp;
+      
+      console.log("[SUBMIT-DEBUG-TEXT] User IP:", userIp, "Auth User ID:", currentUser?.id, "Space Owner:", space.user_id, "isFounderIp:", isFounderIp);
+
+      if (currentUser?.id === space.user_id && !isFounderIp) {
+        throw new Error("Founders cannot submit reviews for their own space. Use this page for your customers!");
+      }
+
+      if (userIp && !isFounderIp) {
+        const { count: ipCount } = await supabase
+          .from("testimonials")
+          .select("*", { count: "exact", head: true })
+          .eq("space_id", space.id)
+          .eq("ip_address", userIp);
+          
+        if (ipCount !== null && ipCount >= 3) {
+          throw new Error("Maximum review limit reached for this connection (3 reviews max).");
+        }
+      }
+
+      const planLower = space.profiles?.plan?.toLowerCase() || 'free';
+      if (planLower === 'free') {
+        const { count } = await supabase
+          .from("testimonials")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", space.user_id)
+          .eq("type", "text");
+          
+        if (count !== null && count >= 50) {
+          throw new Error("This space has reached the maximum of 50 text reviews for the free tier.");
+        }
+      }
+
       let avatarUrl = null;
       if (avatarFile) {
         const ext = avatarFile.name.split('.').pop();
@@ -128,6 +204,8 @@ export default function CollectionPage() {
         author_company: form.company, author_title: form.title,
         author_avatar_url: avatarUrl,
         content: form.content, rating: form.rating, type: "text",
+        status: "pending",
+        ip_address: userIp,
       });
       if (error) throw error;
       setMode("success");
@@ -210,7 +288,14 @@ export default function CollectionPage() {
               </div>
               <div className={`grid grid-cols-1 ${space.profiles?.plan !== 'free' ? 'md:grid-cols-2' : 'max-w-xs'} gap-3 lg:gap-4 w-full max-w-xl mx-auto items-stretch justify-center`}>
                 {space.profiles?.plan !== 'free' && (
-                  <MethodCard accentColor={accentColor} icon={<Video className="w-8 h-8 md:w-9 md:h-9" />} label="Video" description="Record a quick, authentic message." onClick={() => setMode("video")} />
+                  <MethodCard 
+                    accentColor={accentColor} 
+                    icon={<Video className="w-8 h-8 md:w-9 md:h-9" />} 
+                    label="Video" 
+                    description={videoLimitReached ? "Storage limit reached for this account." : "Record a quick, authentic message."} 
+                    onClick={() => setMode("video")} 
+                    disabled={videoLimitReached}
+                  />
                 )}
                 <MethodCard accentColor={accentColor} icon={<MessageSquareText className="w-8 h-8 md:w-9 md:h-9" />} label="Writing" description="Classic, clear, and curated story." onClick={() => setMode("text")} />
               </div>
@@ -367,10 +452,33 @@ export default function CollectionPage() {
             </motion.div>
           )}
 
+          {mode === "limit_reached" && (
+            <motion.div 
+              key="limit" 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              className="text-center space-y-8"
+            >
+              <div className="relative">
+                <div 
+                  className="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.5rem] flex items-center justify-center mx-auto text-slate-400 shadow-xl transition-all duration-500 bg-slate-100"
+                >
+                  <MessageSquareText className="w-8 h-8 lg:w-10 lg:h-10" strokeWidth={2.5} />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h2 className="text-5xl lg:text-7xl font-black tracking-tightest leading-none">Limit Reached.</h2>
+                <p className="text-slate-400 font-bold text-lg lg:text-xl">
+                  {workspaceName} has reached their maximum number of text reviews.
+                </p>
+              </div>
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </main>
       {/* Vouchy Public Footer */}
-      <PublicFooter theme="light" />
+      <PublicFooter theme="light" plan={space?.profiles?.plan || "free"} />
     </div>
   );
 }
