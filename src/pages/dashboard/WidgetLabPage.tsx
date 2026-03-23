@@ -85,6 +85,157 @@ function MarqueeRow({ testimonials, config, reverse }: { testimonials: Testimoni
   );
 }
 
+/* ── Trust Page Preview Component (inline, no router) ── */
+interface TrustPagePreviewProps {
+  spaceName: string;
+  logoUrl?: string;
+  pageAccent: string;
+  widgetAccent: string;
+  testimonials: TestimonialItem[];
+  cardConfig: CardConfig;
+  lightColors: { accentColor: string; cardBg: string; containerBg: string; nameColor: string; companyColor: string; bodyColor: string; starColor: string; navIconColor: string; navBgColor: string; primaryBtnColor: string };
+  darkColors: { accentColor: string; cardBg: string; containerBg: string; nameColor: string; companyColor: string; bodyColor: string; starColor: string; navIconColor: string; navBgColor: string; primaryBtnColor: string };
+  layout: string;
+  isDark: boolean;
+  minRating: number;
+  mediaFilter: string;
+  maxItems: number;
+}
+
+function TrustPageMarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
+  const items = [...testimonials, ...testimonials];
+  return (
+    <div style={{ overflow: 'hidden', width: '100%' }}>
+      <motion.div
+        className="flex"
+        style={{ gap: 8 }}
+        animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      >
+        {items.map((t, i) => (
+          <div key={i} style={{ flexShrink: 0, width: 200 }}>
+            <TestimonialCard t={t} config={{ ...config, layout: 'modern' }} index={0} />
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+function TrustPagePreview({ spaceName, logoUrl, pageAccent, widgetAccent, testimonials, cardConfig, lightColors, darkColors, layout, isDark, minRating, mediaFilter, maxItems }: TrustPagePreviewProps) {
+  // Apply exact same filters as TrustPage
+  const filtered = testimonials
+    .filter(t => t.rating >= minRating)
+    .filter(t => {
+      if (mediaFilter === "video") return t.type === "video";
+      if (mediaFilter === "text") return t.type === "text";
+      return true;
+    })
+    .slice(0, maxItems);
+
+  const total = testimonials.length;
+  const avg = total > 0 ? (testimonials.reduce((s, t) => s + t.rating, 0) / total).toFixed(1) : "5.0";
+  const fiveStarPct = total > 0 ? Math.round((testimonials.filter(t => t.rating === 5).length / total) * 100) : 100;
+  const bg = isDark ? '#000000' : '#f8fafc';
+  const textColor = isDark ? '#ffffff' : '#0f172a';
+  const subColor = isDark ? 'rgba(255,255,255,0.5)' : '#64748b';
+  const statBg = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.8)';
+  const statBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+
+  // Use the correct color palette based on theme (same as TrustPage cardConfig logic)
+  const themeColors = isDark ? darkColors : lightColors;
+  const previewCardConfig: CardConfig = {
+    ...cardConfig,
+    accent: widgetAccent,
+    darkMode: isDark,
+    cardBg: themeColors.cardBg,
+    nameColor: themeColors.nameColor,
+    companyColor: themeColors.companyColor,
+    bodyColor: themeColors.bodyColor,
+    starColor: themeColors.starColor,
+    layout: layout === 'marquee' ? 'modern' : cardConfig.layout,
+  };
+
+  return (
+    <div style={{ backgroundColor: bg, height: '100%', fontFamily: 'system-ui, sans-serif', overflow: 'auto', position: 'relative' }}>
+      {/* Ambient glow */}
+      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 400, height: 300, borderRadius: '50%', background: pageAccent, filter: 'blur(80px)', opacity: isDark ? 0.1 : 0.14, pointerEvents: 'none', zIndex: 0 }} />
+      {/* Top accent bar */}
+      <div style={{ height: 3, backgroundColor: pageAccent, width: '100%', position: 'relative', zIndex: 2 }} />
+      {/* Grid background pattern */}
+      <div style={{ position: 'absolute', top: 3, left: 0, right: 0, height: 320, zIndex: 0, opacity: 0.05,
+        backgroundImage: `linear-gradient(${isDark ? '#fff' : '#000'} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? '#fff' : '#000'} 1px, transparent 1px)`,
+        backgroundSize: '20px 20px',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent)',
+        maskImage: 'linear-gradient(to bottom, black 60%, transparent)' }} />
+
+      {/* ── Hero: prominent centrepiece ── */}
+      <div style={{ padding: '28px 24px 20px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        {/* Logo */}
+        {logoUrl && (
+          <div style={{ display: 'inline-flex', marginBottom: 12, padding: '6px', borderRadius: 14, border: `1px solid ${pageAccent}30`, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.5)', boxShadow: `0 6px 16px -8px ${pageAccent}50` }}>
+            <img src={logoUrl} alt={spaceName} style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+          </div>
+        )}
+        {!logoUrl && <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: subColor, marginBottom: 8 }}>{spaceName}</p>}
+        {/* Big headline */}
+        <div style={{ fontWeight: 900, lineHeight: 1.0, color: textColor, fontSize: 28, opacity: 0.6, marginBottom: 2 }}>What people say</div>
+        <div style={{ fontWeight: 900, color: pageAccent, lineHeight: 1.0, fontSize: 28, position: 'relative', display: 'inline-block', marginBottom: 14 }}>
+          about us
+          <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', height: 2, borderRadius: 2, backgroundColor: pageAccent, opacity: 0.4 }} />
+        </div>
+        {/* Subtitle */}
+        <p style={{ fontSize: 10, color: subColor, marginBottom: 16, lineHeight: 1.5 }}>Real stories from real customers. Every review is authentic and independently verified.</p>
+        {/* Stats row */}
+        {total > 0 && (
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+            {[{ label: 'Total Reviews', value: String(total) }, { label: 'Average Rating', value: avg + ' ★' }, { label: '5-Star Happy', value: fiveStarPct + '%' }].map(s => (
+              <div key={s.label} style={{ flex: 1, maxWidth: 90, padding: '8px 6px', borderRadius: 10, background: statBg, border: `1px solid ${statBorder}` }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: textColor, marginBottom: 2 }}>{s.value}</div>
+                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: subColor }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {/* CTA buttons */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 6 }}>
+          <div style={{ padding: '7px 16px', borderRadius: 12, backgroundColor: pageAccent, color: 'white', fontWeight: 700, fontSize: 11, boxShadow: `0 6px 18px -6px ${pageAccent}70` }}>Share Page Link</div>
+          <div style={{ padding: '7px 16px', borderRadius: 12, border: `1px solid ${pageAccent}35`, fontWeight: 600, fontSize: 11, color: textColor }}>Leave a Review</div>
+        </div>
+      </div>
+
+      {/* ── Testimonials: scaled down grid ── */}
+      <div style={{ padding: '8px 12px 24px', position: 'relative', zIndex: 1 }}>
+        {/* Scale wrapper: shrink cards so they don't dominate the preview */}
+        <div style={{ transform: 'scale(0.72)', transformOrigin: 'top center', marginBottom: '-28%' }}>
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: subColor, fontSize: 12 }}>No testimonials match filters</div>
+          ) : layout === 'marquee' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <TrustPageMarqueeRow testimonials={filtered.slice(0, Math.ceil(filtered.length / 2))} config={previewCardConfig} />
+              <TrustPageMarqueeRow testimonials={filtered.slice(Math.ceil(filtered.length / 2))} config={previewCardConfig} reverse />
+            </div>
+          ) : layout === 'masonry' ? (
+            <div style={{ columns: 3, gap: 8, columnFill: 'balance' }}>
+              {filtered.map((t, i) => (
+                <div key={i} style={{ breakInside: 'avoid', marginBottom: 8 }}>
+                  <TestimonialCard t={t} config={previewCardConfig} index={i} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {filtered.map((t, i) => (
+                <TestimonialCard key={i} t={t} config={t.type === 'video' ? { ...previewCardConfig, layout: 'video' } : previewCardConfig} index={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main ── */
 export default function WidgetLabPage() {
   const { user } = useAuth();
@@ -96,6 +247,12 @@ export default function WidgetLabPage() {
   const [embedType, setEmbedType] = useState<"script" | "iframe">("script");
   const [mobileTab, setMobileTab] = useState<"editor" | "live">("editor");
   const [displayMode, setDisplayMode] = useState<"grid" | "carousel">("grid");
+  const [previewMode, setPreviewMode] = useState<"embed" | "trust">(() => {
+    return (localStorage.getItem("vouchy_preview_mode") as "embed" | "trust") || "embed";
+  });
+  useEffect(() => {
+    localStorage.setItem("vouchy_preview_mode", previewMode);
+  }, [previewMode]);
   const [gridLimit, setGridLimit] = useState([6]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [carouselVisible, setCarouselVisible] = useState([3]);
@@ -135,6 +292,9 @@ export default function WidgetLabPage() {
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [loadingSpaces, setLoadingSpaces] = useState(true);
   const [loadingTestimonials, setLoadingTestimonials] = useState(false);
+  const [workspaceBrandColor, setWorkspaceBrandColor] = useState("#3b82f6");
+  const [workspaceCompanyName, setWorkspaceCompanyName] = useState("");
+  const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState("");
 
   const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
@@ -175,9 +335,21 @@ export default function WidgetLabPage() {
     async function load() {
       try {
         const data = await fetchSpaces();
-        const s = (data as any[]).map(d => ({ id: d.id, name: d.name, slug: d.slug }));
+        const s = (data as any[]).map(d => ({ id: d.id, name: d.name, slug: d.slug, user_id: d.user_id }));
         setSpaces(s);
-        if (s.length > 0) setSelectedSpaceId(s[0].id);
+        if (s.length > 0) {
+          setSelectedSpaceId(s[0].id);
+          // Fetch workspace brand color from profiles
+          if (s[0].user_id) {
+            const { data: profile } = await (await import("@/integrations/supabase/client")).supabase
+              .from("profiles").select("brand_color, company_name, logo_url").eq("user_id", s[0].user_id).single();
+            if (profile) {
+              setWorkspaceBrandColor(profile.brand_color || "#3b82f6");
+              setWorkspaceCompanyName(profile.company_name || "");
+              setWorkspaceLogoUrl(profile.logo_url || "");
+            }
+          }
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -367,10 +539,11 @@ export default function WidgetLabPage() {
           ...activeColors
         }
       });
-      const shortUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}`;
-      await navigator.clipboard.writeText(shortUrl);
+      // Copy the full URL with all widget params so TrustPage renders the correct design
+      const fullShareUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
+      await navigator.clipboard.writeText(fullShareUrl);
       setShareCopied(true);
-      toast({ title: "Design saved & short link copied!" });
+      toast({ title: "Design saved & link copied!" });
       setTimeout(() => setShareCopied(false), 2000);
     } catch (err) {
       console.error(err);
@@ -824,8 +997,8 @@ export default function WidgetLabPage() {
         {/* DESKTOP: full toolbar + browser preview */}
         <div className="hidden lg:flex flex-col flex-1 min-h-0">
           {/* Toolbar */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border relative">
+            <div className="flex items-center gap-3 w-1/3">
               {/* Device switcher */}
               <div className="flex items-center gap-0.5 rounded-lg bg-muted/60 p-0.5">
                 {devices.map(d => (
@@ -833,8 +1006,8 @@ export default function WidgetLabPage() {
                     key={d.id}
                     onClick={() => setDevice(d.id)}
                     className={`p-1.5 rounded-md transition-all duration-150 ${device === d.id
-                      ? "bg-background text-foreground vouchy-shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-background text-foreground vouchy-shadow-xs border border-border/40"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       }`}
                   >
                     <d.icon className="h-3.5 w-3.5" />
@@ -853,7 +1026,25 @@ export default function WidgetLabPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            {/* Centered Preview Mode Switcher */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center p-0.5 bg-background/80 backdrop-blur-md rounded-[10px] border border-border/60 shadow-md z-[60] pointer-events-auto">
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewMode("embed"); }}
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 ${previewMode === "embed" ? "bg-background text-foreground shadow border border-border/50" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Code className="h-3.5 w-3.5" /> Embed to Website
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewMode("trust"); }}
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 flex items-center gap-1.5 ${previewMode === "trust" ? "bg-background text-foreground shadow border border-border/50" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Link2 className="h-3.5 w-3.5" /> Trust Page
+              </button>
+            </div>
+
+            <div className="flex items-center justify-end gap-1.5 w-1/3">
               {/* Share Page Button & Popover */}
               <Popover>
                 <PopoverTrigger asChild>
@@ -936,9 +1127,11 @@ export default function WidgetLabPage() {
                   <div className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--vouchy-warning))]/20" />
                   <div className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--vouchy-success))]/20" />
                 </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="px-6 py-1 rounded-lg bg-muted/60 border border-border text-2xs text-muted-foreground font-mono">
-                    yourwebsite.com
+                <div className="flex-1 flex justify-center overflow-hidden">
+                  <div className="px-6 py-1 rounded-lg bg-muted/60 border border-border text-2xs text-muted-foreground font-mono max-w-full truncate">
+                    {previewMode === "trust" && selectedSpace?.slug
+                      ? `${window.location.hostname}/t/${selectedSpace.slug}?layout=${selectedLayout}&darkMode=${editingTheme === "dark"}&accent=...`
+                      : "yourwebsite.com"}
                   </div>
                 </div>
               </div>
@@ -948,7 +1141,23 @@ export default function WidgetLabPage() {
                 className={`flex-1 overflow-y-auto transition-colors duration-300`}
                 style={{ backgroundColor: activeColors.containerBg === 'transparent' ? (editingTheme === "dark" ? "hsl(240 10% 4%)" : "white") : activeColors.containerBg }}
               >
-                {loadingTestimonials ? (
+                {previewMode === "trust" ? (
+                  <TrustPagePreview
+                    spaceName={workspaceCompanyName || selectedSpace?.name || "Your Brand"}
+                    logoUrl={workspaceLogoUrl}
+                    pageAccent={workspaceBrandColor}
+                    widgetAccent={activeColors.accentColor}
+                    testimonials={visibleTestimonials}
+                    cardConfig={cardConfig}
+                    lightColors={lightColors}
+                    darkColors={darkColors}
+                    layout={selectedLayout}
+                    isDark={editingTheme === "dark"}
+                    minRating={minRating}
+                    mediaFilter={mediaFilter}
+                    maxItems={maxItems[0]}
+                  />
+                ) : loadingTestimonials ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>

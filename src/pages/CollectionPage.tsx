@@ -8,6 +8,7 @@ import { VouchyLogo } from "@/components/VouchyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadToR2 } from "@/lib/storage";
+import { PublicFooter } from "@/components/shared/PublicFooter";
 
 /** * UI COMPONENT: Precision Field
  * High-impact but vertically compact.
@@ -368,17 +369,8 @@ export default function CollectionPage() {
 
         </AnimatePresence>
       </main>
-
-      <footer className="w-full flex flex-col items-center gap-4 py-8 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400/60 pb-0.5">Powered by</span>
-          <VouchyLogo variant="minimal" />
-        </div>
-        <div className="flex gap-6 opacity-40">
-          <Link to="/privacy" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">Privacy</Link>
-          <Link to="/terms" className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">Terms</Link>
-        </div>
-      </footer>
+      {/* Vouchy Public Footer */}
+      <PublicFooter theme="light" />
     </div>
   );
 }

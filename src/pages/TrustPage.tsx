@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/contexts/ThemeContext";
 import { VouchyLogo } from "@/components/VouchyLogo";
 import { TestimonialCard, TestimonialItem, CardConfig } from "@/components/TestimonialCard";
+import { PublicFooter } from "@/components/shared/PublicFooter";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -85,14 +86,14 @@ export default function TrustPage() {
   const [page, setPage] = useState(0);
   const [copied, setCopied] = useState(false);
   const { theme, setTheme } = useTheme();
+  const [userTheme, setUserTheme] = useState<"light" | "dark" | null>(null);
   
   // Widget Customization Support
   const [widgetConfig, setWidgetConfig] = useState<any>(null);
   const PER_PAGE = 12;
 
   const handleCopyLink = () => {
-    // Return shortest link (current URL)
-    navigator.clipboard.writeText(window.location.origin + "/trust/" + slug).then(() => {
+    navigator.clipboard.writeText(window.location.origin + "/t/" + slug).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     });
@@ -102,7 +103,6 @@ export default function TrustPage() {
     async function load() {
       if (!slug) return;
       try {
-        // 1. Fetch Space
         const { data: spaceData, error: spaceErr } = await supabase
           .from("spaces")
           .select("id, name, slug, form_config, user_id")
@@ -111,7 +111,6 @@ export default function TrustPage() {
 
         if (spaceErr || !spaceData) { setNotFound(true); return; }
 
-        // 2. Fetch Profile for defaults
         const { data: profileData } = await supabase
           .from("profiles")
           .select("company_name, brand_color, logo_url")
@@ -120,7 +119,6 @@ export default function TrustPage() {
 
         setSpace({ ...spaceData, profiles: profileData });
 
-        // 3. Fetch approved testimonials
         const { data: testimonialsData } = await supabase
           .from("testimonials")
           .select("id, author_name, author_company, author_title, author_avatar_url, content, rating, type, video_url")
@@ -130,7 +128,6 @@ export default function TrustPage() {
 
         setTestimonials((testimonialsData as Testimonial[]) || []);
 
-        // 4. Fetch most recent Widget config for custom designs
         const { data: widgets } = await supabase
           .from("widgets")
           .select("*")
@@ -173,17 +170,22 @@ export default function TrustPage() {
     );
   }
 
-  const profileAccent = space.profiles?.brand_color || "#3b82f6";
+  // Workspace-level brand color (the "Theme")
+  const pageAccent = space.profiles?.brand_color || "#3b82f6";
   const companyName = space.profiles?.company_name || space.name;
   const logoUrl = space.profiles?.logo_url;
   
-  // Custom design from searchParams (priority) or Widget Lab or profile defaults
+  // Widget Customization (the "Cards")
   const layout = searchParams.get("layout") || widgetConfig?.layout || "modern";
-  const accent = decodeURIComponent(searchParams.get("accent") || widgetConfig?.accentColor || profileAccent);
+  
+  const widgetAccent = searchParams.get("accent") 
+    ? decodeURIComponent(searchParams.get("accent")!) 
+    : (widgetConfig?.accentColor || pageAccent);
   
   const isDarkLink = searchParams.get("darkMode") === "true";
   const isWidgetDark = widgetConfig?.darkMode;
-  const effectiveTheme = searchParams.has("darkMode") ? (isDarkLink ? "dark" : "light") : (widgetConfig ? (isWidgetDark ? "dark" : "light") : theme);
+  const initialTheme = searchParams.has("darkMode") ? (isDarkLink ? "dark" : "light") : (widgetConfig ? (isWidgetDark ? "dark" : "light") : theme);
+  const effectiveTheme = userTheme || initialTheme;
 
   const total = testimonials.length;
   const filtered = testimonials.filter(t => {
@@ -199,14 +201,25 @@ export default function TrustPage() {
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   
   const avg = total > 0 ? (testimonials.reduce((s, t) => s + t.rating, 0) / total).toFixed(1) : "5.0";
-  const fiveStars = testimonials.filter(t => t.rating === 5).length;
-  const fiveStarPct = total > 0 ? Math.round((fiveStars / total) * 100) : 100;
+  const fiveStarPct = total > 0 ? Math.round((testimonials.filter(t => t.rating === 5).length / total) * 100) : 100;
+  // If the user manually overrides the theme via toggle, we discard the URL-provided static colors 
+  // and load the corresponding full palette from the database config to prevent white cards on dark backgrounds.
+  const usingInitialUrlTheme = !userTheme || userTheme === initialTheme;
+  const urlColor = (param: string) => searchParams.get(param) ? decodeURIComponent(searchParams.get(param)!) : null;
+  const dbColor = (param: string) => effectiveTheme === "dark" 
+    ? (widgetConfig?.dark?.[param] || widgetConfig?.[param])
+    : (widgetConfig?.light?.[param] || widgetConfig?.[param]);
+    
+  const getColor = (param: string, fallbackLight: string, fallbackDark: string) => {
+    if (usingInitialUrlTheme && urlColor(param)) return urlColor(param)!;
+    return dbColor(param) || (effectiveTheme === "dark" ? fallbackDark : fallbackLight);
+  };
 
   // Map everything to CardConfig
   const cardConfig: CardConfig = {
     layout: layout === "marquee" ? "modern" : layout,
     darkMode: effectiveTheme === "dark",
-    accent: accent,
+    accent: widgetAccent,
     radius: parseInt(searchParams.get("radius") || String(widgetConfig?.radius || 16), 10),
     padding: parseInt(searchParams.get("padding") || String(widgetConfig?.padding || 24), 10),
     shadow: searchParams.get("shadow") || widgetConfig?.shadow || "md",
@@ -214,11 +227,11 @@ export default function TrustPage() {
     showStars: searchParams.get("showStars") !== "false" && widgetConfig?.showStars !== false,
     showAvatar: searchParams.get("showAvatar") !== "false" && widgetConfig?.showAvatar !== false,
     showCompany: searchParams.get("showCompany") !== "false" && widgetConfig?.showCompany !== false,
-    starColor: decodeURIComponent(searchParams.get("starColor") || widgetConfig?.starColor || "#f59e0b"),
-    cardBg: decodeURIComponent(searchParams.get("cardBg") || widgetConfig?.cardBg || (effectiveTheme === "dark" ? "hsl(var(--card))" : "#ffffff")),
-    nameColor: decodeURIComponent(searchParams.get("nameColor") || widgetConfig?.nameColor || (effectiveTheme === "dark" ? "#ffffff" : "#0f172a")),
-    bodyColor: decodeURIComponent(searchParams.get("bodyColor") || widgetConfig?.bodyColor || (effectiveTheme === "dark" ? "rgba(255,255,255,0.8)" : "#475569")),
-    companyColor: decodeURIComponent(searchParams.get("companyColor") || widgetConfig?.companyColor || (effectiveTheme === "dark" ? "rgba(255,255,255,0.5)" : "#64748b")),
+    starColor: getColor("starColor", "#f59e0b", "#f59e0b"),
+    cardBg: getColor("cardBg", "#ffffff", "hsl(var(--card))"),
+    nameColor: getColor("nameColor", "#0f172a", "#ffffff"),
+    bodyColor: getColor("bodyColor", "#475569", "rgba(255,255,255,0.8)"),
+    companyColor: getColor("companyColor", "#64748b", "rgba(255,255,255,0.5)"),
   };
 
   const mappedTestimonials: TestimonialItem[] = filtered.map(t => ({
@@ -233,24 +246,40 @@ export default function TrustPage() {
   }));
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${effectiveTheme === 'dark' ? 'bg-[#000000]' : 'bg-background'}`} data-theme={effectiveTheme}>
-      {/* TOP ACCENT BAR */}
+    <div className={`min-h-screen font-sans transition-colors duration-300 ${effectiveTheme === 'dark' ? 'bg-[#000000]' : 'bg-[#f8fafc]'}`} data-theme={effectiveTheme}>
+      {/* Page Hero uses Workspace Accent (pageAccent) */}
+      <div className="absolute top-0 left-0 w-full h-[600px] overflow-hidden pointer-events-none">
+        <div 
+          className="absolute left-1/2 -top-[200px] -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-[0.12] dark:opacity-[0.08]" 
+          style={{ backgroundColor: pageAccent }}
+        />
+        <div 
+          className="absolute left-1/4 top-[100px] w-[300px] h-[300px] rounded-full blur-[100px] opacity-[0.08] dark:opacity-[0.05]" 
+          style={{ backgroundColor: pageAccent }}
+        />
+      </div>
+
+      {/* TOP ACCENT BAR uses Page Accent */}
       <div 
         className="w-full h-1.5 shrink-0 relative z-[110] shadow-sm"
-        style={{ backgroundColor: accent }}
+        style={{ backgroundColor: pageAccent }}
       />
 
-      {/* THEME TOGGLE (Only if not in hardcoded link mode) */}
-      {!searchParams.has("darkMode") && !widgetConfig && (
-        <div className="absolute top-6 right-6 z-[100]">
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex w-10 h-10 rounded-2xl items-center justify-center bg-card/50 backdrop-blur-md border border-border/50 text-muted-foreground hover:text-primary transition-all duration-300 shadow-sm"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-        </div>
-      )}
+      {/* THEME TOGGLE */}
+      <div className="absolute top-6 right-6 z-[100]">
+        <button
+          onClick={() => setUserTheme(effectiveTheme === "dark" ? "light" : "dark")}
+          className="flex w-10 h-10 rounded-2xl items-center justify-center transition-all duration-300 shadow-sm"
+          style={{
+            backgroundColor: effectiveTheme === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.5)",
+            border: `1px solid ${pageAccent}30`,
+            color: effectiveTheme === "dark" ? "#ffffff" : "#0f172a",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          {effectiveTheme === "dark" ? <Sun className="h-[18px] w-[18px] opacity-80" /> : <Moon className="h-[18px] w-[18px] opacity-80" />}
+        </button>
+      </div>
 
       <div className="relative overflow-hidden pt-6">
         {/* Grid Background */}
@@ -270,49 +299,73 @@ export default function TrustPage() {
             className="flex flex-col items-center text-center"
           >
             {logoUrl && (
-              <div className={`mb-5 p-2 rounded-2xl border backdrop-blur-md shadow-sm ${effectiveTheme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white/40 border-slate-200/50'}`}>
-                <img src={logoUrl} alt={companyName} className="h-10 w-auto object-contain" />
+              <div 
+                className={`mb-6 p-2 rounded-2xl border backdrop-blur-md shadow-lg transition-all duration-500`}
+                style={{ 
+                  backgroundColor: effectiveTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.4)',
+                  borderColor: pageAccent + '30',
+                  boxShadow: `0 8px 20px -10px ${pageAccent}40`
+                }}
+              >
+                <img src={logoUrl} alt={companyName} className="h-12 w-auto object-contain rounded-lg" />
               </div>
             )}
 
-            <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] mb-6 max-w-4xl ${effectiveTheme === 'dark' ? 'text-white' : 'text-foreground'}`}>
-              {!logoUrl && <span className="block text-muted-foreground text-xs uppercase tracking-[0.2em] mb-3">{companyName}</span>}
+            <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] mb-6 max-w-4xl ${effectiveTheme === 'dark' ? 'text-white' : 'text-[#0f172a]'}`}>
+              {!logoUrl && <span className="block text-xs uppercase tracking-[0.2em] mb-3" style={{ color: effectiveTheme === 'dark' ? 'rgba(255,255,255,0.5)' : '#64748b' }}>{companyName}</span>}
               <span className="opacity-60">What people say</span>
               <br />
-              <span className="relative" style={{ color: accent }}>
+              <span className="relative" style={{ color: pageAccent }}>
                 about us
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 rounded-full opacity-60" style={{ backgroundColor: accent }} />
+                <span className="absolute -bottom-2 left-0 w-full h-1 rounded-full opacity-40" style={{ backgroundColor: pageAccent }} />
               </span>
             </h1>
 
-            <p className={`text-lg sm:text-xl font-medium max-w-xl leading-relaxed mb-10 ${effectiveTheme === 'dark' ? 'text-white/60' : 'text-muted-foreground'}`}>
+            <p className={`text-lg sm:text-xl font-medium max-w-xl leading-relaxed mb-10 ${effectiveTheme === 'dark' ? 'text-white/60' : 'text-[#475569]'}`}>
               Real stories from real customers. Every review is authentic and independently verified.
             </p>
 
-            {/* Statistics Row */}
+            {/* Statistics Row uses Page Accent */}
             {total > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12 w-full max-w-3xl">
-                <StatItem icon={Award} label="Total Reviews" value={total} accent={accent} darkMode={effectiveTheme === 'dark'} />
-                <StatItem icon={TrendingUp} label="Average Rating" value={avg + " ★"} accent={accent} darkMode={effectiveTheme === 'dark'} />
-                <StatItem icon={Users} label="5-Star Happy" value={fiveStarPct + "%"} accent={accent} darkMode={effectiveTheme === 'dark'} />
+                <StatItem icon={Award} label="Total Reviews" value={total} accent={pageAccent} darkMode={effectiveTheme === 'dark'} />
+                <StatItem icon={TrendingUp} label="Average Rating" value={avg + " ★"} accent={pageAccent} darkMode={effectiveTheme === 'dark'} />
+                <StatItem icon={Users} label="5-Star Happy" value={fiveStarPct + "%"} accent={pageAccent} darkMode={effectiveTheme === 'dark'} />
               </div>
             )}
 
             <div className="flex flex-wrap items-center justify-center gap-4">
               <button
                 onClick={handleCopyLink}
-                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-[1.02] shadow-lg shadow-primary/20"
-                style={{ backgroundColor: accent, color: "white" }}
+                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
+                style={{ 
+                  backgroundColor: pageAccent, 
+                  color: "white",
+                  boxShadow: `0 10px 40px -12px ${pageAccent}70`
+                }}
               >
                 {copied ? <CheckCheck className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
                 {copied ? "Copied!" : "Share Page Link"}
               </button>
 
               <a
-                href={`/collect/${space.slug}`}
+                href={`/c/${space.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className={`flex items-center gap-2 px-8 py-4 rounded-2xl border backdrop-blur-sm font-semibold text-base transition-all hover:scale-[1.02] ${effectiveTheme === 'dark' ? 'bg-card/50 border-white/10 text-white hover:bg-card' : 'bg-card/50 border-border text-foreground hover:bg-card'}`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-2xl border backdrop-blur-sm font-semibold text-base transition-all hover:scale-[1.02] active:scale-[0.98]`}
+                style={{
+                  borderColor: pageAccent + '30',
+                  backgroundColor: effectiveTheme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                  color: effectiveTheme === 'dark' ? '#ffffff' : '#000000'
+                }}
+                onMouseEnter={(e) => {
+                   e.currentTarget.style.borderColor = pageAccent;
+                   e.currentTarget.style.backgroundColor = pageAccent + '08';
+                }}
+                onMouseLeave={(e) => {
+                   e.currentTarget.style.borderColor = pageAccent + '30';
+                   e.currentTarget.style.backgroundColor = effectiveTheme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)';
+                }}
               >
                 <ExternalLink className="h-5 w-5 opacity-70" />
                 Leave a Testimonial
@@ -376,7 +429,7 @@ export default function TrustPage() {
                       key={i}
                       onClick={() => { setPage(i); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                       className={`h-2 rounded-full transition-all duration-300 ${i === page ? "w-6" : "w-2 bg-border"}`}
-                      style={i === page ? { backgroundColor: accent } : {}}
+                      style={i === page ? { backgroundColor: pageAccent } : {}}
                     />
                   ))}
                 </div>
@@ -393,16 +446,8 @@ export default function TrustPage() {
           </>
         )}
 
-        <div className="mt-32 flex flex-col items-center gap-6">
-          <div className="flex flex-col items-center gap-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground/30">Powered by</span>
-            <VouchyLogo variant="minimal" />
-          </div>
-          <div className={`flex gap-8 opacity-40 ${effectiveTheme === 'dark' ? 'text-white' : 'text-foreground'}`}>
-            <Link to="/privacy" className="text-[10px] font-bold uppercase tracking-widest hover:text-primary transition-colors">Privacy</Link>
-            <Link to="/terms" className="text-[10px] font-bold uppercase tracking-widest hover:text-primary transition-colors">Terms</Link>
-          </div>
-        </div>
+        {/* Vouchy Public Footer */}
+        <PublicFooter theme={effectiveTheme as "light" | "dark"} />
       </div>
     </div>
   );
