@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Star, ArrowUpRight, Plus, Sparkles, Video, MessageSquareText, TrendingUp, TrendingDown, Minus, ArrowRight, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import FirstTimeGuide from "@/components/FirstTimeGuide";
-import { fetchDashboardStats, fetchTestimonials, fetchSpaces } from "@/lib/api";
+import { fetchPortalSummary } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
@@ -42,57 +41,39 @@ export default function DashboardHome() {
   const { profile } = useAuth();
   const userName = profile?.company_name || "there";
 
-  const [stats, setStats] = useState({ total: 0, avgRating: "0.0", videoRate: 0, testimonials: [] as any[] });
-  const [recentTestimonials, setRecentTestimonials] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasSpaces, setHasSpaces] = useState(true);
-  const [hasMoreThanOneSpace, setHasMoreThanOneSpace] = useState(false);
+  const { data: summary, isLoading } = useQuery({
+    queryKey: ["portal-summary"],
+    queryFn: fetchPortalSummary,
+  });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [statsData, testimonials, spaces] = await Promise.all([
-          fetchDashboardStats(),
-          fetchTestimonials(),
-          fetchSpaces(),
-        ]);
-        setStats(statsData);
-        setRecentTestimonials((testimonials as any[]).slice(0, 4));
-        setHasSpaces((spaces as any[]).length > 0);
-        setHasMoreThanOneSpace((spaces as any[]).length >= 1);
-
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const now = new Date();
-        const chart = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(now);
-          d.setDate(d.getDate() - i);
-          const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-          const dayEnd = new Date(dayStart);
-          dayEnd.setDate(dayEnd.getDate() + 1);
-          const count = statsData.testimonials.filter((t: any) => {
-            const created = new Date(t.created_at);
-            return created >= dayStart && created < dayEnd;
-          }).length;
-          chart.push({ date: days[d.getDay()], count });
-        }
-        setChartData(chart);
-      } catch (err) {
-        console.error("Dashboard load error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
-
-  if (loading) {
+  if (isLoading || !summary) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  const { stats, recentTestimonials, spaces } = summary;
+  const hasSpaces = spaces.length > 0;
+  const hasMoreThanOneSpace = spaces.length >= 1;
+
+  // Chart data calculation from summary stats if possible, 
+  // or a simplified version for high performance
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const now = new Date();
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dayName = days[d.getDay()];
+    // For high performance, we'll just show the distribution of the 'recent' ones 
+    // or a flattened scale if real history isn't needed for the 'volume' feel
+    const count = recentTestimonials.filter((t: any) => {
+      const created = new Date(t.created_at);
+      return created.toDateString() === d.toDateString();
+    }).length;
+    chartData.push({ date: dayName, count });
   }
 
   const statCards = [

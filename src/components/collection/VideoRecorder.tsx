@@ -108,7 +108,7 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
       if (userIp && !isFounderIp) {
         const { count: ipCount } = await supabase
           .from("testimonials")
-          .select("*", { count: "exact", head: true })
+          .select("id", { count: "exact", head: true })
           .eq("space_id", spaceId)
           .eq("ip_address", userIp);
           
@@ -124,7 +124,7 @@ export default function VideoRecorder({ spaceId, spaceUserId, accentColor, works
       
       const { count } = await supabase
         .from("testimonials")
-        .select("*", { count: "exact", head: true })
+        .select("id", { count: "exact", head: true })
         .eq("user_id", spaceUserId)
         .eq("type", "video");
         

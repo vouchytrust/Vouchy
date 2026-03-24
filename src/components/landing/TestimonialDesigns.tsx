@@ -71,7 +71,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
       return (
         <div className="p-6 bg-card/40 border border-border/50 rounded-2xl h-full flex flex-col group/card transition-colors">
           <div className="flex items-center gap-3 mb-4">
-            <img src={data.avatar} className="h-10 w-10 rounded-full object-cover border border-border" alt={data.name} />
+            <img src={data.avatar} className="h-10 w-10 rounded-full object-cover border border-border" alt={data.name} loading="lazy" />
             <div>
               <p className="text-xs font-bold text-foreground leading-none mb-1">{data.name}</p>
               <p className="text-[10px] text-muted-foreground">{data.role}</p>
@@ -87,7 +87,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
       return (
         <div className="p-6 bg-card/40 border-b border-border/50 h-full flex flex-col rounded-b-none">
           <div className="flex items-start gap-4">
-            <img src={data.avatar} className="h-10 w-10 rounded-full object-cover border border-border" alt={data.name} />
+            <img src={data.avatar} className="h-10 w-10 rounded-full object-cover border border-border" alt={data.name} loading="lazy" />
             <div className="flex-1">
               <p className="text-xs font-bold text-foreground mb-1">{data.name}</p>
               <Stars />
@@ -105,7 +105,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
             "Vouchy's automation handles everything while I focus on building."
           </p>
           <div className="mt-auto flex items-center gap-3 pt-4 border-t border-border/10">
-            <img src={data.avatar} className="h-8 w-8 rounded-full border border-border" alt={data.name} />
+            <img src={data.avatar} className="h-8 w-8 rounded-full border border-border" alt={data.name} loading="lazy" />
             <p className="text-[10px] font-bold text-foreground/60">{data.name}</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
           </div>
           <p className="text-xs font-medium text-foreground/80 leading-relaxed mb-4">"{data.content}"</p>
           <div className="mt-auto pt-4 border-t border-border/10 flex items-center gap-3">
-            <img src={data.avatar} className="h-8 w-8 rounded-full border border-border" alt={data.name} />
+            <img src={data.avatar} className="h-8 w-8 rounded-full border border-border" alt={data.name} loading="lazy" />
             <div>
               <p className="text-[10px] font-bold text-foreground leading-none">{data.name}</p>
               <p className="text-[8px] text-muted-foreground mt-0.5">{data.role}</p>
@@ -131,7 +131,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
     case 'avatar-wall':
       return (
         <div className="p-4 sm:p-6 bg-card/40 border border-border/50 rounded-2xl h-full flex flex-col items-center text-center overflow-y-auto scrollbar-hide">
-          <img src={data.avatar} className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-4 border-background shadow-lg mb-3 sm:mb-4 shrink-0" alt={data.name} />
+          <img src={data.avatar} className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-4 border-background shadow-lg mb-3 sm:mb-4 shrink-0" alt={data.name} loading="lazy" />
           <p className="text-[11px] sm:text-xs font-bold text-foreground mb-0.5 sm:mb-1">{data.name}</p>
           <p className="text-[9px] sm:text-[10px] text-muted-foreground mb-3 sm:mb-4">{data.role}</p>
           <div className="shrink-0"><Stars /></div>
@@ -142,7 +142,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
       return (
         <div className="p-5 bg-card/40 border border-border/50 rounded-xl h-full flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <img src={data.avatar} className="h-8 w-8 rounded-full" alt={data.name} />
+            <img src={data.avatar} className="h-8 w-8 rounded-full" alt={data.name} loading="lazy" />
             <div>
               <p className="text-[10px] font-bold text-foreground">{data.name}</p>
               <Stars />
@@ -157,7 +157,7 @@ const BlueprintCard = ({ layoutId }: { layoutId: string }) => {
     case 'marquee':
       return (
         <div className="p-4 bg-card/40 border border-border/50 rounded-2xl h-full flex items-center gap-4 overflow-hidden">
-          <img src={data.avatar} className="h-12 w-12 rounded-full flex-shrink-0" alt={data.name} />
+          <img src={data.avatar} className="h-12 w-12 rounded-full flex-shrink-0" alt={data.name} loading="lazy" />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-foreground truncate">{data.name}</p>
             <p className="text-[10px] text-foreground/60 truncate">"{data.content}"</p>

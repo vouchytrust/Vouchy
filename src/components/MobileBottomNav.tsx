@@ -32,30 +32,13 @@ export function MobileBottomNav() {
               to={item.url}
               className="relative flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-colors duration-150"
             >
-              {/* Active pill background */}
-              {active && (
-                <motion.div
-                  layoutId="mobile-nav-active"
-                  className="absolute inset-0 bg-primary/[0.08] rounded-xl"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-
               {/* Icon */}
-              <div className="relative">
+              <div className="relative z-10">
                 <item.icon
-                  className={`h-[18px] w-[18px] transition-colors duration-150 ${active ? "text-primary" : "text-muted-foreground"
+                  className={`h-[18px] w-[18px] transition-all duration-300 ${active ? "text-primary hover:scale-110" : "text-muted-foreground"
                     }`}
-                  strokeWidth={active ? 2.3 : 1.7}
+                  strokeWidth={active ? 2.5 : 1.7}
                 />
-                {/* Active dot */}
-                {active && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary"
-                  />
-                )}
               </div>
 
               {/* Label */}

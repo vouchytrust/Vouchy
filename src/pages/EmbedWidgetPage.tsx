@@ -90,8 +90,42 @@ export default function EmbedWidgetPage() {
     containerBg: decodeURIComponent(searchParams.get("containerBg") || "transparent"),
   };
 
-  const isDark = activeThemeOverride !== null ? activeThemeOverride === "dark" : (baseSettings.darkMode || false);
-  const activeColorTheme = isDark ? (baseSettings.dark || baseSettings) : (baseSettings.light || baseSettings);
+  // Priority: 1. activeThemeOverride (from postMessage) 2. searchParams theme 3. baseSettings darkMode
+  const isDarkOverride = activeThemeOverride !== null ? activeThemeOverride === "dark" : (searchParams.get("theme") === "dark" ? true : (searchParams.get("theme") === "light" ? false : null));
+  const isDark = isDarkOverride !== null ? isDarkOverride : baseSettings.darkMode;
+  
+  // High-priority dark mode theme calculation
+  const getActiveConfig = () => {
+    // If we have explicit sub-configs, use them
+    if (isDark && baseSettings.dark) return { ...baseSettings, ...baseSettings.dark };
+    if (!isDark && baseSettings.light) return { ...baseSettings, ...baseSettings.light };
+    
+    // Auto-adaptation if sub-configs are missing
+    if (isDark) {
+      return {
+        ...baseSettings,
+        cardBg: (baseSettings.cardBg && (baseSettings.cardBg.toLowerCase() === '#ffffff' || baseSettings.cardBg.toLowerCase() === '#fff' || baseSettings.cardBg === 'transparent')) ? '#1c1c1e' : baseSettings.cardBg,
+        containerBg: (baseSettings.containerBg && (baseSettings.containerBg.toLowerCase() === '#ffffff' || baseSettings.containerBg.toLowerCase() === '#fff')) ? 'transparent' : baseSettings.containerBg,
+        nameColor: (baseSettings.nameColor && baseSettings.nameColor.toLowerCase() === '#1a1a1a') ? '#FFFFFF' : baseSettings.nameColor,
+        companyColor: (baseSettings.companyColor && baseSettings.companyColor.toLowerCase() === '#888888') ? '#9CA3AF' : baseSettings.companyColor,
+        bodyColor: (baseSettings.bodyColor && baseSettings.bodyColor.toLowerCase() === '#666666') ? '#D1D5DB' : baseSettings.bodyColor,
+        darkMode: true
+      };
+    } else {
+      // Light mode forced adaptation (if it was otherwise dark)
+      return {
+        ...baseSettings,
+        cardBg: (baseSettings.cardBg && (baseSettings.cardBg.toLowerCase() === '#1c1c1e' || baseSettings.cardBg.toLowerCase() === '#1a1a1b')) ? '#ffffff' : baseSettings.cardBg,
+        containerBg: 'transparent',
+        nameColor: (baseSettings.nameColor && (baseSettings.nameColor.toLowerCase() === '#ffffff' || baseSettings.nameColor.toLowerCase() === '#f5f5f7')) ? '#1a1a1a' : baseSettings.nameColor,
+        companyColor: (baseSettings.companyColor && baseSettings.companyColor.toLowerCase() === '#9ca3af') ? '#888888' : baseSettings.companyColor,
+        bodyColor: (baseSettings.bodyColor && baseSettings.bodyColor.toLowerCase() === '#d1d5db') ? '#666666' : baseSettings.bodyColor,
+        darkMode: false
+      }
+    }
+  };
+
+  const activeColorTheme = getActiveConfig();
 
   const config: CardConfig = {
     layout: baseSettings.layout,
@@ -100,17 +134,17 @@ export default function EmbedWidgetPage() {
     padding: baseSettings.padding,
     font: baseSettings.font,
     accent: activeColorTheme.accentColor || activeColorTheme.accent || baseSettings.accent,
-    cardBg: activeColorTheme.cardBg || baseSettings.cardBg,
-    nameColor: activeColorTheme.nameColor || baseSettings.nameColor,
-    companyColor: activeColorTheme.companyColor || baseSettings.companyColor,
-    bodyColor: activeColorTheme.bodyColor || baseSettings.bodyColor,
-    starColor: activeColorTheme.starColor || baseSettings.starColor,
+    cardBg: activeColorTheme.cardBg || "#ffffff",
+    nameColor: activeColorTheme.nameColor || "#1a1a1a",
+    companyColor: activeColorTheme.companyColor || "#888888",
+    bodyColor: activeColorTheme.bodyColor || "#666666",
+    starColor: activeColorTheme.starColor || "#f59e0b",
     showStars: baseSettings.showStars,
     showAvatar: baseSettings.showAvatar,
     showCompany: baseSettings.showCompany,
     shadow: baseSettings.shadow,
     primaryBtnColor: activeColorTheme.primaryBtnColor || baseSettings.primaryBtnColor,
-    containerBg: activeColorTheme.containerBg || baseSettings.containerBg,
+    containerBg: activeColorTheme.containerBg || "transparent",
   };
 
   // useLayoutEffect fires BEFORE the browser paints — reliable transparent background
@@ -166,42 +200,37 @@ export default function EmbedWidgetPage() {
         let currentMax = layoutSettings.maxItems;
 
         const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slug);
+        let rawTestimonials: any[] = [];
+        let finalMax = layoutSettings.maxItems;
+        let finalMinRating = layoutSettings.minRating;
+        let finalFilter = layoutSettings.mediaFilter;
 
         if (isUUID) {
-          try {
-            const widgetData = await fetchWidgetById(slug);
-            spaceIdToUse = widgetData.space_id;
-            const c = widgetData.config as any;
-            setDbConfig(c);
+          const widgetData = await fetchWidgetById(slug);
+          if (widgetData) {
+            setDbConfig(widgetData.config);
+            setSpace(widgetData.spaces);
+            rawTestimonials = widgetData.spaces?.testimonials || [];
             
-            const overrideTheme = searchParams.get("theme");
-            if (overrideTheme === "dark") setActiveThemeOverride("dark");
-            if (overrideTheme === "light") setActiveThemeOverride("light");
-
-            currentMinRating = c.minRating !== undefined ? c.minRating : currentMinRating;
-            currentMediaFilter = c.mediaFilter !== undefined ? c.mediaFilter : currentMediaFilter;
-            currentMax = c.maxItems !== undefined ? c.maxItems : currentMax;
-          } catch (e) {
-            console.error("Failed to load widget config, falling back", e);
-            const spaceData = await fetchSpaceBySlug(slug);
-            setSpace(spaceData);
-            spaceIdToUse = spaceData.id;
+            const c = widgetData.config as any;
+            if (c.minRating !== undefined) finalMinRating = c.minRating;
+            if (c.mediaFilter !== undefined) finalFilter = c.mediaFilter;
+            if (c.maxItems !== undefined) finalMax = c.maxItems;
           }
         } else {
           const spaceData = await fetchSpaceBySlug(slug);
           setSpace(spaceData);
-          spaceIdToUse = spaceData.id;
+          rawTestimonials = await fetchTestimonialsBySpace(spaceData.id);
         }
 
-        const data = await fetchTestimonialsBySpace(spaceIdToUse);
-        const mapped = (data as any[])
-          .filter(t => t.status === "approved" && t.rating >= currentMinRating)
+        const mapped = rawTestimonials
+          .filter(t => t.status === "approved" && t.rating >= finalMinRating)
           .filter(t => {
-            if (currentMediaFilter === "video") return t.type === "video";
-            if (currentMediaFilter === "text") return t.type === "text";
+            if (finalFilter === "video") return t.type === "video";
+            if (finalFilter === "text") return t.type === "text";
             return true;
           })
-          .slice(0, currentMax)
+          .slice(0, finalMax)
           .map(t => ({
             name: t.author_name,
             company: t.author_company || "",
@@ -223,6 +252,17 @@ export default function EmbedWidgetPage() {
   }, [slug]);
 
   useEffect(() => {
+    // Attempt same-origin direct theme detection for immediate sync
+    try {
+      if (window.parent && window.parent.document) {
+        const doc = window.parent.document.documentElement;
+        const isParentDark = doc.classList.contains('dark') || doc.getAttribute('data-theme') === 'dark';
+        setActiveThemeOverride(isParentDark ? 'dark' : 'light');
+      }
+    } catch (e) {
+      // Cross-origin, rely on postMessage below
+    }
+
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'vouchy-theme-change') {
          const newTheme = event.data.theme === 'dark';
@@ -268,7 +308,7 @@ export default function EmbedWidgetPage() {
       <div 
         ref={containerRef}
         className={`w-full overflow-hidden ${config.darkMode ? "dark" : ""}`}
-        style={{ backgroundColor: (config.containerBg && config.containerBg !== 'transparent') ? config.containerBg : 'transparent' }}
+        style={{ backgroundColor: activeThemeOverride !== null ? 'transparent' : (config.darkMode ? 'transparent' : ((config.containerBg && config.containerBg !== 'transparent') ? config.containerBg : 'transparent')) }}
       >
       {config.layout === "marquee" ? (
         <div className="space-y-4 py-4">

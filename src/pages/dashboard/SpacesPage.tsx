@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageSquareText, Video, Settings2, Shield } from "lucide-react";
+import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageSquareText, Video, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -62,14 +62,10 @@ export default function SpacesPage() {
   };
 
   const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/collect/${slug}`);
+    navigator.clipboard.writeText(`${window.location.origin}/c/${slug}`);
     toast({ title: "Collection link copied" });
   };
 
-  const copyTrustLink = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/trust/${slug}`);
-    toast({ title: "Trust link copied!", description: "Share it anywhere — email, bio, DMs." });
-  };
 
   const handleToggleActive = async (id: string, current: boolean) => {
     try {
@@ -105,11 +101,12 @@ export default function SpacesPage() {
     setEditorOpen(true);
   };
 
-  const handleEditorSave = async (spaceId: string, updates: { name?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => {
+  const handleEditorSave = async (spaceId: string, updates: { name?: string; slug?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => {
     try {
       if (isCreating) {
         const spaceName = updates.name || "Untitled";
-        const slug = spaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 6);
+        const slug = updates.slug || (spaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + randomSuffix);
         const newSpace = await apiCreateSpace({
           name: spaceName,
           slug,
@@ -123,12 +120,14 @@ export default function SpacesPage() {
       } else {
         await apiUpdateSpace(spaceId, {
           ...(updates.name && { name: updates.name }),
+          ...(updates.slug && { slug: updates.slug }),
           ...(updates.isActive !== undefined && { is_active: updates.isActive }),
           ...(updates.formConfig && { form_config: updates.formConfig }),
         });
         setSpaces(prev => prev.map(s => s.id === spaceId ? {
           ...s,
           ...(updates.name && { name: updates.name }),
+          ...(updates.slug && { slug: updates.slug }),
           ...(updates.isActive !== undefined && { is_active: updates.isActive }),
           ...(updates.formConfig && { form_config: updates.formConfig }),
         } : s));
@@ -225,7 +224,7 @@ export default function SpacesPage() {
                       {space.is_active ? <PowerOff className="h-3 w-3" /> : <Power className="h-3 w-3" />}
                       {space.is_active ? "Pause" : "Activate"}
                     </Button>
-                    <a href={`/collect/${space.slug}`} target="_blank" rel="noreferrer">
+                    <a href={`/c/${space.slug}`} target="_blank" rel="noreferrer">
                       <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground">
                         <ExternalLink className="h-3 w-3" /> Open
                       </Button>
@@ -235,16 +234,6 @@ export default function SpacesPage() {
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7 text-2xs gap-1 px-2 text-muted-foreground hover:text-foreground" onClick={() => openEditor(space)}>
                       <Settings2 className="h-3 w-3" /> Edit
-                    </Button>
-                    <div className="flex-1" />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 text-2xs gap-1 px-2 text-primary hover:text-primary hover:bg-primary/10 font-semibold"
-                      onClick={() => copyTrustLink(space.slug)}
-                      title="Copy Trust Link — shareable testimonial page"
-                    >
-                      <Shield className="h-3 w-3" /> Trust Link
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(space.id)}>
                       <Trash2 className="h-3 w-3" />

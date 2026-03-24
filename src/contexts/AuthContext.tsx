@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchInitialAppData } from "@/lib/api";
 
 interface Profile {
   id: string;
@@ -37,27 +39,26 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const refreshProfile = async () => {
+    if (!session?.user) return;
     const { data } = await supabase
       .from("profiles")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", session.user.id)
       .single();
     setProfile(data as unknown as Profile | null);
-  };
-
-  const refreshProfile = async () => {
-    if (session?.user) await fetchProfile(session.user.id);
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
     setProfile(null);
+    queryClient.clear();
   };
 
   useEffect(() => {
@@ -67,8 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         setLoading(true);
         setSession(activeSession);
+        
         if (activeSession?.user) {
-          await fetchProfile(activeSession.user.id);
+          // ULTRA FAST BOOT: Parallel fetch profile + dashboard summary
+          const { profile: prof, summary } = await fetchInitialAppData(activeSession.user.id);
+          
+          if (mounted) {
+            setProfile(prof as unknown as Profile | null);
+            // Hydrate React Query cache immediately
+            if (summary) {
+              queryClient.setQueryData(["portal-summary"], summary);
+            }
+          }
         } else {
           setProfile(null);
         }
@@ -88,15 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
-      // We only want to trigger a full load on specific events to avoid loops
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         loadData(session);
       } else if (event === "SIGNED_OUT") {
         setSession(null);
         setProfile(null);
         setLoading(false);
+        queryClient.clear();
       } else {
-        // For other events just update the session
         setSession(session);
       }
     });

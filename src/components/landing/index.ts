@@ -1,8 +1,16 @@
-// Landing components barrel file
-export { default as Hero } from "./Hero";
-export { default as BentoGrid } from "./BentoGrid";
-export { default as CTA } from "./CTA";
-export { default as HowItWorks } from "./HowItWorks";
-export { default as Pricing } from "./Pricing";
-export { default as ProductShowcase } from "./ProductShowcase";
-export { default as TestimonialDesigns } from "./TestimonialDesigns";
+import { memo } from "react";
+import HeroComponent from "./Hero";
+import BentoGridComponent from "./BentoGrid";
+import CTAComponent from "./CTA";
+import HowItWorksComponent from "./HowItWorks";
+import PricingComponent from "./Pricing";
+import ProductShowcaseComponent from "./ProductShowcase";
+import TestimonialDesignsComponent from "./TestimonialDesigns";
+
+export const Hero = memo(HeroComponent);
+export const BentoGrid = memo(BentoGridComponent);
+export const CTA = memo(CTAComponent);
+export const HowItWorks = memo(HowItWorksComponent);
+export const Pricing = memo(PricingComponent);
+export const ProductShowcase = memo(ProductShowcaseComponent);
+export const TestimonialDesigns = memo(TestimonialDesignsComponent);

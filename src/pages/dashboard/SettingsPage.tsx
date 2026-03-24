@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToR2 } from "@/lib/storage";
 
 const brandColors = [
   "#3b82f6", "#1a3f64", "#059669", "#ea580c", "#7c3aed", "#e11d48", "#0d9488", "#f59e0b",
@@ -25,6 +26,10 @@ export default function SettingsPage() {
   const [weeklyDigest, setWeeklyDigest] = useState(false);
   const [saving, setSaving] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [liveCredits, setLiveCredits] = useState<{ used: number; reset_at: string | null } | null>(null);
   const { toast } = useToast();
 
@@ -37,8 +42,12 @@ export default function SettingsPage() {
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => {
-        const d = data as unknown as { ai_credits_used: number | null; ai_credits_reset_at: string | null } | null;
-        if (d) setLiveCredits({ used: d.ai_credits_used ?? 0, reset_at: d.ai_credits_reset_at });
+        const d = data as any;
+        if (d) {
+          setLiveCredits({ used: d.ai_credits_used ?? 0, reset_at: d.ai_credits_reset_at });
+          setAvatarUrl(d.avatar_url || "");
+          setLogoUrl(d.logo_url || "");
+        }
       });
   }, [user]);
 
@@ -52,6 +61,30 @@ export default function SettingsPage() {
     }
   }, [profile, user]);
 
+  const handleFileUpload = async (file: File, type: 'avatar' | 'logo') => {
+    if (!user) return;
+    const isAvatar = type === 'avatar';
+    isAvatar ? setUploadingAvatar(true) : setUploadingLogo(true);
+    
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${type}s/${user.id}/${Date.now()}.${ext}`;
+      const publicUrl = await uploadToR2(file, path);
+      
+      if (isAvatar) {
+        setAvatarUrl(publicUrl);
+      } else {
+        setLogoUrl(publicUrl);
+      }
+      
+      toast({ title: `${isAvatar ? 'Avatar' : 'Logo'} uploaded` });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      isAvatar ? setUploadingAvatar(false) : setUploadingLogo(false);
+    }
+  };
+
   const save = async () => {
     if (!user) return;
     setSaving(true);
@@ -61,6 +94,8 @@ export default function SettingsPage() {
         .update({
           company_name: workspaceName.trim(),
           brand_color: brandColor,
+          avatar_url: avatarUrl,
+          logo_url: logoUrl,
         })
         .eq("user_id", user.id);
       if (error) throw error;
@@ -77,7 +112,7 @@ export default function SettingsPage() {
   const initials = displayName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
 
   return (
-    <div>
+    <div className="pb-20">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-[22px] font-semibold text-foreground">Settings</h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">Account, workspace, and billing.</p>
@@ -92,23 +127,70 @@ export default function SettingsPage() {
           {/* Profile */}
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Profile</h2>
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border flex items-center justify-center shrink-0">
-                <span className="text-sm font-semibold text-primary">{initials}</span>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8">
+              {/* User Avatar */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xl font-bold text-muted-foreground">{initials}</span>
+                    )}
+                    {uploadingAvatar && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform">
+                    <Plus className="w-4 h-4" />
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'avatar')} />
+                  </label>
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Profile Photo</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-medium text-foreground">{displayName}</div>
-                <div className="text-[12px] text-muted-foreground">{userEmail}</div>
+
+              {/* Workspace Logo */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Plus className="w-6 h-6 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    {uploadingLogo && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-black text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform">
+                    <Plus className="w-4 h-4" />
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'logo')} />
+                  </label>
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Workspace Logo</span>
+              </div>
+
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="text-[16px] font-bold text-foreground">{displayName || workspaceName}</div>
+                <div className="text-[12px] text-muted-foreground opacity-60">{userEmail}</div>
               </div>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-[12px] text-muted-foreground">Display name</Label>
-                <Input className="mt-1.5 h-9 text-[13px]" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                <Input className="mt-1.5 h-9 text-[13px] font-medium" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
               </div>
               <div>
-                <Label className="text-[12px] text-muted-foreground">Workspace</Label>
-                <Input className="mt-1.5 h-9 text-[13px]" value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
+                <Label className="text-[12px] text-muted-foreground">Workspace Name</Label>
+                <Input className="mt-1.5 h-9 text-[13px] font-medium" value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
               </div>
             </div>
           </div>

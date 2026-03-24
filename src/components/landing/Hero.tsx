@@ -56,7 +56,7 @@ export default function Hero() {
                 <span className="inline-flex items-center -space-x-4 align-middle transform translate-y-[-2px]">
                   {[1, 2, 3, 4].map((i) => (
                     <Avatar key={i} className="w-10 h-10 md:w-14 lg:w-16 border-4 border-background ring-1 ring-primary/20 overflow-hidden">
-                      <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" />
+                      <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" loading="lazy" />
                       <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-black uppercase">U{i}</AvatarFallback>
                     </Avatar>
                   ))}

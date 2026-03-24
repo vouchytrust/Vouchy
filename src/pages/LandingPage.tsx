@@ -41,14 +41,38 @@ export default function LandingPage() {
     container.innerHTML = '';
 
     const script = document.createElement('script');
-    script.src = window.location.origin + "/embed.js";
+    script.src = window.location.origin + "/embed.js?v=" + Date.now();
     script.setAttribute("data-widget-id", "c2fef0f4-0357-4a6b-b183-f774481deee6");
+    script.setAttribute("data-theme", theme);
     script.async = true;
 
     container.appendChild(script);
+  }, [theme]);
+
+  // Load Tawk.to Only on Landing Page
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Check if Tawk is already loaded to avoid duplicates
+      if (document.getElementById('tawk-script')) return;
+
+      const s1 = document.createElement("script");
+      const s0 = document.getElementsByTagName("script")[0];
+      s1.id = 'tawk-script';
+      s1.async = true;
+      s1.src = 'https://embed.tawk.to/69c0ee530ad9171c37866bca/1jkcq5uc6';
+      s1.charset = 'UTF-8';
+      s1.setAttribute('crossorigin', '*');
+      s0.parentNode?.insertBefore(s1, s0);
+    }, 3000); // 3s delay for landing page feel
 
     return () => {
-      // Leave cleanup to the next mount to prevent flicker or race conditions
+      clearTimeout(timer);
+      // Optional: hide Tawk widget on leave if the platform supports it
+      const tawkWidget = document.getElementById('tawk-chat-widget');
+      if (tawkWidget) tawkWidget.style.display = 'none';
+      if ((window as any).Tawk_API && (window as any).Tawk_API.hideWidget) {
+        (window as any).Tawk_API.hideWidget();
+      }
     };
   }, []);
 
@@ -204,12 +228,12 @@ export default function LandingPage() {
                   {/* Header strip */}
                   <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-primary/8">
                     <div className="flex items-center gap-2">
-                      <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-50" />
-                      <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">vouchy Navigation</span>
+                       <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-50" />
+                       <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">vouchy Navigation</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[8px] font-black text-primary/50 uppercase tracking-widest">Live</span>
+                       <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                       <span className="text-[8px] font-black text-primary/50 uppercase tracking-widest">Live</span>
                     </div>
                   </div>
 
@@ -338,7 +362,14 @@ export default function LandingPage() {
             </motion.p>
           </div>
         </div>
-        <div id="landing-widget-container" style={{ background: 'transparent' }}></div>
+        
+        {/* WIDGET CONTAINER */}
+        <div 
+          key={`widget-${theme}`} 
+          id="landing-widget-container" 
+          className="bg-transparent" 
+          style={{ background: 'transparent' }}
+        ></div>
 
         <HowItWorks />
         <Pricing />

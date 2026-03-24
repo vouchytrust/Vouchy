@@ -26,6 +26,14 @@
       return;
     }
 
+    // Preconnect to Supabase for faster API fetch
+    if (!document.querySelector('link[href*="supabase.co"][rel="preconnect"]')) {
+      const pc = document.createElement('link');
+      pc.rel = 'preconnect';
+      pc.href = 'https://ayayzmvntqpsctymsktr.supabase.co';
+      document.head.appendChild(pc);
+    }
+
     // Get host origin
     let host = '';
     try {
@@ -35,15 +43,13 @@
       host = window.location.origin;
     }
 
-    let iframeUrl = '';
+    // Determine theme early to avoid flashes
+    const isDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
+    const initialTheme = script.dataset.theme || (isDark ? 'dark' : 'light');
 
+    let iframeUrl;
     if (widgetId) {
-      iframeUrl = `${host}/embed/${widgetId}`;
-      
-      // Allow parent to explicitly override theme via data-theme
-      if (script.dataset.theme) {
-        iframeUrl += `?theme=${script.dataset.theme}`;
-      }
+      iframeUrl = `${host}/embed/${widgetId}?theme=${initialTheme}`;
     } else {
       // Build query params from all data attributes
       const params = new URLSearchParams();
@@ -73,7 +79,7 @@
     iframe.style.cssText = 'width:100%;border:none;overflow:hidden;background:transparent;';
     iframe.style.height = height + 'px';
     iframe.className = 'vouchy-embed-iframe';
-    iframe.loading = 'lazy';
+    iframe.loading = 'eager';
     iframe.title = 'Vouchy Embed Widget';
 
     // Allow transparency
@@ -98,15 +104,21 @@
       if (!iframe.contentWindow) return;
       
       const el = document.documentElement;
-      const classDark = el.classList.contains('dark') || document.body.classList.contains('dark') || el.getAttribute('data-theme') === 'dark';
-      const classLight = el.classList.contains('light') || document.body.classList.contains('light') || el.getAttribute('data-theme') === 'light';
-      const colorScheme = el.style.colorScheme || document.body.style.colorScheme;
+      const htmlClass = el.className.toLowerCase();
+      const bodyClass = document.body.className.toLowerCase();
+      const htmlDataMode = (el.getAttribute('data-theme') || el.getAttribute('data-mode') || el.getAttribute('data-color-scheme') || '').toLowerCase();
       
+      const hasDarkClass = htmlClass.includes('dark') || bodyClass.includes('dark') || htmlClass.includes('night') || htmlClass.includes('theme-dark');
+      const hasLightClass = htmlClass.includes('light') || bodyClass.includes('light') || htmlClass.includes('theme-light');
+      
+      const isDarkData = htmlDataMode === 'dark' || htmlDataMode === 'night';
+      const isLightData = htmlDataMode === 'light';
+
       let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       
-      if (colorScheme === 'dark' || classDark) {
+      if (isDarkData || hasDarkClass) {
         isDark = true;
-      } else if (colorScheme === 'light' || classLight) {
+      } else if (isLightData || hasLightClass) {
         isDark = false;
       }
 

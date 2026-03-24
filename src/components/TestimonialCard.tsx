@@ -69,7 +69,7 @@ export function TestimonialCard({ t, config, index }: { t: TestimonialItem; conf
   const avatarSmall = showAvatar && (
     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden border-2" style={{ backgroundColor: darkMode ? "hsl(240 4% 16%)" : "#f3f4f6", borderColor: config.accent + '30' }}>
       {t.avatar ? (
-        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" loading="lazy" />
       ) : (
         <span className="text-xs font-semibold" style={{ color: companyColor }}>{t.initials}</span>
       )}
@@ -79,7 +79,7 @@ export function TestimonialCard({ t, config, index }: { t: TestimonialItem; conf
   const avatarLarge = showAvatar && (
     <div className="w-16 h-16 rounded-full flex items-center justify-center shrink-0 overflow-hidden border-4 shadow-lg" style={{ backgroundColor: starColor + "20", borderColor: darkMode ? cardBg : '#fff' }}>
       {t.avatar ? (
-        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+        <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" loading="lazy" />
       ) : (
         <span className="text-lg font-bold" style={{ color: starColor }}>{t.initials}</span>
       )}
@@ -455,7 +455,7 @@ export function TestimonialCard({ t, config, index }: { t: TestimonialItem; conf
             playsInline
           />
         ) : t.avatar ? (
-          <img src={t.avatar} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/thumbnail:opacity-100 transition-all duration-700 group-hover/thumbnail:scale-110" />
+          <img src={t.avatar} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/thumbnail:opacity-100 transition-all duration-700 group-hover/thumbnail:scale-110" loading="lazy" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/20 opacity-40">
              <Quote className="w-24 h-24 rotate-12" style={{ color: config.accent }} />

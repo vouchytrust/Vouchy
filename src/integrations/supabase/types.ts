@@ -18,11 +18,14 @@ export type Database = {
         Row: {
           ai_credits_reset_at: string | null
           ai_credits_used: number | null
+          ai_scripts_used: number | null
+          ai_text_used: number | null
           brand_color: string | null
           company_name: string | null
           created_at: string
           email: string | null
           id: string
+          is_admin: boolean | null
           logo_url: string | null
           onboarding_completed: boolean
           plan: string | null
@@ -32,11 +35,14 @@ export type Database = {
         Insert: {
           ai_credits_reset_at?: string | null
           ai_credits_used?: number | null
+          ai_scripts_used?: number | null
+          ai_text_used?: number | null
           brand_color?: string | null
           company_name?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          is_admin?: boolean | null
           logo_url?: string | null
           onboarding_completed?: boolean
           plan?: string | null
@@ -46,11 +52,14 @@ export type Database = {
         Update: {
           ai_credits_reset_at?: string | null
           ai_credits_used?: number | null
+          ai_scripts_used?: number | null
+          ai_text_used?: number | null
           brand_color?: string | null
           company_name?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          is_admin?: boolean | null
           logo_url?: string | null
           onboarding_completed?: boolean
           plan?: string | null
@@ -92,6 +101,51 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip_address: string | null
+          message: string
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_branding"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           author_avatar_url: string | null
@@ -103,6 +157,7 @@ export type Database = {
           created_at: string
           extra_fields: Json | null
           id: string
+          ip_address: string | null
           is_favorite: boolean
           rating: number
           space_id: string
@@ -123,6 +178,7 @@ export type Database = {
           created_at?: string
           extra_fields?: Json | null
           id?: string
+          ip_address?: string | null
           is_favorite?: boolean
           rating?: number
           space_id: string
@@ -143,6 +199,7 @@ export type Database = {
           created_at?: string
           extra_fields?: Json | null
           id?: string
+          ip_address?: string | null
           is_favorite?: boolean
           rating?: number
           space_id?: string
@@ -203,7 +260,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profile_branding: {
+        Row: {
+          brand_color: string | null
+          company_name: string | null
+          logo_url: string | null
+          plan: string | null
+          user_id: string | null
+        }
+        Insert: {
+          brand_color?: string | null
+          company_name?: string | null
+          logo_url?: string | null
+          plan?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          brand_color?: string | null
+          company_name?: string | null
+          logo_url?: string | null
+          plan?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

@@ -502,7 +502,7 @@ export default function WidgetLabPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const shareUrl = `${window.location.origin}/trust/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
+  const shareUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}`;
   const [shareCopied, setShareCopied] = useState(false);
 
   const copyShareLink = async () => {
@@ -540,7 +540,8 @@ export default function WidgetLabPage() {
         }
       });
       // Copy the full URL with all widget params so TrustPage renders the correct design
-      const fullShareUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
+      // Copy the full URL based on database state
+      const fullShareUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}`;
       await navigator.clipboard.writeText(fullShareUrl);
       setShareCopied(true);
       toast({ title: "Design saved & link copied!" });
@@ -570,6 +571,7 @@ export default function WidgetLabPage() {
   const currentLayout = layouts.find(l => l.id === selectedLayout);
   
   // Preview URL for live editing
+  // Preview URL for live editing in a new tab (if needed)
   const previewUrl = `${window.location.origin}/t/${selectedSpace?.slug || ""}?${embedParams.toString()}`;
 
   return (
@@ -1055,7 +1057,7 @@ export default function WidgetLabPage() {
                     disabled={!selectedSpace}
                   >
                     <Link2 className="h-3 w-3" />
-                    Share Website
+                    Share Trust Page
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[280px] p-4 rounded-xl shadow-xl z-50 border border-border/60 backdrop-blur-md" align="end" sideOffset={8}>
@@ -1130,7 +1132,7 @@ export default function WidgetLabPage() {
                 <div className="flex-1 flex justify-center overflow-hidden">
                   <div className="px-6 py-1 rounded-lg bg-muted/60 border border-border text-2xs text-muted-foreground font-mono max-w-full truncate">
                     {previewMode === "trust" && selectedSpace?.slug
-                      ? `${window.location.hostname}/t/${selectedSpace.slug}?layout=${selectedLayout}&darkMode=${editingTheme === "dark"}&accent=...`
+                      ? `${window.location.hostname}/t/${selectedSpace.slug}`
                       : "yourwebsite.com"}
                   </div>
                 </div>

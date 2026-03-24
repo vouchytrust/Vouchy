@@ -13,7 +13,7 @@ export async function uploadToR2(file: File | Blob, path: string): Promise<strin
   const { data, error: signerError } = await supabase.functions.invoke('r2-signer', {
     body: {
       fileName: path,
-      contentType: file.type,
+      contentType: file.type || 'application/octet-stream',
     },
   });
 
@@ -22,18 +22,11 @@ export async function uploadToR2(file: File | Blob, path: string): Promise<strin
     throw new Error('Failed to authorize upload. Check R2 secrets.');
   }
 
-  const { uploadUrl, publicUrl } = data;
+  const { uploadUrl, publicUrl, contentType } = data;
   
   if (!uploadUrl) {
     throw new Error('Signer returned no upload URL');
   }
-
-  // VALIDATION: If the publicUrl contains supabase.co, something is configured wrong!
-  if (publicUrl.includes('supabase.co')) {
-    console.warn('[R2-STORAGE] WARNING: Signer returned a Supabase URL instead of R2!', publicUrl);
-  }
-
-  console.log(`[R2-STORAGE] Starting binary PUT to R2...`);
 
   // 2. Upload directly to R2
   try {
@@ -41,7 +34,7 @@ export async function uploadToR2(file: File | Blob, path: string): Promise<strin
       method: 'PUT',
       body: file,
       headers: {
-        'Content-Type': file.type,
+        'Content-Type': contentType || file.type || 'application/octet-stream',
       },
     });
 

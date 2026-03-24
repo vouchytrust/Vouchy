@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Star, Video, Play, MessageSquareText, Search, CheckCircle2, XCircle, Clock, Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
 import { fetchTestimonials, updateTestimonialStatus, toggleTestimonialFavorite, deleteTestimonial as apiDeleteTestimonial } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -48,74 +48,76 @@ function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-
 export default function TestimonialsPage() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  const loadTestimonials = async () => {
-    try {
-      const data = await fetchTestimonials();
-      setTestimonials(data as Testimonial[]);
-    } catch (err: any) {
-      toast({ title: "Error loading testimonials", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: testimonials = [], isLoading } = useQuery({
+    queryKey: ["testimonials"],
+    queryFn: fetchTestimonials,
+  });
 
-  useEffect(() => { loadTestimonials(); }, []);
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => updateTestimonialStatus(id, status),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["testimonials"] });
+      const previous = queryClient.getQueryData(["testimonials"]);
+      queryClient.setQueryData(["testimonials"], (old: any) =>
+        old?.map((t: any) => (t.id === id ? { ...t, status } : t))
+      );
+      return { previous };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["testimonials"], context?.previous);
+      toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["testimonials"] }),
+  });
 
-  const filtered = testimonials
+  const favoriteMutation = useMutation({
+    mutationFn: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => toggleTestimonialFavorite(id, isFavorite),
+    onMutate: async ({ id, isFavorite }) => {
+      await queryClient.cancelQueries({ queryKey: ["testimonials"] });
+      const previous = queryClient.getQueryData(["testimonials"]);
+      queryClient.setQueryData(["testimonials"], (old: any) =>
+        old?.map((t: any) => (t.id === id ? { ...t, is_favorite: isFavorite } : t))
+      );
+      return { previous };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["testimonials"], context?.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["testimonials"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: apiDeleteTestimonial,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+      toast({ title: "Testimonial deleted" });
+    },
+  });
+
+  const filtered = (testimonials as Testimonial[])
     .filter((t) => {
       if (filter === "all") return true;
       if (filter === "favorite") return t.is_favorite;
-      if (filter === "video" || filter === "text") return t.type === filter;
+      if (filter === "video") return t.type === "video";
       return t.status === filter;
     })
     .filter((t) => !search || (t.author_name + (t.author_company || "") + t.content).toLowerCase().includes(search.toLowerCase()));
 
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      await updateTestimonialStatus(id, status);
-      setTestimonials(prev => prev.map(t => t.id === id ? { ...t, status } : t));
-      toast({ title: `Testimonial ${status}` });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
-  const toggleFavorite = async (id: string, current: boolean) => {
-    try {
-      await toggleTestimonialFavorite(id, !current);
-      setTestimonials(prev => prev.map(t => t.id === id ? { ...t, is_favorite: !current } : t));
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await apiDeleteTestimonial(id);
-      setTestimonials(prev => prev.filter(t => t.id !== id));
-      toast({ title: "Testimonial deleted" });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
-  };
-
   const stats = {
     total: testimonials.length,
-    pending: testimonials.filter(t => t.status === "pending").length,
-    approved: testimonials.filter(t => t.status === "approved").length,
-    video: testimonials.filter(t => t.type === "video").length,
+    pending: testimonials.filter((t: any) => t.status === "pending").length,
+    approved: testimonials.filter((t: any) => t.status === "approved").length,
+    video: testimonials.filter((t: any) => t.type === "video").length,
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20 min-h-[60vh]">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -267,12 +269,12 @@ export default function TestimonialsPage() {
                       </div>
                     </div>
                     
-                    <button 
-                      onClick={() => toggleFavorite(t.id, t.is_favorite)}
-                      className="text-muted-foreground/30 hover:text-destructive transition-colors"
-                    >
-                      <Heart className={`h-4 w-4 ${t.is_favorite ? "fill-destructive text-destructive" : ""}`} />
-                    </button>
+<button 
+  onClick={() => favoriteMutation.mutate({ id: t.id, isFavorite: !t.is_favorite })}
+  className="text-muted-foreground/30 hover:text-destructive transition-colors"
+>
+  <Heart className={`h-4 w-4 ${t.is_favorite ? "fill-destructive text-destructive" : ""}`} />
+</button>
                   </div>
 
                   {/* Rating */}
@@ -327,25 +329,25 @@ export default function TestimonialsPage() {
                     <div className="flex items-center gap-1">
                       {t.status === "pending" && (
                         <>
-                          <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-success hover:bg-vouchy-success/10" onClick={() => updateStatus(t.id, "approved")}>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-success hover:bg-vouchy-success/10" onClick={() => statusMutation.mutate({ id: t.id, status: "approved" })}>
                             <CheckCircle2 className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-destructive hover:bg-destructive/10" onClick={() => updateStatus(t.id, "rejected")}>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-destructive hover:bg-destructive/10" onClick={() => statusMutation.mutate({ id: t.id, status: "rejected" })}>
                             <XCircle className="h-3.5 w-3.5" />
                           </Button>
                         </>
                       )}
                       {t.status === "approved" && (
-                        <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-warning hover:bg-vouchy-warning/10" onClick={() => updateStatus(t.id, "pending")}>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-warning hover:bg-vouchy-warning/10" onClick={() => statusMutation.mutate({ id: t.id, status: "pending" })}>
                           <Clock className="h-3.5 w-3.5" />
                         </Button>
                       )}
                       {t.status === "rejected" && (
-                        <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-success hover:bg-vouchy-success/10" onClick={() => updateStatus(t.id, "approved")}>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-vouchy-success hover:bg-vouchy-success/10" onClick={() => statusMutation.mutate({ id: t.id, status: "approved" })}>
                           <CheckCircle2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/5" onClick={() => handleDelete(t.id)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/5" onClick={() => deleteMutation.mutate(t.id)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>

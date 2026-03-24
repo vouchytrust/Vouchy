@@ -41,7 +41,7 @@ interface SpaceEditorProps {
   } | null;
   /** If true, this is a new space being created */
   isCreating?: boolean;
-  onSave: (spaceId: string, updates: { name?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => void;
+  onSave: (spaceId: string, updates: { name?: string; slug?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => void;
 }
 
 const defaultFields: FormField[] = [
@@ -239,6 +239,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
   const [fields, setFields] = useState<FormField[]>(defaultFields);
   const [thankYou, setThankYou] = useState<ThankYouConfig>(defaultThankYou);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [slug, setSlug] = useState("");
   const [activeTab, setActiveTab] = useState("general");
 
   // Sync state when space changes
@@ -247,6 +248,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
     setLoadedId(space.id);
     setName(space.name);
     setIsActive(space.isActive);
+    setSlug(space.slug);
     setFields(space.formConfig?.formFields ?? defaultFields);
     setThankYou(space.formConfig?.thankYouConfig ?? defaultThankYou);
     setActiveTab("general");
@@ -258,6 +260,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
       setLoadedId(null);
       setName("");
       setIsActive(true);
+      setSlug("");
       setFields([...defaultFields]);
       setThankYou({ ...defaultThankYou });
       setActiveTab("general");
@@ -299,6 +302,7 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
     onSave(spaceId, {
       name,
       isActive,
+      ...(slug.trim() && { slug: slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-") }),
       formConfig: { formFields: fields, thankYouConfig: thankYou },
     });
     onOpenChange(false);
@@ -356,15 +360,19 @@ export default function SpaceEditorPanel({ open, onOpenChange, space, isCreating
               </div>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </div>
-            {!isCreating && space && (
-              <div className="space-y-1.5">
-                <Label className="text-[13px]">Collection URL Slug</Label>
-                <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border px-3 py-2">
-                  <span className="text-2xs text-muted-foreground font-mono">/collect/{space.slug}</span>
-                </div>
-                <p className="text-2xs text-muted-foreground">Auto-generated from name</p>
+            <div className="space-y-1.5">
+              <Label className="text-[13px]">Collection URL Slug</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-2xs text-muted-foreground font-mono bg-muted/40 px-2 py-2 rounded-l-lg border border-r-0 border-border">/t/</span>
+                <Input
+                  className="h-9 text-[13px] rounded-l-none"
+                  value={slug}
+                  onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ""))}
+                  placeholder="my-cool-space"
+                />
               </div>
-            )}
+              <p className="text-2xs text-muted-foreground">This defines your public Trust Page and Collection links.</p>
+            </div>
           </TabsContent>
 
           {/* ── Form Builder ── */}

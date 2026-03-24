@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 
-export function PublicFooter({ theme = "light", plan = "free" }: { theme?: "light" | "dark", plan?: string }) {
+export function PublicFooter({ theme = "light", plan = "free", className = "" }: { theme?: "light" | "dark", plan?: string, className?: string }) {
   const isDark = theme === "dark";
   const textColor = isDark ? "text-white/40" : "text-slate-400";
   const showBranding = !plan || plan.toLowerCase() === "free";
   
   return (
-    <div className={`w-full mt-24 pb-12 pt-12 border-t border-border/10 flex flex-row flex-wrap items-center justify-center gap-4 relative z-10 ${textColor}`}>
+    <div className={`w-full mt-12 pb-12 pt-12 border-t border-border/10 flex flex-row flex-wrap items-center justify-center gap-4 relative z-10 ${textColor} ${className}`}>
       {showBranding && (
         <>
           <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-[0.2em]">

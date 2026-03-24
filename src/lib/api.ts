@@ -1,9 +1,25 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Module-level cache for the current user session
+let cachedUser: any = null;
+let lastUserFetch = 0;
+const USER_CACHE_TTL = 30000; // 30 seconds
+
+async function getCachedUser() {
+  const now = Date.now();
+  if (cachedUser && (now - lastUserFetch < USER_CACHE_TTL)) {
+    return cachedUser;
+  }
+  const { data: { user } } = await supabase.auth.getUser();
+  cachedUser = user;
+  lastUserFetch = now;
+  return user;
+}
+
 // ── Spaces ──
 
 export async function fetchSpaces() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -78,7 +94,7 @@ export async function toggleSpaceActive(id: string, isActive: boolean) {
 // ── Testimonials ──
 
 export async function fetchTestimonials() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -162,7 +178,7 @@ export async function deleteTestimonial(id: string) {
 // ── Dashboard Stats ──
 
 export async function fetchDashboardStats() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return { total: 0, avgRating: "0.0", videoRate: 0, testimonials: [] };
 
   const { data: testimonials, error } = await supabase
@@ -182,7 +198,7 @@ export async function fetchDashboardStats() {
 }
 
 export async function fetchSpaceTestimonialCounts() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return {};
 
   const { data, error } = await supabase
@@ -201,13 +217,73 @@ export async function fetchSpaceTestimonialCounts() {
   return counts;
 }
 
-// ── Widgets ──
+export async function fetchPortalSummary() {
+  const user = await getCachedUser();
+  if (!user) return null;
+
+  // Run core dashboard metrics in parallel
+  const [counts, recent, spaces] = await Promise.all([
+    // Testimonial counts and aggregation
+    supabase
+      .from("testimonials")
+      .select("rating, type", { count: 'exact' })
+      .eq("user_id", user.id),
+    
+    // Most recent items ONLY
+    supabase
+      .from("testimonials")
+      .select("*, spaces(name)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    
+    // Basic spaces overview
+    supabase
+      .from("spaces")
+      .select("id, name, is_active")
+      .eq("user_id", user.id)
+      .limit(10)
+  ]);
+
+  const testimonials = counts.data || [];
+  const total = counts.count || 0;
+  const avgRating = total > 0
+    ? (testimonials.reduce((sum, t) => sum + t.rating, 0) / total).toFixed(1)
+    : "0.0";
+  const videoCount = testimonials.filter(t => t.type === "video").length || 0;
+  const videoRate = total > 0 ? Math.round((videoCount / total) * 100) : 0;
+
+  return {
+    stats: { total, avgRating, videoRate },
+    recentTestimonials: recent.data || [],
+    spaces: spaces.data || [],
+  };
+}
 
 export async function fetchWidgetById(id: string) {
   const { data, error } = await supabase
     .from("widgets")
-    .select("*, spaces(slug)")
+    .select(`
+      *,
+      spaces!inner(
+        slug,
+        name,
+        testimonials(
+          id,
+          author_name,
+          author_company,
+          rating,
+          content,
+          author_avatar_url,
+          type,
+          video_url,
+          status,
+          created_at
+        )
+      )
+    `)
     .eq("id", id)
+    .eq("spaces.testimonials.status", "approved")
     .single();
   if (error) throw error;
   return data;
@@ -230,7 +306,7 @@ export async function upsertWidget(widget: {
 }
 
 export async function fetchWidgetsBySpace(spaceId: string) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -241,4 +317,20 @@ export async function fetchWidgetsBySpace(spaceId: string) {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;
+}
+
+export async function fetchInitialAppData(userId: string) {
+  const [profileData, summaryData] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, user_id, company_name, brand_color, logo_url, plan, onboarding_completed, is_admin")
+      .eq("user_id", userId)
+      .single(),
+    fetchPortalSummary()
+  ]);
+
+  return {
+    profile: profileData.data,
+    summary: summaryData
+  };
 }

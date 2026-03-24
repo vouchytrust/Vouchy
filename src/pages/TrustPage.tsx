@@ -59,12 +59,20 @@ function MarqueeRow({ testimonials, config, reverse }: { testimonials: Testimoni
 
 function StatItem({ icon: Icon, label, value, accent, darkMode }: { icon: any; label: string; value: string | number; accent: string; darkMode?: boolean }) {
   return (
-    <div className={`flex flex-col items-center p-4 rounded-2xl border backdrop-blur-md shadow-sm transition-all duration-300 ${darkMode ? 'bg-card/40 border-white/5' : 'bg-white/40 border-slate-200/50'}`}>
-      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2.5" style={{ backgroundColor: accent + '10' }}>
-        <Icon className="h-5 w-5" style={{ color: accent }} />
+    <div 
+      className={`flex flex-col items-center p-6 rounded-[24px] border transition-all duration-300 group hover:scale-[1.02]`}
+      style={{
+        backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.7)',
+        borderColor: darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+        backdropFilter: 'blur(16px)',
+        boxShadow: darkMode ? 'none' : '0 10px 25px -5px rgba(0, 0, 0, 0.02)'
+      }}
+    >
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110" style={{ backgroundColor: accent + '15' }}>
+        <Icon className="h-6 w-6" style={{ color: accent }} />
       </div>
-      <div className={`text-2xl font-black tracking-tighter ${darkMode ? 'text-white' : 'text-slate-900'}`}>{value}</div>
-      <div className={`text-[10px] font-bold uppercase tracking-[0.2em] mt-1 ${darkMode ? 'text-white/40' : 'text-slate-400'}`}>{label}</div>
+      <div className={`text-3xl font-black tracking-tighter ${darkMode ? 'text-white' : 'text-slate-900'}`}>{value}</div>
+      <div className={`text-[10px] font-bold uppercase tracking-[0.3em] mt-2 ${darkMode ? 'text-white/40' : 'text-slate-500'}`}>{label}</div>
     </div>
   );
 }
@@ -113,7 +121,7 @@ export default function TrustPage() {
         if (spaceErr || !spaceData) { setNotFound(true); return; }
 
         const { data: profileData } = await supabase
-          .from("profile_branding")
+          .from("profiles")
           .select("company_name, brand_color, logo_url, plan")
           .eq("user_id", spaceData.user_id)
           .single();
