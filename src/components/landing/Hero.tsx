@@ -92,7 +92,7 @@ export default function Hero() {
               >
                 <div className="flex items-center gap-2 group-hover/demo:scale-105 transition-transform duration-300">
                   <Play className="w-4 h-4 fill-foreground" />
-                  <span>See Live Example</span>
+                  <span>Leave a Review</span>
                 </div>
               </Button>
             </motion.div>

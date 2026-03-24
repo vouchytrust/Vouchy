@@ -170,82 +170,125 @@ export default function CollectionPage() {
   // CHOOSE SCREEN
   // ─────────────────────────────────────────────────────────────────────────
   if (mode === "choose") return (
-    <div className="h-[100svh] flex flex-col bg-white antialiased overflow-hidden">
+    <div className="min-h-[100svh] flex flex-col bg-zinc-50 antialiased relative selection:bg-zinc-200">
+      
+      {/* Subtle blueprint pattern background */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} 
+      />
 
-      {/* Brand Hero — the logo IS the page identity, give it real estate */}
-      <div className="shrink-0 flex flex-col items-center justify-center px-10 border-b border-zinc-100" style={{ minHeight: '36%' }}>
-        {logo ? (
-          <img
-            src={logo}
-            alt={workspaceName}
-            className="object-contain mb-6"
-            style={{ height: '72px', width: 'auto', maxWidth: '260px' }}
-          />
-        ) : (
-          /* Branded monogram fallback when no logo uploaded */
-          <div
-            className="w-24 h-24 rounded-[28px] flex items-center justify-center mb-6 shadow-xl"
-            style={{ backgroundColor: accent }}
-          >
-            <span className="text-4xl font-black text-white select-none">
-              {workspaceName.charAt(0).toUpperCase()}
-            </span>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 relative z-10 w-full max-w-5xl mx-auto">
+        
+        {/* Main Card Wrapper */}
+        <div className="w-full flex flex-col lg:flex-row bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:shadow-[0_20px_60px_-15px_rgb(0,0,0,0.05)] overflow-hidden border border-zinc-100">
+          
+          {/* Brand/Hero Section */}
+          <div className="lg:w-2/5 p-8 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-zinc-100 bg-zinc-50/50 flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative overflow-hidden">
+            {/* Soft background glow based on brand color */}
+            <div 
+              className="absolute -top-32 -left-32 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none"
+              style={{ backgroundColor: accent }}
+            />
+
+            {logo ? (
+              <img
+                src={logo}
+                alt={workspaceName}
+                className="object-contain mb-8 relative z-10"
+                style={{ height: '56px', width: 'auto', maxWidth: '100%' }}
+              />
+            ) : (
+              <div
+                className="w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-8 shadow-sm relative z-10"
+                style={{ backgroundColor: accent }}
+              >
+                <span className="text-3xl font-black text-white select-none">
+                  {workspaceName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.25em] mb-4 relative z-10">
+              Share your experience
+            </p>
+            <h1 className="text-3xl lg:text-4xl font-bold text-zinc-900 leading-[1.15] mb-4 relative z-10 tracking-tight">
+              We'd love to hear from you
+            </h1>
+            <p className="text-sm text-zinc-500 font-medium leading-relaxed relative z-10 max-w-[280px]">
+              Your feedback is incredibly valuable. How would you like to share your story with us today?
+            </p>
           </div>
-        )}
-        <p className="text-[11px] font-semibold text-zinc-300 uppercase tracking-[0.22em] mb-2">
-          Share your experience with
-        </p>
-        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">{workspaceName}</h1>
+
+          {/* Options Section */}
+          <div className="flex-1 p-6 lg:p-10 xl:p-12 flex flex-col sm:flex-row gap-5 lg:gap-6 bg-white justify-center items-stretch">
+            
+            {/* Video (Pro/Agency only) */}
+            {!isFree && (
+              <button
+                onClick={() => setMode("video")}
+                className="group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 focus:outline-none relative overflow-hidden text-center border overflow-hidden"
+                style={{ backgroundColor: accent, borderColor: 'rgba(255,255,255,0.1)' }}
+              >
+                {/* Glossy sheen */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="w-16 h-16 rounded-[1.25rem] bg-white/10 flex items-center justify-center mb-6 shadow-inner backdrop-blur-md relative z-10 border border-white/20 group-hover:scale-110 transition-transform duration-500">
+                  <Video className="w-8 h-8 text-white drop-shadow-md" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-white mb-3 tracking-tight relative z-10">Record a Video</h3>
+                <p className="text-xs text-white/75 font-medium mb-8 leading-relaxed relative z-10 max-w-[200px]">
+                  The most impactful way to share your success. ~60 secs.
+                </p>
+                
+                <div className="flex flex-wrap justify-center gap-2 relative z-10">
+                  {["Authentic", "Show Results", "Guided"].map(p => (
+                    <span key={p} className="text-[9px] font-black text-white/80 uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            )}
+
+            {/* Written */}
+            <button
+              onClick={() => setMode("text")}
+              className={`group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-xl focus:outline-none border-2 border-zinc-100 bg-white hover:border-zinc-300 text-center relative overflow-hidden ${isFree ? "w-full min-h-[300px]" : ""}`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <div className="w-16 h-16 rounded-[1.25rem] bg-zinc-50 flex items-center justify-center mb-6 border border-zinc-100 shadow-sm relative z-10 group-hover:bg-white group-hover:shadow-md transition-all duration-500 group-hover:scale-110">
+                <PenLine className="w-8 h-8 text-zinc-700" />
+              </div>
+              
+              <h3 className="text-xl font-bold text-zinc-900 mb-3 tracking-tight relative z-10">Write a Review</h3>
+              <p className="text-xs text-zinc-500 font-medium mb-8 leading-relaxed relative z-10 max-w-[200px]">
+                Quick, structured, and easy to complete text feedback. ~2 mins.
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-2 relative z-10">
+                {["Private options", !isFree ? "AI Polish" : null, "Quick form"].filter(Boolean).map(p => (
+                  <span key={p} className="text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-zinc-100 px-3 py-1.5 rounded-full transition-colors group-hover:bg-zinc-200 border border-transparent group-hover:border-zinc-300/30">
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Method cards */}
-      <div className="flex-1 flex flex-col sm:flex-row gap-3 p-4 overflow-hidden min-h-0">
-        {/* Video (Pro/Agency only) */}
-        {!isFree && (
-          <button
-            onClick={() => setMode("video")}
-            className="group flex-1 flex flex-col items-center justify-center rounded-2xl p-6 transition-all duration-200 hover:brightness-105 hover:scale-[1.015] active:scale-[0.99] focus:outline-none relative overflow-hidden"
-            style={{ backgroundColor: accent }}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors">
-              <Video className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-base font-bold text-white mb-1">Video</span>
-            <span className="text-xs text-white/50 font-medium mb-3">Most impactful · 60 sec</span>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {["Tell your story", "Show results", "Be yourself"].map(p => (
-                <span key={p} className="text-[10px] font-medium text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{p}</span>
-              ))}
-            </div>
-          </button>
-        )}
-
-        {/* Writing */}
-        <button
-          onClick={() => setMode("text")}
-          className="group flex-1 flex flex-col items-center justify-center rounded-2xl p-6 border-2 border-zinc-100 bg-zinc-50/60 transition-all duration-200 hover:border-zinc-300 hover:bg-white hover:scale-[1.015] active:scale-[0.99] focus:outline-none"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-sm group-hover:shadow-md transition-shadow">
-            <PenLine className="w-6 h-6 text-zinc-600" />
-          </div>
-          <span className="text-base font-bold text-zinc-900 mb-1">Written</span>
-          <span className="text-xs text-zinc-400 font-medium mb-3">Quick &amp; structured · 2 min</span>
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {["Rate experience", "AI polish", "Stay anonymous"].map(p => (
-              <span key={p} className="text-[10px] font-medium text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-full group-hover:bg-zinc-200 transition-colors">{p}</span>
-            ))}
-          </div>
-        </button>
-      </div>
-
-      {/* Footer — only for free plan */}
+      {/* Footer */}
       {isFree && (
-        <footer className="shrink-0 flex items-center justify-center h-10 gap-5 text-[10px] font-semibold text-zinc-300 uppercase tracking-widest border-t border-zinc-50">
-          <Link to="/privacy" className="hover:text-zinc-500 transition-colors">Privacy</Link>
-          <span>·</span>
-          <span>Powered by Vouchy</span>
-          <span>·</span>
-          <Link to="/terms" className="hover:text-zinc-500 transition-colors">Terms</Link>
+        <footer className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-4 sm:gap-6 text-[9px] font-bold text-zinc-400 uppercase tracking-[0.25em] z-20">
+          <Link to="/privacy" className="hover:text-zinc-700 transition-colors">Privacy</Link>
+          <span className="opacity-30">·</span>
+          <a href="https://vouchy.click" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-700 transition-colors flex items-center gap-1.5">
+            Powered by Vouchy
+          </a>
+          <span className="opacity-30">·</span>
+          <Link to="/terms" className="hover:text-zinc-700 transition-colors">Terms</Link>
         </footer>
       )}
     </div>
