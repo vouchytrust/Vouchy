@@ -41,8 +41,8 @@ export default function LandingPage() {
     container.innerHTML = '';
 
     const script = document.createElement('script');
-    script.src = window.location.origin + "/embed.js?v=" + Date.now();
-    script.setAttribute("data-widget-id", "c2fef0f4-0357-4a6b-b183-f774481deee6");
+    script.src = "https://vouchy.click/embed.js?v=" + Date.now();
+    script.setAttribute("data-widget-id", "63c30831-be72-4a56-9fdd-46e425261628");
     script.setAttribute("data-theme", theme);
     script.async = true;
 
@@ -76,13 +76,12 @@ export default function LandingPage() {
     };
   }, []);
 
-  const navLinks = [
+  const navLinks: { label: string; href: string; external?: boolean }[] = [
     { label: "Home", href: "#top" },
     { label: "Features", href: "#features" },
     { label: "Design", href: "#design-showcase" },
     { label: "Workflow", href: "#how-it-works" },
     { label: "Pricing", href: "#pricing" },
-    { label: "Demo", href: "https://vouchy.click/c/vouchy-rmxe", external: true },
   ];
 
   return (
