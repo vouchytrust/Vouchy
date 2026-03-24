@@ -23,8 +23,8 @@ const VisualLink = () => (
     <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center mb-3 border border-primary/10">
       <Link2 className="w-5 h-5 text-primary" />
     </div>
-    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[7px] font-mono text-muted-foreground">
-      vouchy.app/ref/081
+    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[7px] font-mono text-muted-foreground whitespace-nowrap overflow-hidden">
+      vouchy.click/c/vouchy-rmxe
     </div>
     <div className="absolute top-4 right-4">
       <div className="w-2 h-2 rounded-full bg-primary/40" />

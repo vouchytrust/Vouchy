@@ -87,10 +87,13 @@ export default function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-                className="h-14 px-8 rounded-2xl text-foreground border-border hover:bg-muted text-base font-semibold w-full sm:w-auto"
+                onClick={() => window.open("https://vouchy.click/c/vouchy-rmxe", "_blank")}
+                className="h-14 px-8 rounded-2xl text-foreground border-border hover:bg-muted text-base font-semibold w-full sm:w-auto overflow-hidden group/demo"
               >
-                <Play className="mr-2 w-4 h-4 fill-foreground" /> See How It Works
+                <div className="flex items-center gap-2 group-hover/demo:scale-105 transition-transform duration-300">
+                  <Play className="w-4 h-4 fill-foreground" />
+                  <span>Try the Studio</span>
+                </div>
               </Button>
             </motion.div>
           </motion.div>

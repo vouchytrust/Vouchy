@@ -82,10 +82,15 @@ export default function CollectionPage() {
   const accent      = space?.profile?.brand_color || "#18181b";
   const workspaceName = space?.profile?.company_name || space?.name || "Workspace";
   const logo        = space?.profile?.logo_url;
-  const isFree      = !space?.profile?.plan || space.profile.plan === "free";
+  const userPlan    = space?.profile?.plan?.toLowerCase() || "free";
+  const isFree      = userPlan !== "pro" && userPlan !== "agency";
 
   // ── AI enhance ──────────────────────────────────────────────────────────────
   const handleEnhance = async (styleId: string) => {
+    if (isFree) {
+      toast({ title: "Pro Feature", description: "AI Enhancement is available on Pro and Agency plans.", variant: "default" });
+      return;
+    }
     if (!content.trim() || aiUses >= 3) {
       if (aiUses >= 3) toast({ title: "AI Limit Reached", description: "You can use AI polish up to 3 times per review." });
       return;
@@ -97,7 +102,7 @@ export default function CollectionPage() {
         body: { action: "enhance_text", text: content, style: styleId, spaceOwnerId: space!.user_id },
       });
       if (data?.result) setContent(data.result);
-    } catch {
+    } catch (err: any) {
       toast({ title: "AI enhancement failed", variant: "destructive" });
     } finally {
       setAiWorking(null);
@@ -195,23 +200,25 @@ export default function CollectionPage() {
 
       {/* Method cards */}
       <div className="flex-1 flex flex-col sm:flex-row gap-3 p-4 overflow-hidden min-h-0">
-        {/* Video */}
-        <button
-          onClick={() => setMode("video")}
-          className="group flex-1 flex flex-col items-center justify-center rounded-2xl p-6 transition-all duration-200 hover:brightness-105 hover:scale-[1.015] active:scale-[0.99] focus:outline-none"
-          style={{ backgroundColor: accent }}
-        >
-          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors">
-            <Video className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-base font-bold text-white mb-1">Video</span>
-          <span className="text-xs text-white/50 font-medium mb-3">Most impactful · 60 sec</span>
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {["Tell your story", "Show results", "Be yourself"].map(p => (
-              <span key={p} className="text-[10px] font-medium text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{p}</span>
-            ))}
-          </div>
-        </button>
+        {/* Video (Pro/Agency only) */}
+        {!isFree && (
+          <button
+            onClick={() => setMode("video")}
+            className="group flex-1 flex flex-col items-center justify-center rounded-2xl p-6 transition-all duration-200 hover:brightness-105 hover:scale-[1.015] active:scale-[0.99] focus:outline-none relative overflow-hidden"
+            style={{ backgroundColor: accent }}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors">
+              <Video className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-base font-bold text-white mb-1">Video</span>
+            <span className="text-xs text-white/50 font-medium mb-3">Most impactful · 60 sec</span>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {["Tell your story", "Show results", "Be yourself"].map(p => (
+                <span key={p} className="text-[10px] font-medium text-white/40 bg-white/10 px-2 py-0.5 rounded-full">{p}</span>
+              ))}
+            </div>
+          </button>
+        )}
 
         {/* Writing */}
         <button
@@ -396,36 +403,38 @@ export default function CollectionPage() {
               })()}
             </div>
 
-            {/* AI polish strip */}
-            <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <p className="text-[10px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
-                  <Wand2 className="w-3 h-3" /> AI Polish
-                </p>
-                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
-                  {3 - aiUses} left
-                </span>
+            {/* AI polish strip (Pro/Agency only) */}
+            {!isFree && (
+              <div>
+                <div className="flex items-center justify-between mb-2.5">
+                  <p className="text-[10px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <Wand2 className="w-3 h-3" /> AI Polish
+                  </p>
+                  <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                    {3 - aiUses} left
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {AI_ACTIONS.map(action => (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={!!aiWorking || !content.trim() || aiUses >= 3}
+                      onClick={() => handleEnhance(action.id)}
+                      title={action.hint}
+                      className="h-8 px-4 rounded-full text-[11px] font-semibold border border-zinc-200 text-zinc-600 bg-white hover:border-zinc-900 hover:text-zinc-900 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex-shrink-0"
+                    >
+                      {aiWorking === action.id ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full border border-zinc-400 border-t-transparent animate-spin inline-block" />
+                          {action.label}
+                        </span>
+                      ) : action.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {AI_ACTIONS.map(action => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    disabled={!!aiWorking || !content.trim() || aiUses >= 3}
-                    onClick={() => handleEnhance(action.id)}
-                    title={action.hint}
-                    className="h-8 px-4 rounded-full text-[11px] font-semibold border border-zinc-200 text-zinc-600 bg-white hover:border-zinc-900 hover:text-zinc-900 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex-shrink-0"
-                  >
-                    {aiWorking === action.id ? (
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full border border-zinc-400 border-t-transparent animate-spin inline-block" />
-                        {action.label}
-                      </span>
-                    ) : action.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* RIGHT — author details + CTA */}

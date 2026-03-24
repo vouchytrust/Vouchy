@@ -82,6 +82,7 @@ export default function LandingPage() {
     { label: "Design", href: "#design-showcase" },
     { label: "Workflow", href: "#how-it-works" },
     { label: "Pricing", href: "#pricing" },
+    { label: "Demo", href: "https://vouchy.click/c/vouchy-rmxe", external: true },
   ];
 
   return (
@@ -112,10 +113,12 @@ export default function LandingPage() {
             {/* ── CENTER: Nav pills ─────────────────────────── */}
             <div className="hidden md:flex flex-1 items-center justify-center">
               <div className="relative flex items-center gap-1.5 px-1.5 py-1">
-                {navLinks.map(({ label, href }) => (
+                {navLinks.map(({ label, href, external }) => (
                   <a
                     key={label}
                     href={href}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noopener noreferrer" : undefined}
                     onClick={(e) => {
                       if (href === "#top") {
                         e.preventDefault();
@@ -132,7 +135,7 @@ export default function LandingPage() {
                       }
                     `}
                   >
-                    {activeLink === label && (
+                    {activeLink === label && !external && (
                       <motion.div
                         layoutId="nav-pill"
                         className="absolute inset-0 rounded-xl bg-primary/[0.05] border border-primary/15 shadow-[0_2px_10px_-3px_rgba(10,169,57,0.1)] -z-10"
@@ -239,10 +242,12 @@ export default function LandingPage() {
 
                   <div className="p-3 flex flex-col gap-0.5">
                     {/* Nav links */}
-                    {navLinks.map(({ label, href }, i) => (
+                    {navLinks.map(({ label, href, external }, i) => (
                       <motion.a
                         key={label}
                         href={href}
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener noreferrer" : undefined}
                         initial={{ opacity: 0, x: -12 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.04, duration: 0.25, ease: "easeOut" }}
