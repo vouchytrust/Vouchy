@@ -69,7 +69,10 @@ export default function CollectionPage() {
         if (error || !spaceData) return setNotFound(true);
         const { data: profile } = await supabase
           .from("profiles").select("*").eq("user_id", spaceData.user_id).single();
-        setSpace({ ...spaceData, profile });
+        setSpace({ 
+          ...spaceData, 
+          profile: profile as Space["profile"] 
+        });
       } catch {
         setNotFound(true);
       } finally {
@@ -102,7 +105,7 @@ export default function CollectionPage() {
         body: { action: "enhance_text", text: content, style: styleId, spaceOwnerId: space!.user_id },
       });
       if (data?.result) setContent(data.result);
-    } catch (err: any) {
+    } catch (err) {
       toast({ title: "AI enhancement failed", variant: "destructive" });
     } finally {
       setAiWorking(null);
@@ -132,8 +135,9 @@ export default function CollectionPage() {
       });
       if (error) throw error;
       setMode("success");
-    } catch (err: any) {
-      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      toast({ title: "Submission failed", description: msg, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -141,14 +145,14 @@ export default function CollectionPage() {
 
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="h-[100svh] flex items-center justify-center bg-white">
-      <div className="w-6 h-6 rounded-full border-2 border-zinc-200 border-t-zinc-900 animate-spin" />
+    <div className="h-[100svh] flex items-center justify-center bg-background">
+      <div className="w-6 h-6 rounded-full border-2 border-border border-t-foreground animate-spin" />
     </div>
   );
 
   if (notFound) return (
-    <div className="h-[100svh] flex flex-col items-center justify-center bg-white gap-3">
-      <p className="text-sm font-semibold text-zinc-400 tracking-widest uppercase">Page not found</p>
+    <div className="h-[100svh] flex flex-col items-center justify-center bg-background gap-3">
+      <p className="text-sm font-semibold text-muted-foreground tracking-widest uppercase">Page not found</p>
     </div>
   );
 
@@ -170,20 +174,29 @@ export default function CollectionPage() {
   // CHOOSE SCREEN
   // ─────────────────────────────────────────────────────────────────────────
   if (mode === "choose") return (
-    <div className="min-h-[100svh] flex flex-col bg-zinc-50 antialiased relative selection:bg-zinc-200">
+    <div className="min-h-[100svh] flex flex-col bg-background antialiased relative selection:bg-primary/20">
       
       {/* Subtle blueprint pattern background */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} 
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '80px 80px' 
+        }} 
+      />
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
+        style={{ 
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+          backgroundSize: '20px 20px' 
+        }} 
       />
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 relative z-10 w-full max-w-5xl mx-auto">
         
         {/* Main Card Wrapper */}
-        <div className="w-full flex flex-col lg:flex-row bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:shadow-[0_20px_60px_-15px_rgb(0,0,0,0.05)] overflow-hidden border border-zinc-100">
+        <div className="w-full flex flex-col lg:flex-row bg-card/40 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-border/50">
           
           {/* Brand/Hero Section */}
-          <div className="lg:w-2/5 p-8 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-zinc-100 bg-zinc-50/50 flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative overflow-hidden">
+          <div className="lg:w-2/5 p-8 lg:p-12 xl:p-16 border-b lg:border-b-0 lg:border-r border-border/50 bg-muted/10 flex flex-col items-center lg:items-start justify-center text-center lg:text-left relative overflow-hidden">
             {/* Soft background glow based on brand color */}
             <div 
               className="absolute -top-32 -left-32 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none"
@@ -208,25 +221,25 @@ export default function CollectionPage() {
               </div>
             )}
             
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.25em] mb-4 relative z-10">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.25em] mb-4 relative z-10">
               Share your experience
             </p>
-            <h1 className="text-3xl lg:text-4xl font-bold text-zinc-900 leading-[1.15] mb-4 relative z-10 tracking-tight">
+            <h1 className="text-3xl lg:text-4xl font-bold text-foreground leading-[1.15] mb-4 relative z-10 tracking-tight">
               We'd love to hear from you
             </h1>
-            <p className="text-sm text-zinc-500 font-medium leading-relaxed relative z-10 max-w-[280px]">
+            <p className="text-sm text-muted-foreground font-medium leading-relaxed relative z-10 max-w-[280px]">
               Your feedback is incredibly valuable. How would you like to share your story with us today?
             </p>
           </div>
 
           {/* Options Section */}
-          <div className="flex-1 p-6 lg:p-10 xl:p-12 flex flex-col sm:flex-row gap-5 lg:gap-6 bg-white justify-center items-stretch">
+          <div className="flex-1 p-6 lg:p-10 xl:p-12 flex flex-col sm:flex-row gap-5 lg:gap-6 bg-transparent justify-center items-stretch relative">
             
             {/* Video (Pro/Agency only) */}
             {!isFree && (
               <button
                 onClick={() => setMode("video")}
-                className="group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/20 focus:outline-none relative overflow-hidden text-center border overflow-hidden"
+                className="group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl focus:outline-none relative overflow-hidden text-center border"
                 style={{ backgroundColor: accent, borderColor: 'rgba(255,255,255,0.1)' }}
               >
                 {/* Glossy sheen */}
@@ -254,22 +267,22 @@ export default function CollectionPage() {
             {/* Written */}
             <button
               onClick={() => setMode("text")}
-              className={`group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-xl focus:outline-none border-2 border-zinc-100 bg-white hover:border-zinc-300 text-center relative overflow-hidden ${isFree ? "w-full min-h-[300px]" : ""}`}
+              className={`group flex-1 flex flex-col items-center justify-center rounded-3xl p-8 lg:p-10 transition-all duration-400 hover:-translate-y-1 hover:shadow-xl focus:outline-none border border-border/50 bg-card/40 hover:border-border text-center relative overflow-hidden ${isFree ? "w-full min-h-[300px]" : ""}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <div className="w-16 h-16 rounded-[1.25rem] bg-zinc-50 flex items-center justify-center mb-6 border border-zinc-100 shadow-sm relative z-10 group-hover:bg-white group-hover:shadow-md transition-all duration-500 group-hover:scale-110">
-                <PenLine className="w-8 h-8 text-zinc-700" />
+              <div className="w-16 h-16 rounded-[1.25rem] bg-muted/50 flex items-center justify-center mb-6 border border-border/50 shadow-sm relative z-10 group-hover:bg-primary/10 group-hover:shadow-md transition-all duration-500 group-hover:scale-110">
+                <PenLine className="w-8 h-8 text-foreground" />
               </div>
               
-              <h3 className="text-xl font-bold text-zinc-900 mb-3 tracking-tight relative z-10">Write a Review</h3>
-              <p className="text-xs text-zinc-500 font-medium mb-8 leading-relaxed relative z-10 max-w-[200px]">
+              <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight relative z-10">Write a Review</h3>
+              <p className="text-xs text-muted-foreground font-medium mb-8 leading-relaxed relative z-10 max-w-[200px]">
                 Quick, structured, and easy to complete text feedback. ~2 mins.
               </p>
               
               <div className="flex flex-wrap justify-center gap-2 relative z-10">
                 {["Private options", !isFree ? "AI Polish" : null, "Quick form"].filter(Boolean).map(p => (
-                  <span key={p} className="text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-zinc-100 px-3 py-1.5 rounded-full transition-colors group-hover:bg-zinc-200 border border-transparent group-hover:border-zinc-300/30">
+                  <span key={p} className="text-[9px] font-black text-muted-foreground uppercase tracking-widest bg-muted px-3 py-1.5 rounded-full transition-colors group-hover:bg-primary/10 border border-transparent group-hover:border-primary/20">
                     {p}
                   </span>
                 ))}
@@ -281,14 +294,14 @@ export default function CollectionPage() {
 
       {/* Footer */}
       {isFree && (
-        <footer className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-4 sm:gap-6 text-[9px] font-bold text-zinc-400 uppercase tracking-[0.25em] z-20">
-          <Link to="/privacy" className="hover:text-zinc-700 transition-colors">Privacy</Link>
+        <footer className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-4 sm:gap-6 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.25em] z-20">
+          <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
           <span className="opacity-30">·</span>
-          <a href="https://vouchy.click" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-700 transition-colors flex items-center gap-1.5">
+          <a href="https://vouchy.click" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center gap-1.5">
             Powered by Vouchy
           </a>
           <span className="opacity-30">·</span>
-          <Link to="/terms" className="hover:text-zinc-700 transition-colors">Terms</Link>
+          <Link to="/terms" className="hover:text-primary transition-colors">Terms</Link>
         </footer>
       )}
     </div>
@@ -298,7 +311,7 @@ export default function CollectionPage() {
   // SUCCESS SCREEN
   // ─────────────────────────────────────────────────────────────────────────
   if (mode === "success") return (
-    <div className="h-[100svh] flex flex-col items-center justify-center gap-6 bg-white antialiased px-6">
+    <div className="h-[100svh] flex flex-col items-center justify-center gap-6 bg-background antialiased px-6">
       {logo && (
         <img src={logo} alt={workspaceName} className="h-10 w-auto object-contain mb-2 opacity-60" />
       )}
@@ -309,12 +322,12 @@ export default function CollectionPage() {
         <Check className="w-8 h-8 text-white" strokeWidth={3} />
       </div>
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">Thank you!</h1>
-        <p className="text-sm text-zinc-400">Your review is in — we really appreciate it.</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Thank you!</h1>
+        <p className="text-sm text-muted-foreground">Your review is in — we really appreciate it.</p>
       </div>
       <button
         onClick={() => window.location.reload()}
-        className="text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition-colors underline underline-offset-4"
+        className="text-xs font-semibold text-primary/60 hover:text-primary transition-colors underline underline-offset-4"
       >
         Submit another
       </button>
@@ -323,16 +336,15 @@ export default function CollectionPage() {
 
   // ─────────────────────────────────────────────────────────────────────────
   // WRITING FORM
-  // Three zones: header (brand) / body (form, scrollable on mobile) / footer
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="h-[100svh] flex flex-col bg-white antialiased overflow-hidden text-zinc-900">
+    <div className="h-[100svh] flex flex-col bg-background antialiased overflow-hidden text-foreground">
 
       {/* Header — brand is centred, back on left, mirror spacer on right */}
-      <header className="shrink-0 flex items-center justify-between px-5 sm:px-8 h-16 border-b border-zinc-100">
+      <header className="shrink-0 flex items-center justify-between px-5 sm:px-8 h-16 border-b border-border/50 bg-card/10">
         <button
           onClick={() => setMode("choose")}
-          className="flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-zinc-900 transition-colors shrink-0"
+          className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
@@ -348,24 +360,28 @@ export default function CollectionPage() {
               style={{ height: '36px', width: 'auto', maxWidth: '160px' }}
             />
           ) : (
-            <span className="text-sm font-bold text-zinc-800">{workspaceName}</span>
+            <span className="text-sm font-bold text-foreground">{workspaceName}</span>
           )}
         </div>
 
         <div className="w-16 shrink-0" /> {/* mirror of back button width */}
       </header>
 
-      {/* Form body:
-          Mobile  — stacks vertically, zone scrolls naturally
-          Desktop — two columns, locked to viewport height            */}
+      {/* Form body */}
       <form
         onSubmit={handleSubmit}
-        className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden"
+        className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden relative"
       >
-        <div className="flex flex-col lg:flex-row lg:h-full">
+        <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
+          style={{ 
+            backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
+            backgroundSize: '20px 20px' 
+          }} 
+        />
+        <div className="flex flex-col lg:flex-row lg:h-full relative z-10">
 
           {/* LEFT — review content */}
-          <div className="flex flex-col px-5 sm:px-8 pt-6 pb-6 lg:py-8 lg:flex-1 lg:min-h-0 gap-5 border-b border-zinc-100 lg:border-b-0 lg:border-r">
+          <div className="flex flex-col px-5 sm:px-8 pt-6 pb-6 lg:py-8 lg:flex-1 lg:min-h-0 gap-5 border-b border-border/50 lg:border-b-0 lg:border-r">
             {/* Star rating */}
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map(i => (
@@ -381,7 +397,8 @@ export default function CollectionPage() {
                     className="w-7 h-7 transition-colors"
                     style={{
                       fill:  (hoverRating || rating) >= i ? accent : "transparent",
-                      color: (hoverRating || rating) >= i ? accent : "#D4D4D8",
+                      color: (hoverRating || rating) >= i ? accent : "currentColor",
+                      opacity: (hoverRating || rating) >= i ? 1 : 0.2
                     }}
                     strokeWidth={2}
                   />
@@ -394,7 +411,7 @@ export default function CollectionPage() {
               {/* Prompt starters — click to seed the textarea */}
               {!content && (
                 <div className="flex flex-wrap gap-2">
-                  <p className="w-full text-[10px] font-semibold text-zinc-300 uppercase tracking-widest">Start with a prompt</p>
+                  <p className="w-full text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Start with a prompt</p>
                   {[
                     "What I liked most was...",
                     "Before using this, I struggled with...",
@@ -405,7 +422,7 @@ export default function CollectionPage() {
                       key={prompt}
                       type="button"
                       onClick={() => setContent(prompt)}
-                      className="text-[11px] font-medium text-zinc-500 bg-zinc-50 border border-zinc-100 hover:border-zinc-300 hover:text-zinc-800 hover:bg-white px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                      className="text-[11px] font-medium text-muted-foreground bg-muted/40 border border-border/50 hover:border-border hover:text-foreground hover:bg-muted px-3 py-1.5 rounded-lg transition-all active:scale-95"
                     >
                       {prompt}
                     </button>
@@ -417,7 +434,7 @@ export default function CollectionPage() {
                 <textarea
                   required
                   placeholder="Share your experience..."
-                  className="w-full min-h-[140px] lg:absolute lg:inset-0 lg:h-full text-base sm:text-lg font-medium text-zinc-900 bg-transparent outline-none resize-none placeholder:text-zinc-200 leading-relaxed"
+                  className="w-full min-h-[140px] lg:absolute lg:inset-0 lg:h-full text-base sm:text-lg font-medium text-foreground bg-transparent outline-none resize-none placeholder:text-muted-foreground/30 leading-relaxed"
                   value={content}
                   onChange={e => setContent(e.target.value)}
                 />
@@ -432,13 +449,13 @@ export default function CollectionPage() {
                 return (
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-semibold text-zinc-300 uppercase tracking-widest">{label}</span>
-                      <span className="text-[10px] font-semibold text-zinc-300">{words} words</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{label}</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground">{words} words</span>
                     </div>
-                    <div className="h-1 bg-zinc-100 rounded-full overflow-hidden">
+                    <div className="h-1 bg-muted rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, backgroundColor: pct === 100 ? accent : '#D4D4D8' }}
+                        style={{ width: `${pct}%`, backgroundColor: pct === 100 ? accent : 'hsl(var(--muted-foreground)/0.3)' }}
                       />
                     </div>
                   </div>
@@ -450,10 +467,10 @@ export default function CollectionPage() {
             {!isFree && (
               <div>
                 <div className="flex items-center justify-between mb-2.5">
-                  <p className="text-[10px] font-semibold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
+                  <p className="text-[10px] font-semibold text-primary uppercase tracking-widest flex items-center gap-1.5">
                     <Wand2 className="w-3 h-3" /> AI Polish
                   </p>
-                  <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     {3 - aiUses} left
                   </span>
                 </div>
@@ -465,11 +482,11 @@ export default function CollectionPage() {
                       disabled={!!aiWorking || !content.trim() || aiUses >= 3}
                       onClick={() => handleEnhance(action.id)}
                       title={action.hint}
-                      className="h-8 px-4 rounded-full text-[11px] font-semibold border border-zinc-200 text-zinc-600 bg-white hover:border-zinc-900 hover:text-zinc-900 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex-shrink-0"
+                      className="h-8 px-4 rounded-full text-[11px] font-semibold border border-border/50 text-muted-foreground bg-card hover:border-border hover:text-foreground transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 flex-shrink-0"
                     >
                       {aiWorking === action.id ? (
                         <span className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full border border-zinc-400 border-t-transparent animate-spin inline-block" />
+                          <span className="w-2.5 h-2.5 rounded-full border border-primary/40 border-t-transparent animate-spin inline-block" />
                           {action.label}
                         </span>
                       ) : action.label}
@@ -481,17 +498,17 @@ export default function CollectionPage() {
           </div>
 
           {/* RIGHT — author details + CTA */}
-          <div className="flex flex-col justify-between px-5 sm:px-8 pt-6 pb-6 lg:py-8 lg:w-[400px] xl:w-[440px] shrink-0 gap-8">
-            {/* Fields — always 2 columns since panel is fixed width on desktop */}
+          <div className="flex flex-col justify-between px-5 sm:px-8 pt-6 pb-6 lg:py-8 lg:w-[400px] xl:w-[440px] shrink-0 gap-8 bg-card/20 backdrop-blur-sm">
+            {/* Fields */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-x-6">
               {FIELDS.map(([key, label, req]) => (
                 <div key={key} className="flex flex-col gap-1.5">
                   <label
                     htmlFor={`field-${key}`}
-                    className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest"
+                    className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest"
                   >
                     {label}
-                    {req && <span className="text-red-400 ml-0.5">*</span>}
+                    {req && <span className="text-destructive ml-0.5">*</span>}
                   </label>
                   <input
                     id={`field-${key}`}
@@ -500,8 +517,7 @@ export default function CollectionPage() {
                     autoComplete={key === "email" ? "email" : key === "name" ? "name" : "off"}
                     value={fields[key as keyof typeof fields]}
                     onChange={e => setFields(f => ({ ...f, [key]: e.target.value }))}
-                    className="h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-900 outline-none transition-colors"
-                    placeholder={label}
+                    className="h-10 w-full rounded-lg border border-border bg-card/50 px-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/30 focus:border-primary/50 outline-none transition-colors"
                   />
                 </div>
               ))}
@@ -512,9 +528,9 @@ export default function CollectionPage() {
               {/* Honest confirmation */}
               <label className="flex items-start gap-3 cursor-pointer group">
                 <div
-                  className="mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all"
+                  className="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all"
                   style={{
-                    borderColor:      agreed ? accent : "#D4D4D8",
+                    borderColor:      agreed ? accent : "hsl(var(--border))",
                     backgroundColor:  agreed ? accent : "transparent",
                     color:            agreed ? "#fff"  : "transparent",
                   }}
@@ -527,7 +543,7 @@ export default function CollectionPage() {
                   checked={agreed}
                   onChange={e => setAgreed(e.target.checked)}
                 />
-                <span className="text-xs text-zinc-400 leading-relaxed group-hover:text-zinc-600 transition-colors">
+                <span className="text-xs text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">
                   I confirm this review is honest and based on my real experience.
                 </span>
               </label>
@@ -536,7 +552,7 @@ export default function CollectionPage() {
               <button
                 type="submit"
                 disabled={submitting || !agreed}
-                className="w-full h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-30 hover:brightness-110 focus:outline-none"
+                className="w-full h-12 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-30 hover:brightness-110 focus:outline-none shadow-lg shadow-black/10"
                 style={{ backgroundColor: accent }}
               >
                 {submitting ? (
@@ -559,12 +575,12 @@ export default function CollectionPage() {
 
       {/* Footer */}
       {isFree && (
-        <footer className="shrink-0 flex items-center justify-center h-10 gap-5 text-[10px] font-semibold text-zinc-300 uppercase tracking-widest border-t border-zinc-50">
-          <Link to="/privacy" className="hover:text-zinc-500 transition-colors">Privacy</Link>
+        <footer className="shrink-0 flex items-center justify-center h-10 gap-5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest border-t border-border/50">
+          <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <span>·</span>
           <span>Powered by Vouchy</span>
           <span>·</span>
-          <Link to="/terms" className="hover:text-zinc-500 transition-colors">Terms</Link>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </footer>
       )}
     </div>

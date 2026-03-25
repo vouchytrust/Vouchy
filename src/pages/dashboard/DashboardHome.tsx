@@ -10,7 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
   { label: "New Collector", icon: Plus, to: "/dashboard/spaces" },
-  { label: "Design Widgets", to: "/dashboard/widgets" },
+  { label: "Design Widgets", icon: Sparkles, to: "/dashboard/widgets" },
 ];
 
 const container = {
@@ -235,7 +235,7 @@ export default function DashboardHome() {
               </div>
             ) : (
               <div className="divide-y divide-border/40">
-                {recentTestimonials.map((t: any, i: number) => {
+                {recentTestimonials.map((t: { id: string; author_name: string; created_at: string; author_avatar_url?: string | null; rating: number; content: string; type: string }, i: number) => {
                   const initials = t.author_name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                   const gradient = gradients[i % gradients.length];
                   const timeAgo = formatDistanceToNow(new Date(t.created_at), { addSuffix: true });

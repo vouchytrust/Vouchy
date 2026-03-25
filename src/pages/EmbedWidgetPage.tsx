@@ -195,10 +195,10 @@ export default function EmbedWidgetPage() {
     async function loadData() {
       if (!slug) return;
       try {
-        let spaceIdToUse = "";
-        let currentMinRating = layoutSettings.minRating;
-        let currentMediaFilter = layoutSettings.mediaFilter;
-        let currentMax = layoutSettings.maxItems;
+        const spaceIdToUse = "";
+        const currentMinRating = layoutSettings.minRating;
+        const currentMediaFilter = layoutSettings.mediaFilter;
+        const currentMax = layoutSettings.maxItems;
 
         const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(slug);
         let rawTestimonials: any[] = [];

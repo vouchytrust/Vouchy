@@ -39,7 +39,7 @@ const VisualCapture = () => (
     </div>
     <div className="flex gap-0.5 h-6 items-end">
       {[4, 8, 12, 8, 4].map((height, i) => (
-        <div 
+        <div
           key={i}
           style={{ height: `${height}px` }}
           className="w-1 bg-primary/40 rounded-full"
@@ -59,7 +59,7 @@ const VisualRefine = () => (
       <Wand2 className="absolute top-3 right-3 w-4 h-4 text-primary" />
     </div>
     <div className="mt-4 flex items-center gap-2 px-1">
-      <Sparkles className="w-3 h-3 text-primary" />
+
       <div className="text-[6px] font-bold text-primary/60 uppercase tracking-tighter">AI Assisted</div>
     </div>
   </div>
@@ -117,14 +117,14 @@ const HowItWorks = () => {
 
   return (
     <section id="how-it-works" className="py-24 lg:py-32 bg-background relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '40px 40px' }} 
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '40px 40px' }}
       />
-      
+
       <div className="container mx-auto px-6 relative z-10 max-w-7xl">
         <div className="text-center mb-16 lg:mb-24">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-6">
-            <Sparkles className="w-3 h-3 text-primary" />
+
             <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Workflow</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
