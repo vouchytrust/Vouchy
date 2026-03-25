@@ -145,7 +145,7 @@ export default function OnboardingPage() {
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <p className="text-[11px] font-bold text-primary uppercase tracking-widest">Applied to: Collection Pages · Trust Links · Video HUD · Success Screens</p>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {brandColors.map((c) => (
                     <button
                       key={c.value}
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
                     >
                       <div className="w-8 h-8 rounded-full shrink-0" style={{ backgroundColor: c.value }} />
                       <span className="text-sm font-medium text-foreground">{c.name}</span>
-                      {color === c.value && (
+                      {color === c.value && brandColors.some(bc => bc.value === color) && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -166,6 +166,29 @@ export default function OnboardingPage() {
                       )}
                     </button>
                   ))}
+                  
+                  {/* Custom color picker */}
+                  <div className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${!brandColors.some(bc => bc.value === color) ? "border-primary" : "border-border hover:border-muted-foreground/30"}`}>
+                    <div className="w-8 h-8 rounded-full shrink-0 relative overflow-hidden border border-border">
+                      <input 
+                        type="color" 
+                        value={color} 
+                        onChange={(e) => setColor(e.target.value)}
+                        className="absolute inset-[-10px] w-[50px] h-[50px] cursor-pointer"
+                        title="Choose custom color"
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">Custom</span>
+                    {!brandColors.some(bc => bc.value === color) && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                      >
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

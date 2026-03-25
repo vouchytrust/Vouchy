@@ -186,17 +186,17 @@ export default function TestimonialDesigns() {
   return (
     <section id="design-showcase" className='py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center'>
       {/* Blueprint Grid Background - Slightly more visible for the "architect" feel */}
-      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '80px 80px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '80px 80px'
+        }}
       />
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '20px 20px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }}
       />
 
       <div className='container mx-auto px-6 relative z-10 max-w-7xl font-sans'>
@@ -210,7 +210,6 @@ export default function TestimonialDesigns() {
               viewport={{ once: true }}
               className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/[0.03] border border-primary/10 mb-4'
             >
-              <Sparkles className="w-3 h-3 text-primary" />
               <span className='text-[10px] font-black text-primary/60 uppercase tracking-[0.2em]'>Display styles</span>
             </motion.div>
 
@@ -254,7 +253,7 @@ export default function TestimonialDesigns() {
                     className="flex flex-col h-full group pb-4"
                   >
                     <div className="flex-1 relative rounded-2xl p-8 flex items-center justify-center transition-all duration-500 group">
-                      
+
                       {/* Precision Corners - Perfectly aligned with parent radius */}
                       <div className="absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
                       <div className="absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />

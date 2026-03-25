@@ -12,6 +12,7 @@ import {
 import { fetchSpaceBySlug, fetchTestimonialsBySpace, fetchWidgetById } from "@/lib/api";
 
 import { TestimonialCard, CardConfig, TestimonialItem } from "@/components/TestimonialCard";
+import { TrustBadgeWidget, ConstellationWidget } from "@/components/AggregateWidgets";
 import {
   Carousel,
   CarouselContent,
@@ -23,15 +24,15 @@ import {
 function MarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
   const items = [...testimonials, ...testimonials];
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden w-full relative" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
       <motion.div
-        className="flex gap-3"
+        className="flex gap-5 py-4 px-2"
         animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
       >
         {items.map((t, i) => (
-          <div key={i} className="shrink-0 w-[350px]">
-            <TestimonialCard t={t} config={{ ...config, layout: "clean" }} index={0} />
+          <div key={i} className="shrink-0 w-[400px]">
+            <TestimonialCard t={t} config={{ ...config, layout: "modern" }} index={0} />
           </div>
         ))}
       </motion.div>
@@ -315,6 +316,10 @@ export default function EmbedWidgetPage() {
           <MarqueeRow testimonials={testimonials.slice(0, Math.ceil(testimonials.length / 2))} config={config} />
           <MarqueeRow testimonials={testimonials.slice(Math.ceil(testimonials.length / 2))} config={config} reverse />
         </div>
+      ) : config.layout === "badge" ? (
+        <div className="flex justify-center p-4"><TrustBadgeWidget testimonials={testimonials} config={config} /></div>
+      ) : config.layout === "constellation" ? (
+        <ConstellationWidget testimonials={testimonials} config={config} />
       ) : config.layout === "masonry" ? (
         <div className="columns-1 md:columns-2 lg:columns-3 gap-4 p-4">
           {testimonials.map((t, i) => (

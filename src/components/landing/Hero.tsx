@@ -126,9 +126,7 @@ export default function Hero() {
                   <p className="text-lg md:text-xl font-medium text-foreground tracking-tight leading-snug mb-3">
                     "It used to take weeks to get a case study. Now our customers record them on their phones in two minutes."
                   </p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-bold">
-                    Mark T. &mdash; VP of Growth
-                  </p>
+
                 </motion.div>
 
                 {/* Secondary Minimal Testimonial */}
@@ -141,12 +139,9 @@ export default function Hero() {
                   <div className="absolute inset-0 bg-primary/5 -z-10 backdrop-blur-md rounded-r-2xl" />
                   <div className="p-6">
                     <div className="flex items-start gap-4 mb-4">
-                      <img src="https://i.pravatar.cc/150?u=elena" className="w-10 h-10 rounded-full border border-primary/20 brightness-90 saturate-50" alt="Elena" />
+
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-foreground">Elena V.</span>
-                          <span className="text-[8px] font-black uppercase text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded-sm">Verified</span>
-                        </div>
+
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map(i => <TbStarFilled key={i} className="w-2.5 h-2.5 text-yellow-500/80" />)}
                         </div>
@@ -154,13 +149,9 @@ export default function Hero() {
                     </div>
 
                     <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                      "We embedded the React component, and our conversion rate jumped by 14% overnight. Best decision we made this quarter."
+                      "Vouchy's automation handles everything while you focus on building."
                     </p>
 
-                    <div className="mt-4 pt-4 border-t border-primary/10 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Widget V.2</span>
-                      <span className="text-[10px] text-foreground font-mono">14% ↗</span>
-                    </div>
                   </div>
                 </motion.div>
 

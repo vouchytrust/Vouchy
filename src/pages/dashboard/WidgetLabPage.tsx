@@ -5,7 +5,7 @@ import {
   Copy, Check, LayoutGrid, Rows3, GalleryHorizontalEnd,
   MessageCircle, Users, Layers3, Quote,
   FolderOpen, Play, ChevronDown, Columns2, ChevronLeft, ChevronRight, Circle,
-  Twitter, Facebook, Linkedin, Mail, Link2, AlignCenter, Type
+  Twitter, Facebook, Linkedin, Mail, Link2, AlignCenter, Type, BadgeCheck, Network
 } from "lucide-react";
 import {
   Carousel,
@@ -55,6 +55,8 @@ const layouts: Layout[] = [
   { id: "marquee", name: "Marquee", icon: <GalleryHorizontalEnd className="h-3.5 w-3.5" />, free: false },
   { id: "masonry", name: "Masonry", icon: <Layers3 className="h-3.5 w-3.5" />, free: false },
   { id: "video", name: "Video", icon: <Play className="h-3.5 w-3.5" />, free: false },
+  { id: "badge", name: "Trust Badge", icon: <BadgeCheck className="h-3.5 w-3.5" />, free: false },
+  { id: "constellation", name: "Constellation", icon: <Network className="h-3.5 w-3.5" />, free: false },
 ];
 
 const devices = [
@@ -64,20 +66,21 @@ const devices = [
 ];
 
 import { TestimonialCard, CardConfig, TestimonialItem, fontMap, shadowMap } from "@/components/TestimonialCard";
+import { TrustBadgeWidget, ConstellationWidget } from "@/components/AggregateWidgets";
 
 /* ── Marquee row ── */
 function MarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
   const items = [...testimonials, ...testimonials];
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden w-full relative" style={{ WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
       <motion.div
-        className="flex gap-3"
+        className="flex gap-5 py-4 px-2"
         animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
       >
         {items.map((t, i) => (
-          <div key={i} className="shrink-0 w-[350px]">
-            <TestimonialCard t={t} config={{ ...config, layout: "clean" }} index={0} />
+          <div key={i} className="shrink-0 w-[400px]">
+            <TestimonialCard t={t} config={{ ...config, layout: "modern" }} index={0} />
           </div>
         ))}
       </motion.div>
@@ -100,20 +103,21 @@ interface TrustPagePreviewProps {
   minRating: number;
   mediaFilter: string;
   maxItems: number;
+  device: string;
 }
 
 function TrustPageMarqueeRow({ testimonials, config, reverse }: { testimonials: TestimonialItem[]; config: CardConfig; reverse?: boolean }) {
   const items = [...testimonials, ...testimonials];
   return (
-    <div style={{ overflow: 'hidden', width: '100%' }}>
+    <div style={{ overflow: 'hidden', width: '100%', WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
       <motion.div
-        className="flex"
-        style={{ gap: 8 }}
+        className="flex py-2"
+        style={{ gap: 16 }}
         animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
       >
         {items.map((t, i) => (
-          <div key={i} style={{ flexShrink: 0, width: 200 }}>
+          <div key={i} style={{ flexShrink: 0, width: 260 }}>
             <TestimonialCard t={t} config={{ ...config, layout: 'modern' }} index={0} />
           </div>
         ))}
@@ -122,7 +126,7 @@ function TrustPageMarqueeRow({ testimonials, config, reverse }: { testimonials: 
   );
 }
 
-function TrustPagePreview({ spaceName, logoUrl, pageAccent, widgetAccent, testimonials, cardConfig, lightColors, darkColors, layout, isDark, minRating, mediaFilter, maxItems }: TrustPagePreviewProps) {
+function TrustPagePreview({ spaceName, logoUrl, pageAccent, widgetAccent, testimonials, cardConfig, lightColors, darkColors, layout, isDark, minRating, mediaFilter, maxItems, device }: TrustPagePreviewProps) {
   // Apply exact same filters as TrustPage
   const filtered = testimonials
     .filter(t => t.rating >= minRating)
@@ -215,6 +219,22 @@ function TrustPagePreview({ spaceName, logoUrl, pageAccent, widgetAccent, testim
               <TrustPageMarqueeRow testimonials={filtered.slice(0, Math.ceil(filtered.length / 2))} config={previewCardConfig} />
               <TrustPageMarqueeRow testimonials={filtered.slice(Math.ceil(filtered.length / 2))} config={previewCardConfig} reverse />
             </div>
+          ) : device === "mobile" ? (
+            <div className="w-full -mx-2 px-2 pb-6">
+              <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                <CarouselContent className="ml-0">
+                  {filtered.map((t, i) => (
+                    <CarouselItem key={i} className="pl-3 basis-[85%]">
+                      <TestimonialCard t={t} config={t.type === 'video' ? { ...previewCardConfig, layout: 'video' } : previewCardConfig} index={i} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex items-center justify-center gap-3 mt-6">
+                  <CarouselPrevious className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm" style={{ borderColor: pageAccent + '30', color: pageAccent }} />
+                  <CarouselNext className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm" style={{ borderColor: pageAccent + '30', color: pageAccent }} />
+                </div>
+              </Carousel>
+            </div>
           ) : layout === 'masonry' ? (
             <div style={{ columns: 3, gap: 8, columnFill: 'balance' }}>
               {filtered.map((t, i) => (
@@ -238,7 +258,9 @@ function TrustPagePreview({ spaceName, logoUrl, pageAccent, widgetAccent, testim
 
 /* ── Main ── */
 export default function WidgetLabPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const initialBrandColor = profile?.brand_color || "#3b82f6";
+
   const [saving, setSaving] = useState(false);
   const [selectedLayout, setSelectedLayout] = useState("clean");
   const [device, setDevice] = useState("desktop");
@@ -292,9 +314,9 @@ export default function WidgetLabPage() {
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [loadingSpaces, setLoadingSpaces] = useState(true);
   const [loadingTestimonials, setLoadingTestimonials] = useState(false);
-  const [workspaceBrandColor, setWorkspaceBrandColor] = useState("#3b82f6");
-  const [workspaceCompanyName, setWorkspaceCompanyName] = useState("");
-  const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState("");
+  const [workspaceBrandColor, setWorkspaceBrandColor] = useState(initialBrandColor);
+  const [workspaceCompanyName, setWorkspaceCompanyName] = useState(profile?.company_name || "");
+  const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState(profile?.logo_url || "");
 
   const [cardRadius, setCardRadius] = useState([12]);
   const [cardPadding, setCardPadding] = useState([16]);
@@ -315,12 +337,12 @@ export default function WidgetLabPage() {
   const { toast } = useToast();
 
   const [lightColors, setLightColors] = useState({
-    accentColor: "#3b82f6", cardBg: "#ffffff", containerBg: "transparent", nameColor: "#1a1a1a",
+    accentColor: initialBrandColor, cardBg: "#ffffff", containerBg: "transparent", nameColor: "#1a1a1a",
     companyColor: "#888888", bodyColor: "#666666", starColor: "#f59e0b",
     navIconColor: "#1a1a1a", navBgColor: "#ffffff", primaryBtnColor: "#1a1a1a",
   });
   const [darkColors, setDarkColors] = useState({
-    accentColor: "#60a5fa", cardBg: "#1c1c1e", containerBg: "transparent", nameColor: "#f5f5f7",
+    accentColor: initialBrandColor, cardBg: "#1c1c1e", containerBg: "transparent", nameColor: "#f5f5f7",
     companyColor: "#8e8e93", bodyColor: "#aeaeb2", starColor: "#f59e0b",
     navIconColor: "#ffffff", navBgColor: "#2c2c2e", primaryBtnColor: "#ffffff",
   });
@@ -330,6 +352,17 @@ export default function WidgetLabPage() {
     if (editingTheme === "light") setLightColors(prev => ({ ...prev, [key]: value }));
     else setDarkColors(prev => ({ ...prev, [key]: value }));
   };
+
+  // Sync brand color from AuthContext profile whenever it becomes available
+  useEffect(() => {
+    if (!profile) return;
+    const brandColor = profile.brand_color || "#3b82f6";
+    setWorkspaceBrandColor(brandColor);
+    if (profile.company_name) setWorkspaceCompanyName(profile.company_name);
+    if (profile.logo_url) setWorkspaceLogoUrl(profile.logo_url);
+    setLightColors(prev => ({ ...prev, accentColor: brandColor }));
+    setDarkColors(prev => ({ ...prev, accentColor: brandColor }));
+  }, [profile?.brand_color, profile?.company_name, profile?.logo_url]);
 
   useEffect(() => {
     async function load() {
@@ -344,9 +377,12 @@ export default function WidgetLabPage() {
             const { data: profile } = await (await import("@/integrations/supabase/client")).supabase
               .from("profiles").select("brand_color, company_name, logo_url").eq("user_id", s[0].user_id).single();
             if (profile) {
-              setWorkspaceBrandColor(profile.brand_color || "#3b82f6");
+              const brandColor = profile.brand_color || "#3b82f6";
+              setWorkspaceBrandColor(brandColor);
               setWorkspaceCompanyName(profile.company_name || "");
               setWorkspaceLogoUrl(profile.logo_url || "");
+              setLightColors(prev => ({ ...prev, accentColor: brandColor }));
+              setDarkColors(prev => ({ ...prev, accentColor: brandColor }));
             }
           }
         }
@@ -1158,6 +1194,7 @@ export default function WidgetLabPage() {
                     minRating={minRating}
                     mediaFilter={mediaFilter}
                     maxItems={maxItems[0]}
+                    device={device}
                   />
                 ) : loadingTestimonials ? (
                   <div className="flex items-center justify-center h-full">
@@ -1184,6 +1221,10 @@ export default function WidgetLabPage() {
                         <MarqueeRow testimonials={visibleTestimonials.slice(0, Math.ceil(visibleTestimonials.length / 2))} config={cardConfig} />
                         <MarqueeRow testimonials={visibleTestimonials.slice(Math.ceil(visibleTestimonials.length / 2))} config={cardConfig} reverse />
                       </div>
+                    ) : selectedLayout === "badge" ? (
+                      <div className="flex justify-center py-10 w-full"><TrustBadgeWidget testimonials={visibleTestimonials} config={cardConfig} /></div>
+                    ) : selectedLayout === "constellation" ? (
+                      <ConstellationWidget testimonials={visibleTestimonials} config={cardConfig} />
                     ) : selectedLayout === "masonry" ? (
                       <div className={`gap-4 ${
                         device === 'mobile' ? 'columns-1' :

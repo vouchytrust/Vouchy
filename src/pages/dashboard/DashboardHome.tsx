@@ -10,7 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
   { label: "New Collector", icon: Plus, to: "/dashboard/spaces" },
-  { label: "Design Widgets", icon: Sparkles, to: "/dashboard/widgets" },
+  { label: "Design Widgets", to: "/dashboard/widgets" },
 ];
 
 const container = {
@@ -126,10 +126,10 @@ export default function DashboardHome() {
             const isFree = (profile?.plan || "free").toLowerCase() === "free";
             const isDisabled = a.label === "New Collector" && isFree && hasMoreThanOneSpace;
             return (
-              <Button 
-                key={a.label} 
-                size="sm" 
-                className={`h-8 text-xs gap-1.5 font-medium ${isDisabled ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary hover:bg-primary/90"}`} 
+              <Button
+                key={a.label}
+                size="sm"
+                className={`h-8 text-xs gap-1.5 font-medium ${isDisabled ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary hover:bg-primary/90"}`}
                 asChild={!isDisabled}
                 disabled={isDisabled}
               >

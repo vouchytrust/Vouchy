@@ -114,17 +114,17 @@ const Pricing = () => {
   return (
     <section id="pricing" className="relative py-12 lg:py-16 bg-background border-y border-border overflow-hidden min-h-screen flex flex-col justify-center" ref={ref}>
       {/* Background structural lines */}
-      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '80px 80px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '80px 80px'
+        }}
       />
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '20px 20px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }}
       />
 
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
@@ -164,11 +164,10 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              className={`group relative p-6 rounded-2xl transition-all duration-500 flex flex-col bg-card/40 border border-border/50 backdrop-blur-sm ${
-                plan.popular
-                ? "scale-[1.02] z-10 ring-1 ring-primary/20"
-                : ""
-              }`}
+              className={`group relative p-6 rounded-2xl transition-all duration-500 flex flex-col bg-card/40 border border-border/50 backdrop-blur-sm ${plan.popular
+                  ? "scale-[1.02] z-10 ring-1 ring-primary/20"
+                  : ""
+                }`}
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
@@ -209,10 +208,9 @@ const Pricing = () => {
               <button
                 onClick={() => handleSelectPlan(plan)}
                 disabled={loadingPlan === plan.name}
-                className={`w-full group/btn relative h-14 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 z-10 ${
-                  plan.popular 
-                  ? "bg-foreground text-background shadow-xl shadow-black/20 hover:scale-[1.03]" 
-                  : "bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10"}`}
+                className={`w-full group/btn relative h-14 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 z-10 ${plan.popular
+                    ? "bg-foreground text-background shadow-xl shadow-black/20 hover:scale-[1.03]"
+                    : "bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10"}`}
               >
                 {loadingPlan === plan.name ? (
                   <TbLoader className="w-4 h-4 animate-spin" />
@@ -246,9 +244,6 @@ const Pricing = () => {
               </div>
 
               {/* Structural Label */}
-              <div className="mt-12 text-center relative z-10">
-                <span className="text-[7px] font-mono text-primary/20 uppercase tracking-[0.5em]">Auth_Sys_Arc_{plan.name.slice(0, 3).toUpperCase()}</span>
-              </div>
             </motion.div>
           ))}
         </div>

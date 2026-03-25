@@ -30,17 +30,17 @@ const CardArchitecture = ({ id, light = false }: { id: string, light?: boolean }
 const BentoGrid = () => {
   return (
     <section id="features" className="py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center">
-      <div className="absolute inset-0 opacity-[0.035] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '80px 80px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '80px 80px'
+        }}
       />
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none" 
-        style={{ 
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`, 
-          backgroundSize: '20px 20px' 
-        }} 
+      <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }}
       />
 
       <div className="container mx-auto px-6 relative z-10">
@@ -53,7 +53,7 @@ const BentoGrid = () => {
               viewport={{ once: true }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4"
             >
-              <Sparkles className="w-3 h-3 text-primary" />
+
               <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Features</span>
             </motion.div>
             <motion.h2
@@ -87,7 +87,7 @@ const BentoGrid = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <CardArchitecture id="SYS_COMP_01" />
+            <CardArchitecture id="01" />
             {/* Visual - inline, not absolute */}
             <div className="flex gap-3 h-[140px] mt-4 overflow-hidden rounded-2xl">
               <div className="flex-1 bg-card rounded-2xl border border-border/50 flex items-center justify-center relative overflow-hidden group-hover:-translate-x-1 transition-transform duration-500 shadow-xl">
@@ -119,7 +119,7 @@ const BentoGrid = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            <CardArchitecture id="SYS_COMP_03" />
+            <CardArchitecture id="02" />
             {/* Visual */}
             <div className="h-[100px] mt-4 relative overflow-hidden rounded-2xl bg-primary/[0.02] border border-primary/5 flex items-center justify-center">
               <div className="w-32 bg-foreground rounded-xl p-3 shadow-xl transform rotate-[-3deg] group-hover:rotate-0 transition-all duration-700 border border-primary/10">
@@ -150,7 +150,7 @@ const BentoGrid = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            <CardArchitecture id="SYS_COMP_02" />
+            <CardArchitecture id="03" />
             {/* Visual - inline */}
             <div
               className="h-[140px] mt-4 overflow-hidden rounded-2xl"

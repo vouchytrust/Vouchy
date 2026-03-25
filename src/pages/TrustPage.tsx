@@ -6,7 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/contexts/ThemeContext";
 import { VouchyLogo } from "@/components/VouchyLogo";
 import { TestimonialCard, TestimonialItem, CardConfig } from "@/components/TestimonialCard";
+import { TrustBadgeWidget, ConstellationWidget } from "@/components/AggregateWidgets";
 import { PublicFooter } from "@/components/shared/PublicFooter";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -395,10 +403,60 @@ export default function TrustPage() {
             <MarqueeRow testimonials={mappedTestimonials.slice(0, Math.ceil(mappedTestimonials.length / 2))} config={cardConfig} />
             <MarqueeRow testimonials={mappedTestimonials.slice(Math.ceil(mappedTestimonials.length / 2))} config={cardConfig} reverse />
           </div>
+        ) : layout === "badge" ? (
+          <div className="flex justify-center py-20 w-full"><TrustBadgeWidget testimonials={mappedTestimonials} config={cardConfig} /></div>
+        ) : layout === "constellation" ? (
+          <ConstellationWidget testimonials={mappedTestimonials} config={cardConfig} />
         ) : (
           <>
-            {/* Wall of Love with Layout Support */}
-            <div className={`w-full ${layout === 'masonry' ? 'columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}`}>
+            {/* ── MOBILE: swipeable carousel ── */}
+            <div className="sm:hidden -mx-2 px-2">
+              <Carousel
+                opts={{ align: "start", loop: false }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-3">
+                  {visible.map((t, i) => {
+                    const mapped: TestimonialItem = {
+                      name: t.author_name,
+                      company: t.author_company || "",
+                      rating: t.rating,
+                      content: t.content,
+                      avatar: t.author_avatar_url,
+                      type: (t.type === "video" ? "video" : "text") as "video" | "text",
+                      video_url: t.video_url,
+                      initials: initials(t.author_name)
+                    };
+                    return (
+                      <CarouselItem key={t.id} className="pl-3 basis-[85%]">
+                        <TestimonialCard
+                          t={mapped}
+                          config={t.type === "video" ? { ...cardConfig, layout: "video" } : cardConfig}
+                          index={i}
+                        />
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <div className="flex items-center justify-center gap-3 mt-6">
+                  <CarouselPrevious
+                    className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm"
+                    style={{ borderColor: pageAccent + '30', color: pageAccent }}
+                  />
+                  <CarouselNext
+                    className="static translate-y-0 h-9 w-9 rounded-full border shadow-sm"
+                    style={{ borderColor: pageAccent + '30', color: pageAccent }}
+                  />
+                </div>
+              </Carousel>
+            </div>
+
+            {/* ── DESKTOP: existing grid / masonry ── */}
+            <div className={`hidden sm:block w-full ${
+              layout === 'masonry'
+                ? 'columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6'
+                : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
+            }`}>
               {visible.map((t, i) => {
                 const mapped: TestimonialItem = {
                   name: t.author_name,
@@ -412,10 +470,10 @@ export default function TrustPage() {
                 };
                 return (
                   <div key={t.id} className={layout === 'masonry' ? "break-inside-avoid" : ""}>
-                    <TestimonialCard 
-                      t={mapped} 
-                      config={t.type === "video" ? { ...cardConfig, layout: "video" } : cardConfig} 
-                      index={i} 
+                    <TestimonialCard
+                      t={mapped}
+                      config={t.type === "video" ? { ...cardConfig, layout: "video" } : cardConfig}
+                      index={i}
                     />
                   </div>
                 );
