@@ -4,6 +4,7 @@ import { Star, Video, PenLine, Check, Send, ChevronLeft, Wand2 } from "lucide-re
 import VideoRecorder from "@/components/collection/VideoRecorder";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -45,6 +46,16 @@ const FIELDS: [keyof { name: string; email: string; company: string; title: stri
 export default function CollectionPage() {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
+
+  // Collection page is a public-facing form for reviewers — always force light mode
+  // regardless of the visitor's OS preference or the app's current theme state.
+  useEffect(() => {
+    const prev = theme;
+    setTheme("light");
+    return () => setTheme(prev);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [space, setSpace]             = useState<Space | null>(null);
   const [loading, setLoading]         = useState(true);
