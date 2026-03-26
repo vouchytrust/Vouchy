@@ -1,89 +1,62 @@
-import { Sparkles, Link2, Mic2, Terminal, Settings2, ShieldCheck, Wand2, Globe2 } from "lucide-react";
+import { Layers2, ArrowUpRight, MessageSquare, PencilLine, Code2 } from "lucide-react";
 
+// ── Shared icon frame ─────────────────────────────────────────────────────────
+function IconFrame({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
+  return (
+    <div className="relative w-full aspect-[16/10] rounded-xl border border-border/60 bg-card overflow-hidden flex items-center justify-center">
+      {/* Corner marks */}
+      <span className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-primary/25 rounded-tl-sm" />
+      <span className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-primary/25 rounded-tr-sm" />
+      <span className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-primary/25 rounded-bl-sm" />
+      <span className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-primary/25 rounded-br-sm" />
+      {/* Centre axis lines */}
+      <span className="absolute inset-x-0 top-1/2 h-px bg-primary/[0.06]" />
+      <span className="absolute inset-y-0 left-1/2 w-px bg-primary/[0.06]" />
+      {/* Icon */}
+      <div className={`relative z-10 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+        accent
+          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+          : "bg-muted/70 border border-border/70 text-foreground"
+      }`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// 01 — Create your space
 const VisualArchitect = () => (
-  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden p-3">
-    <div className="w-full h-full border border-dashed border-primary/20 rounded-lg bg-primary/[0.02] flex flex-col p-2">
-      <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center mb-3">
-        <Settings2 className="w-3.5 h-3.5 text-primary" />
-      </div>
-      <div className="space-y-2">
-        <div className="h-1 w-full bg-primary/20 rounded-full" />
-        <div className="h-1 w-2/3 bg-primary/20 rounded-full" />
-        <div className="pt-2 flex gap-1">
-          <div className="w-2 h-2 rounded bg-primary/30" />
-          <div className="w-2 h-2 rounded bg-muted" />
-        </div>
-      </div>
-    </div>
-  </div>
+  <IconFrame>
+    <Layers2 className="w-5 h-5" strokeWidth={1.5} />
+  </IconFrame>
 );
 
+// 02 — Share your link
 const VisualLink = () => (
-  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden flex flex-col items-center justify-center">
-    <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center mb-3 border border-primary/10">
-      <Link2 className="w-5 h-5 text-primary" />
-    </div>
-    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[7px] font-mono text-muted-foreground whitespace-nowrap overflow-hidden">
-      vouchy.click/c/vouchy-rmxe
-    </div>
-    <div className="absolute top-4 right-4">
-      <div className="w-2 h-2 rounded-full bg-primary/40" />
-    </div>
-  </div>
+  <IconFrame>
+    <ArrowUpRight className="w-5 h-5" strokeWidth={1.5} />
+  </IconFrame>
 );
 
+// 03 — Capture testimonials
 const VisualCapture = () => (
-  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-[#0a0a0a] overflow-hidden flex flex-col items-center justify-center">
-    <div className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
-      <div className="w-2 h-2 rounded-full bg-red-500" />
-    </div>
-    <div className="flex gap-0.5 h-6 items-end">
-      {[4, 8, 12, 8, 4].map((height, i) => (
-        <div
-          key={i}
-          style={{ height: `${height}px` }}
-          className="w-1 bg-primary/40 rounded-full"
-        />
-      ))}
-    </div>
-    <Mic2 className="w-3 h-3 text-primary/40 mt-3" />
-  </div>
+  <IconFrame accent>
+    <MessageSquare className="w-5 h-5" strokeWidth={1.5} />
+  </IconFrame>
 );
 
+// 04 — AI crafts the script
 const VisualRefine = () => (
-  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-card overflow-hidden p-3 flex flex-col justify-center">
-    <div className="space-y-2">
-      <div className="h-1.5 w-full bg-muted rounded-full" />
-      <div className="h-1.5 w-full bg-muted rounded-full opacity-40" />
-      <div className="h-1.5 w-3/4 bg-primary/20 rounded-full" />
-      <Wand2 className="absolute top-3 right-3 w-4 h-4 text-primary" />
-    </div>
-    <div className="mt-4 flex items-center gap-2 px-1">
-
-      <div className="text-[6px] font-bold text-primary/60 uppercase tracking-tighter">AI Assisted</div>
-    </div>
-  </div>
+  <IconFrame>
+    <PencilLine className="w-5 h-5" strokeWidth={1.5} />
+  </IconFrame>
 );
 
+// 05 — Deploy anywhere
 const VisualDeploy = () => (
-  <div className="relative w-full aspect-[16/10] rounded-xl border border-primary/10 bg-background overflow-hidden p-2 pt-6 flex flex-col">
-    <div className="absolute top-0 left-0 right-0 h-4 border-b border-primary/10 bg-muted/30 flex items-center px-2">
-      <div className="flex gap-1">
-        <div className="w-2 h-2 rounded-full bg-red-400/60" />
-        <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
-        <div className="w-2 h-2 rounded-full bg-green-400/60" />
-      </div>
-    </div>
-    <div className="flex-1 flex flex-col gap-1 mt-2 font-mono text-[6px] text-primary/60">
-      <div><span className="text-green-500">&gt;</span> deploy</div>
-      <div>&nbsp;&nbsp;optimizing...</div>
-      <div>&nbsp;&nbsp;✓ done</div>
-    </div>
-    <div className="h-6 rounded bg-card border border-border flex items-center px-2 gap-1">
-      <Globe2 className="w-3 h-3 text-primary" />
-      <div className="text-[6px] text-muted-foreground truncate">your-site.com</div>
-    </div>
-  </div>
+  <IconFrame>
+    <Code2 className="w-5 h-5" strokeWidth={1.5} />
+  </IconFrame>
 );
 
 const HowItWorks = () => {

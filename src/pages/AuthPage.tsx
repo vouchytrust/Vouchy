@@ -113,13 +113,13 @@ export default function AuthPage() {
                 variant="outline"
                 className="w-full h-11 mb-4"
                 onClick={async () => {
-                    const { error } = await supabase.auth.signInWithOAuth({
-                      provider: "google",
-                      options: {
-                        redirectTo: `${window.location.origin}/auth`,
-                      },
-                    });
-                    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                      redirectTo: `${window.location.origin}/auth`,
+                    },
+                  });
+                  if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
                 }}
               >
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
@@ -182,14 +182,14 @@ export default function AuthPage() {
 
       {/* Right - Visual Panel */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden bg-background border-l border-border/40">
-        
+
         {/* Subtle grid pattern - Brand consistent */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{ 
+          style={{
             backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-            backgroundSize: "40px 40px" 
-          }} 
+            backgroundSize: "40px 40px"
+          }}
         />
 
         {/* Brand Glow - Very subtle corner light */}
@@ -257,13 +257,6 @@ export default function AuthPage() {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Bottom — brand strip */}
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/30">
-              Vouchy — Social Proof Platform
-            </p>
           </div>
 
         </div>

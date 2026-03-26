@@ -114,12 +114,26 @@
       const isDarkData = htmlDataMode === 'dark' || htmlDataMode === 'night';
       const isLightData = htmlDataMode === 'light';
 
+      // 1. Explicit theme declared on the script tag takes highest priority for this widget
+      if (script.dataset.theme === 'dark' || script.dataset.theme === 'light') {
+        iframe.contentWindow.postMessage({ type: 'vouchy-theme-change', theme: script.dataset.theme }, '*');
+        return;
+      }
+
       let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       
-      if (isDarkData || hasDarkClass) {
+      const inlineColorScheme = (el.style.colorScheme || '').toLowerCase();
+      
+      if (isDarkData || hasDarkClass || inlineColorScheme === 'dark') {
         isDark = true;
-      } else if (isLightData || hasLightClass) {
+      } else if (isLightData || hasLightClass || inlineColorScheme === 'light') {
         isDark = false;
+      } else if (document.body.style.backgroundColor) {
+        // Fallback heuristic: if body has a light background, treat as light mode
+        const bg = document.body.style.backgroundColor;
+        if (bg === 'white' || bg === '#fff' || bg === '#ffffff' || bg.includes('rgb(255, 255, 255)')) {
+          isDark = false;
+        }
       }
 
       iframe.contentWindow.postMessage({ type: 'vouchy-theme-change', theme: isDark ? 'dark' : 'light' }, '*');

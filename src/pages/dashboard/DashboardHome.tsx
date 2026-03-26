@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Star, ArrowUpRight, Plus, Sparkles, Video, MessageSquareText, TrendingUp, TrendingDown, Minus, ArrowRight, BarChart3 } from "lucide-react";
+import { Star, ArrowUpRight, Plus, Palette, Video, MessageSquareText, TrendingUp, TrendingDown, Minus, ArrowRight, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const quickActions = [
   { label: "New Collector", icon: Plus, to: "/dashboard/spaces" },
-  { label: "Design Widgets", icon: Sparkles, to: "/dashboard/widgets" },
+  { label: "Design Widgets", icon: Palette, to: "/dashboard/widgets" },
 ];
 
 const container = {

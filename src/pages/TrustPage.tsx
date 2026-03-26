@@ -132,7 +132,7 @@ export default function TrustPage() {
           .from("profiles")
           .select("company_name, brand_color, logo_url, plan")
           .eq("user_id", spaceData.user_id)
-          .single();
+          .maybeSingle();
 
         setSpace({ ...spaceData, profiles: profileData });
 

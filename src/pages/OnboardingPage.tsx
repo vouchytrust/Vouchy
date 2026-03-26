@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadToR2 } from "@/lib/storage";
 import { VouchyLogo } from "@/components/VouchyLogo";
+import { usePostHog } from "@posthog/react";
 
 const brandColors = [
   { name: "Ocean", value: "#1a3f64" },
@@ -30,6 +30,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { session, profile, refreshProfile } = useAuth();
+  const posthog = usePostHog();
 
   // Redirect if not logged in or already onboarded
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function OnboardingPage() {
       if (error) throw error;
 
       await refreshProfile();
+      posthog.capture("onboarding_completed", { workspace: workspace.trim(), color });
       toast({ title: "Workspace created!", description: "Welcome to Vouchy." });
       navigate("/dashboard");
     } catch (err: any) {

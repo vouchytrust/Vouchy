@@ -43,7 +43,7 @@ export async function fetchSpaceBySlug(slug: string) {
     .from("profiles")
     .select("company_name, brand_color, logo_url")
     .eq("user_id", space.user_id)
-    .single();
+    .maybeSingle();
 
   return { ...space, profiles: profile };
 }
@@ -325,7 +325,7 @@ export async function fetchInitialAppData(userId: string) {
       .from("profiles")
       .select("id, user_id, company_name, brand_color, logo_url, plan, onboarding_completed, is_admin")
       .eq("user_id", userId)
-      .single(),
+      .maybeSingle(),
     fetchPortalSummary()
   ]);
 

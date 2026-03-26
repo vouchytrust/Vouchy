@@ -10,8 +10,8 @@ import {
   HowItWorks,
   Pricing,
   CTA,
-  ProductShowcase,
   TestimonialDesigns,
+  TrustPageFeature,
 } from "@/components/landing";
 
 import { TbStarFilled, TbSparkles } from "react-icons/tb";
@@ -41,8 +41,8 @@ export default function LandingPage() {
     container.innerHTML = '';
 
     const script = document.createElement('script');
-    script.src = "https://vouchy.click/embed.js?v=" + Date.now();
-    script.setAttribute("data-widget-id", "63c30831-be72-4a56-9fdd-46e425261628");
+    script.src = "http://localhost:8080/embed.js?v=" + Date.now();
+    script.setAttribute("data-widget-id", "c3cbbf10-58b0-4f11-94f8-8d7b315b540c");
     script.setAttribute("data-theme", theme);
     script.async = true;
 
@@ -214,32 +214,14 @@ export default function LandingPage() {
             {menuOpen && (
               <motion.div
                 key="mobile-menu"
-                initial={{ opacity: 0, y: -12, scale: 0.97 }}
+                initial={{ opacity: 0, y: -8, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -12, scale: 0.97 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="md:hidden mt-2 pb-safe"
               >
-                <div className="relative bg-background border border-primary/20 rounded-2xl shadow-sm overflow-hidden">
-                  {/* Vouchy corner accents - Precision aligned */}
-                  <div className="absolute -top-px -left-px w-8 h-8 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl" />
-                  <div className="absolute -top-px -right-px w-8 h-8 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl" />
-                  <div className="absolute -bottom-px -left-px w-8 h-8 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl" />
-                  <div className="absolute -bottom-px -right-px w-8 h-8 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl" />
-
-                  {/* Header strip */}
-                  <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-primary/8">
-                    <div className="flex items-center gap-2">
-                       <img src="/logo-icon.svg" alt="" className="h-4 w-4 opacity-50" />
-                       <span className="text-[9px] font-black font-mono text-primary/40 uppercase tracking-[0.45em]">vouchy Navigation</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                       <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                       <span className="text-[8px] font-black text-primary/50 uppercase tracking-widest">Live</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 flex flex-col gap-0.5">
+                <div className="bg-background/90 backdrop-blur-xl border border-border/40 rounded-2xl shadow-xl overflow-hidden p-2">
+                  <div className="flex flex-col gap-1">
                     {/* Nav links */}
                     {navLinks.map(({ label, href, external }, i) => (
                       <motion.a
@@ -247,9 +229,9 @@ export default function LandingPage() {
                         href={href}
                         target={external ? "_blank" : undefined}
                         rel={external ? "noopener noreferrer" : undefined}
-                        initial={{ opacity: 0, x: -12 }}
+                        initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.04, duration: 0.25, ease: "easeOut" }}
+                        transition={{ delay: i * 0.03, duration: 0.2 }}
                         onClick={(e) => {
                           if (href === "#top") {
                             e.preventDefault();
@@ -258,66 +240,47 @@ export default function LandingPage() {
                           setMenuOpen(false);
                           setActiveLink(label);
                         }}
-                        className="flex items-center gap-3 h-12 px-4 rounded-xl group/link hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200"
+                        className="flex items-center justify-between h-11 px-4 rounded-xl hover:bg-muted/50 transition-colors"
                       >
-                        <span className="text-[9px] font-black text-primary/20 font-mono group-hover/link:text-primary/50 transition-colors tabular-nums">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/link:text-primary transition-colors flex-1">
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
                           {label}
                         </span>
-                        <ArrowRight className="h-3.5 w-3.5 text-primary/0 group-hover/link:text-primary/40 transition-colors -translate-x-1 group-hover/link:translate-x-0 duration-200" />
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
                       </motion.a>
                     ))}
 
-                    {/* Divider */}
-                    <div className="my-2.5 flex items-center gap-3 px-1">
-                      <div className="h-px flex-1 bg-border/50" />
-                      <span className="text-[8px] font-black uppercase tracking-[0.45em] text-muted-foreground/35">Account</span>
-                      <div className="h-px flex-1 bg-border/50" />
-                    </div>
+                    <div className="h-px bg-border/40 my-2 mx-2" />
 
                     {/* Theme toggle */}
                     <button
-                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                      className="flex items-center gap-3 h-12 px-4 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200 group/theme w-full text-left"
+                      onClick={() => {
+                        setTheme(theme === "dark" ? "light" : "dark");
+                        setMenuOpen(false); // Optional: close menu on theme switch
+                      }}
+                      className="flex items-center justify-between h-11 px-4 rounded-xl hover:bg-muted/50 transition-colors w-full"
                     >
-                      <div className="relative w-7 h-7 rounded-lg flex items-center justify-center bg-primary/5 border border-primary/15 group-hover/theme:border-primary/35 transition-colors shrink-0">
-                        {theme === "dark"
-                          ? <Sun className="h-3.5 w-3.5 text-primary" />
-                          : <Moon className="h-3.5 w-3.5 text-primary" />
-                        }
-                      </div>
-                      <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/theme:text-primary transition-colors">
-                        {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
+                      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors">
+                        {theme === "dark" ? "Light Mode" : "Dark Mode"}
                       </span>
+                      {theme === "dark" ? <Sun className="h-4 w-4 text-muted-foreground" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
                     </button>
 
                     {/* Sign In */}
                     <Link
                       to="/auth"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 h-12 px-4 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/12 transition-all duration-200 group/signin"
+                      className="flex items-center justify-between h-11 px-4 rounded-xl hover:bg-muted/50 transition-colors"
                     >
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black bg-primary/5 border border-primary/15 group-hover/signin:border-primary/35 transition-colors text-primary/60 shrink-0">
-                        ↗
-                      </div>
-                      <span className="text-[12.5px] font-bold uppercase tracking-[0.14em] text-muted-foreground group-hover/signin:text-primary transition-colors">
-                        Sign In
-                      </span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-foreground transition-colors">Sign In</span>
                     </Link>
 
                     {/* Get Started CTA */}
                     <Link
                       to="/auth?mode=signup"
                       onClick={() => setMenuOpen(false)}
-                      className="mt-1.5 relative flex items-center justify-between h-14 px-5 vouchy-gradient-bg text-white rounded-2xl shadow-[0_4px_20px_rgba(10,169,57,0.35)] hover:shadow-[0_6px_28px_rgba(10,169,57,0.45)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 overflow-hidden group/cta"
+                      className="mt-2 flex items-center justify-center h-12 vouchy-gradient-bg text-white rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent opacity-0 group-hover/cta:opacity-100 transition-opacity" />
-                      <div className="absolute top-0 left-0 w-5 h-5 border-t border-l border-white/25 rounded-tl-lg" />
-                      <div className="absolute bottom-0 right-0 w-5 h-5 border-b border-r border-white/25 rounded-br-lg" />
-                      <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] relative z-10">Get Started Free</span>
-                      <ArrowRight className="h-4 w-4 relative z-10 group-hover/cta:translate-x-0.5 transition-transform" />
+                      <span className="text-[11px] font-extrabold uppercase tracking-widest">Get Started Free</span>
                     </Link>
                   </div>
                 </div>
@@ -332,7 +295,7 @@ export default function LandingPage() {
         <Hero />
 
         <BentoGrid />
-        <ProductShowcase />
+        <TrustPageFeature />
         <TestimonialDesigns />
 
         {/* Testimonials Embed */}
@@ -382,12 +345,12 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border/50">
-        <div className="container max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-6">
+        <div className="container max-w-7xl mx-auto px-6 md:px-10 py-6 md:h-16 md:py-0 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
 
           <VouchyLogo variant="minimal" />
 
           {/* Links + copyright */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5 flex-wrap justify-center">
             <Link
               to="/privacy"
               className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
@@ -400,14 +363,7 @@ export default function LandingPage() {
             >
               Terms
             </Link>
-            <a
-              href="https://twitter.com/vouchytrust"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground/35 hover:text-muted-foreground transition-colors duration-200"
-            >
-              Twitter
-            </a>
+
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/25 whitespace-nowrap">
               © 2026 Vouchy Labs
             </span>

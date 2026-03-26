@@ -84,10 +84,29 @@ function AppRoutes() {
   );
 }
 
-const App = () => (
-  <BrowserRouter>
-    <AppRoutes />
-  </BrowserRouter>
-);
+const App = () => {
+  const isEmbed = window.location.pathname.startsWith("/embed/") || window.location.pathname.startsWith("/e/");
+
+  if (isEmbed) {
+    return (
+      <BrowserRouter>
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/embed/:slug" element={<EmbedWidgetPage />} />
+              <Route path="/e/:slug" element={<ShortEmbedRedirect />} />
+            </Routes>
+          </Suspense>
+        </ThemeProvider>
+      </BrowserRouter>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+};
 
 export default App;

@@ -101,7 +101,7 @@ export default function EmbedWidgetPage() {
     if (isDark && baseSettings.dark) return { ...baseSettings, ...baseSettings.dark };
     if (!isDark && baseSettings.light) return { ...baseSettings, ...baseSettings.light };
     
-    // Auto-adaptation if sub-configs are missing
+    // Auto-adaptation if sub-configs are missing (legacy widgets)
     if (isDark) {
       return {
         ...baseSettings,
@@ -114,13 +114,29 @@ export default function EmbedWidgetPage() {
       };
     } else {
       // Light mode forced adaptation (if it was otherwise dark)
+      const isLegacyDarkBg = baseSettings.cardBg && (
+        baseSettings.cardBg.toLowerCase() === '#1c1c1e' || 
+        baseSettings.cardBg.toLowerCase() === '#1a1a1b' ||
+        baseSettings.cardBg.toLowerCase() === '#2a2a2a' ||
+        baseSettings.cardBg.toLowerCase() === '#1a1a1a' ||
+        baseSettings.cardBg.toLowerCase() === '#000000' ||
+        baseSettings.cardBg.toLowerCase() === '#121212'
+      );
+      
+      const isLegacyDarkName = baseSettings.nameColor && (
+        baseSettings.nameColor.toLowerCase() === '#ffffff' || 
+        baseSettings.nameColor.toLowerCase() === '#f5f5f7' ||
+        baseSettings.nameColor.toLowerCase() === '#fafafa' ||
+        baseSettings.nameColor.toLowerCase() === '#fff'
+      );
+
       return {
         ...baseSettings,
-        cardBg: (baseSettings.cardBg && (baseSettings.cardBg.toLowerCase() === '#1c1c1e' || baseSettings.cardBg.toLowerCase() === '#1a1a1b')) ? '#ffffff' : baseSettings.cardBg,
+        cardBg: isLegacyDarkBg ? '#ffffff' : baseSettings.cardBg,
         containerBg: 'transparent',
-        nameColor: (baseSettings.nameColor && (baseSettings.nameColor.toLowerCase() === '#ffffff' || baseSettings.nameColor.toLowerCase() === '#f5f5f7')) ? '#1a1a1a' : baseSettings.nameColor,
-        companyColor: (baseSettings.companyColor && baseSettings.companyColor.toLowerCase() === '#9ca3af') ? '#888888' : baseSettings.companyColor,
-        bodyColor: (baseSettings.bodyColor && baseSettings.bodyColor.toLowerCase() === '#d1d5db') ? '#666666' : baseSettings.bodyColor,
+        nameColor: isLegacyDarkName ? '#1a1a1a' : baseSettings.nameColor,
+        companyColor: (baseSettings.companyColor && (baseSettings.companyColor.toLowerCase() === '#9ca3af' || baseSettings.companyColor.toLowerCase() === '#8e8e93')) ? '#888888' : baseSettings.companyColor,
+        bodyColor: (baseSettings.bodyColor && (baseSettings.bodyColor.toLowerCase() === '#d1d5db' || baseSettings.bodyColor.toLowerCase() === '#aeaeb2')) ? '#666666' : baseSettings.bodyColor,
         darkMode: false
       }
     }
@@ -151,7 +167,7 @@ export default function EmbedWidgetPage() {
   // useLayoutEffect fires BEFORE the browser paints — reliable transparent background
   useLayoutEffect(() => {
     const s = 'transparent';
-    const isActuallyDark = activeThemeOverride === "dark" || (!activeThemeOverride && baseSettings.darkMode);
+    const isActuallyDark = isDark;
     
     const html = document.documentElement;
     const body = document.body;

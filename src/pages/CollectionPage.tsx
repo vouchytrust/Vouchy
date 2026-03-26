@@ -68,7 +68,7 @@ export default function CollectionPage() {
           .from("spaces").select("*").eq("slug", slug).single();
         if (error || !spaceData) return setNotFound(true);
         const { data: profile } = await supabase
-          .from("profiles").select("*").eq("user_id", spaceData.user_id).single();
+          .from("profiles").select("*").eq("user_id", spaceData.user_id).maybeSingle();
         setSpace({ 
           ...spaceData, 
           profile: profile as Space["profile"] 

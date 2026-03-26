@@ -3,6 +3,7 @@ import { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchInitialAppData } from "@/lib/api";
+import posthog from "posthog-js";
 
 interface Profile {
   id: string;
@@ -79,6 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (summary) {
               queryClient.setQueryData(["portal-summary"], summary);
             }
+            // Identify user in PostHog
+            if (prof) {
+              posthog.identify(activeSession.user.id, {
+                email: activeSession.user.email,
+                plan: prof.plan,
+                company_name: prof.company_name,
+              });
+            }
           }
         } else {
           setProfile(null);
@@ -106,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setLoading(false);
         queryClient.clear();
+        posthog.reset();
       } else {
         setSession(session);
       }
