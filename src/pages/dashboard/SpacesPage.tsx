@@ -4,8 +4,8 @@ import { Plus, Copy, ExternalLink, Trash2, FolderOpen, Power, PowerOff, MessageS
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchSpaces as apiFetchSpaces, createSpace as apiCreateSpace, updateSpace as apiUpdateSpace, deleteSpace as apiDeleteSpace, toggleSpaceActive, fetchSpaceTestimonialCounts } from "@/lib/api";
-import SpaceEditorPanel, { type SpaceFormConfig } from "@/components/SpaceEditorPanel";
+import { fetchSpaces as apiFetchSpaces, deleteSpace as apiDeleteSpace, toggleSpaceActive, fetchSpaceTestimonialCounts } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 interface Space {
   id: string;
@@ -26,11 +26,9 @@ export default function SpacesPage() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [counts, setCounts] = useState<Record<string, { total: number; video: number; text: number }>>({});
   const [loading, setLoading] = useState(true);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [selectedSpace, setSelectedSpace] = useState<any>(null);
-  const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
 
   const loadData = async () => {
     try {
@@ -56,9 +54,7 @@ export default function SpacesPage() {
       });
       return;
     }
-    setSelectedSpace(null);
-    setIsCreating(true);
-    setEditorOpen(true);
+    navigate("/dashboard/builder/new");
   };
 
   const copyLink = (slug: string) => {
@@ -87,55 +83,7 @@ export default function SpacesPage() {
   };
 
   const openEditor = (space: Space) => {
-    const idx = spaces.indexOf(space);
-    setSelectedSpace({
-      id: space.id,
-      name: space.name,
-      slug: space.slug,
-      isActive: space.is_active,
-      accentGradient: gradients[idx % gradients.length],
-      initial: space.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2),
-      formConfig: space.form_config,
-    });
-    setIsCreating(false);
-    setEditorOpen(true);
-  };
-
-  const handleEditorSave = async (spaceId: string, updates: { name?: string; slug?: string; isActive?: boolean; formConfig?: SpaceFormConfig }) => {
-    try {
-      if (isCreating) {
-        const spaceName = updates.name || "Untitled";
-        const randomSuffix = Math.random().toString(36).substring(2, 6);
-        const slug = updates.slug || (spaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + randomSuffix);
-        const newSpace = await apiCreateSpace({
-          name: spaceName,
-          slug,
-          is_active: updates.isActive ?? true,
-          form_config: updates.formConfig || {},
-          user_id: user!.id,
-        });
-        setSpaces(prev => [newSpace as Space, ...prev]);
-        setIsCreating(false);
-        toast({ title: "Space created", description: `${spaceName} is ready for testimonials.` });
-      } else {
-        await apiUpdateSpace(spaceId, {
-          ...(updates.name && { name: updates.name }),
-          ...(updates.slug && { slug: updates.slug }),
-          ...(updates.isActive !== undefined && { is_active: updates.isActive }),
-          ...(updates.formConfig && { form_config: updates.formConfig }),
-        });
-        setSpaces(prev => prev.map(s => s.id === spaceId ? {
-          ...s,
-          ...(updates.name && { name: updates.name }),
-          ...(updates.slug && { slug: updates.slug }),
-          ...(updates.isActive !== undefined && { is_active: updates.isActive }),
-          ...(updates.formConfig && { form_config: updates.formConfig }),
-        } : s));
-        toast({ title: "Space updated" });
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
+    navigate(`/dashboard/builder/${space.id}`);
   };
 
   if (loading) {
@@ -256,17 +204,6 @@ export default function SpacesPage() {
           </motion.button>
         </motion.div>
       )}
-
-      <SpaceEditorPanel
-        open={editorOpen}
-        onOpenChange={(open) => {
-          setEditorOpen(open);
-          if (!open) setIsCreating(false);
-        }}
-        space={selectedSpace}
-        isCreating={isCreating}
-        onSave={handleEditorSave}
-      />
     </div>
   );
 }

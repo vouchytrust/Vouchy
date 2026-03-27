@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Video, Code2, Users, CheckCircle2, MessageSquare, Mic, Quote } from "lucide-react";
 import { TbStarFilled, TbHeartFilled } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -52,19 +51,8 @@ export default function Hero() {
             {/* Headline */}
             <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl lg:text-[4rem] xl:text-[4.5rem] font-bold tracking-tighter text-foreground mb-6 leading-[1.05]">
               <span className="lg:block lg:whitespace-nowrap">Let your customers</span>
-              <span className="lg:flex lg:items-center lg:gap-4 lg:whitespace-nowrap mt-1">
-                <span className="inline-flex items-center -space-x-4 align-middle transform translate-y-[-2px]">
-                  {[1, 2, 3, 4].map((i) => (
-                    <Avatar key={i} className="w-10 h-10 md:w-14 lg:w-16 border-4 border-background ring-1 ring-primary/20 overflow-hidden">
-                      <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" loading="lazy" />
-                      <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-black uppercase">U{i}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                </span>
-                sell
-              </span>
               <span className="lg:block lg:whitespace-nowrap mt-1">
-                <> </>for <span className="text-primary">you.</span>
+                sell for <span className="text-primary">you.</span>
               </span>
             </motion.h1>
 
@@ -87,7 +75,7 @@ export default function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => window.open("https://vouchy.click/c/vouchy-rmxe", "_blank")}
+                onClick={() => window.open("https://vouchy.click/c/vouchy", "_blank")}
                 className="h-14 px-8 rounded-2xl text-foreground border-border hover:bg-muted text-base font-semibold w-full sm:w-auto overflow-hidden group/demo"
               >
                 <div className="flex items-center gap-2 group-hover/demo:scale-105 transition-transform duration-300">

@@ -20,6 +20,7 @@ const TestimonialsPage = lazy(() => import("./pages/dashboard/TestimonialsPage")
 const SpacesPage = lazy(() => import("./pages/dashboard/SpacesPage"));
 const WidgetLabPage = lazy(() => import("./pages/dashboard/WidgetLabPage"));
 const SettingsPage = lazy(() => import("./pages/dashboard/SettingsPage"));
+const BuilderPage = lazy(() => import("./pages/dashboard/BuilderPage"));
 const CollectionPage = lazy(() => import("./pages/CollectionPage"));
 const EmbedWidgetPage = lazy(() => import("./pages/EmbedWidgetPage"));
 const ViewTestimonialsPage = lazy(() => import("./pages/ViewTestimonialsPage"));
@@ -72,6 +73,9 @@ function AppRoutes() {
                 <Route path="spaces" element={<AdminSpaces />} />
                 <Route path="testimonials" element={<AdminTestimonials />} />
               </Route>
+
+              {/* Full-screen builder route, protected but no sidebar */}
+              <Route path="/dashboard/builder/:id" element={<ProtectedRoute><BuilderPage /></ProtectedRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

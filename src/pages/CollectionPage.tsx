@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Video, PenLine, Check, Send, ChevronLeft, Wand2 } from "lucide-react";
+import { Star, Video, PenLine, Check, Send, ChevronLeft, Wand2, Image as ImageIcon, Camera } from "lucide-react";
 import VideoRecorder from "@/components/collection/VideoRecorder";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/contexts/ThemeContext";
+import { uploadToR2 } from "@/lib/storage";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -14,11 +15,11 @@ interface Space {
   user_id: string;
   name: string;
   slug: string;
+  plan: string;
   profile?: {
     company_name?: string;
     brand_color?: string;
     logo_url?: string;
-    plan?: string;
   };
 }
 
@@ -69,17 +70,23 @@ export default function CollectionPage() {
   const [submitting, setSubmitting]   = useState(false);
   const [aiWorking, setAiWorking]     = useState<string | null>(null);
   const [aiUses, setAiUses]           = useState(0);
+  const [avatarFile, setAvatarFile]   = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Data fetch ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!slug) return;
     (async () => {
       try {
+        // Fetch space (includes baked-in plan set at creation time)
         const { data: spaceData, error } = await supabase
-          .from("spaces").select("*").eq("slug", slug).single();
+          .from("spaces").select("id, user_id, name, slug, plan").eq("slug", slug).single();
         if (error || !spaceData) return setNotFound(true);
+        // Fetch display fields from profile (logo, brand color, company name) via public view to bypass RLS
         const { data: profile } = await supabase
-          .from("profiles").select("*").eq("user_id", spaceData.user_id).maybeSingle();
+          .from("public_profiles").select("company_name, brand_color, logo_url").eq("user_id", spaceData.user_id).maybeSingle();
         setSpace({ 
           ...spaceData, 
           profile: profile as Space["profile"] 
@@ -93,11 +100,12 @@ export default function CollectionPage() {
   }, [slug]);
 
   // ── Derived values ──────────────────────────────────────────────────────────
-  const accent      = space?.profile?.brand_color || "#18181b";
+  const accent        = space?.profile?.brand_color || "#18181b";
   const workspaceName = space?.profile?.company_name || space?.name || "Workspace";
-  const logo        = space?.profile?.logo_url;
-  const userPlan    = space?.profile?.plan?.toLowerCase() || "free";
-  const isFree      = userPlan !== "pro" && userPlan !== "agency";
+  const logo          = space?.profile?.logo_url;
+  // Plan is baked into the space row at creation time — no auth needed
+  const userPlan      = space?.plan?.toLowerCase() || "free";
+  const isFree        = userPlan !== "pro" && userPlan !== "agency";
 
   // ── AI enhance ──────────────────────────────────────────────────────────────
   const handleEnhance = async (styleId: string) => {
@@ -132,6 +140,11 @@ export default function CollectionPage() {
     }
     setSubmitting(true);
     try {
+      let avatarUrl = null;
+      if (avatarFile) {
+        avatarUrl = await uploadToR2(avatarFile, `avatars/${space!.id}-${Date.now()}-${avatarFile.name}`);
+      }
+
       const { error } = await supabase.from("testimonials").insert({
         space_id:       space!.id,
         user_id:        space!.user_id,
@@ -143,6 +156,7 @@ export default function CollectionPage() {
         rating,
         type:   "text",
         status: "pending",
+        author_avatar_url: avatarUrl,
       });
       if (error) throw error;
       setMode("success");
@@ -510,8 +524,46 @@ export default function CollectionPage() {
 
           {/* RIGHT — author details + CTA */}
           <div className="flex flex-col justify-between px-5 sm:px-8 pt-6 pb-6 lg:py-8 lg:w-[400px] xl:w-[440px] shrink-0 gap-8 bg-card/20 backdrop-blur-sm">
+            
+            {/* Avatar Upload */}
+            <div className="flex flex-col items-center gap-3">
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (!file.type.startsWith("image/")) return toast({ title: "Please upload an image file." });
+                    setAvatarFile(file);
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                className="relative group w-20 h-20 rounded-full border-2 border-dashed border-border/70 bg-card/50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-primary hover:bg-muted"
+              >
+                {avatarPreview ? (
+                  <>
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-white drop-shadow-md" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors mb-1" />
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-primary transition-colors">Photo</span>
+                  </>
+                )}
+              </button>
+            </div>
+
             {/* Fields */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-x-6">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-x-6 mt-[-1rem]">
               {FIELDS.map(([key, label, req]) => (
                 <div key={key} className="flex flex-col gap-1.5">
                   <label

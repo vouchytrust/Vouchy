@@ -41,8 +41,8 @@ export default function LandingPage() {
     container.innerHTML = '';
 
     const script = document.createElement('script');
-    script.src = "http://localhost:8080/embed.js?v=" + Date.now();
-    script.setAttribute("data-widget-id", "c3cbbf10-58b0-4f11-94f8-8d7b315b540c");
+    script.src = `${window.location.origin}/embed.js?v=` + Date.now();
+    script.setAttribute("data-widget-id", "3169769a-52c1-4cb6-961c-1ea984f33464");
     script.setAttribute("data-theme", theme);
     script.async = true;
 
