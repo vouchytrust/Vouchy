@@ -345,7 +345,7 @@ export default function BuilderPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-muted/60 p-1 rounded-lg">
+          <div className="hidden sm:flex items-center bg-muted/60 p-1 rounded-lg">
             <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded-md transition-all ${previewMode === "desktop" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                <Monitor className="h-3.5 w-3.5" />
             </button>
@@ -353,7 +353,7 @@ export default function BuilderPage() {
                <Smartphone className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="flex items-center bg-muted/60 p-1 rounded-lg">
+          <div className="hidden sm:flex items-center bg-muted/60 p-1 rounded-lg">
             <button onClick={() => setPreviewDark(false)} className={`p-1.5 rounded-md transition-all ${!previewDark ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                <Sun className="h-3.5 w-3.5" />
             </button>
@@ -362,7 +362,7 @@ export default function BuilderPage() {
             </button>
           </div>
           
-          <div className="h-5 w-[1px] bg-border mx-1" />
+          <div className="hidden sm:block h-5 w-[1px] bg-border mx-1" />
           
           <Button className="h-9 text-xs font-bold gap-1.5" onClick={handleSave} disabled={saving || !name.trim()}>
             {saving ? <span className="w-3.5 h-3.5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" /> : <Save className="h-3.5 w-3.5" />}
@@ -542,7 +542,7 @@ export default function BuilderPage() {
             </div>
 
             {/* Floating indicator */}
-            <div className="fixed bottom-6 right-6 bg-card/80 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-sm text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 pointer-events-none z-50">
+            <div className="hidden sm:flex fixed bottom-6 right-6 bg-card/80 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-sm text-[9px] font-bold text-muted-foreground uppercase tracking-widest items-center gap-2 pointer-events-none z-50">
                <Eye className="w-3.5 h-3.5" /> High-Fidelity Render
             </div>
 

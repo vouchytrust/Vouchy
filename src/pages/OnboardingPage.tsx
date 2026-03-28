@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadToR2 } from "@/lib/storage";
 import { VouchyLogo } from "@/components/VouchyLogo";
 import { usePostHog } from "@posthog/react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const brandColors = [
   { name: "Ocean", value: "#1a3f64" },

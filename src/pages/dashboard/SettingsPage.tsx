@@ -351,7 +351,7 @@ export default function SettingsPage() {
               <Card className={`relative overflow-hidden ${profile?.plan?.toLowerCase() === 'agency' ? 'border-primary shadow-sm bg-primary/5' : 'border-border'}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
+                    
                     <span className="text-[13px] font-semibold text-foreground">Agency Plan</span>
                     <span className="ml-auto text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded">$45/mo</span>
                   </div>
@@ -412,7 +412,7 @@ export default function SettingsPage() {
                 <div className="mt-4 p-4 rounded-lg border border-border bg-muted/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[12px] font-semibold text-foreground flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    
                       AI Credits this month
                     </span>
                     <span className="text-[11px] text-muted-foreground">{used} / {limit} used</span>
