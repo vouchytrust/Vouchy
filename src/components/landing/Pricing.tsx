@@ -112,21 +112,7 @@ const Pricing = () => {
   };
 
   return (
-    <section id="pricing" className="relative py-12 lg:py-16 bg-background border-y border-border overflow-hidden min-h-screen flex flex-col justify-center" ref={ref}>
-      {/* Background structural lines */}
-      <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
-          backgroundSize: '80px 80px'
-        }}
-      />
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px'
-        }}
-      />
-
+    <section id="pricing" className="relative py-20 lg:py-32 bg-background border-y border-border overflow-hidden min-h-screen flex flex-col justify-center" ref={ref}>
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-10 max-w-7xl mx-auto">
@@ -160,47 +146,36 @@ const Pricing = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              className={`group relative p-6 rounded-2xl transition-all duration-500 flex flex-col bg-card/40 border border-border/50 backdrop-blur-sm ${plan.popular
-                  ? "scale-[1.02] z-10 ring-1 ring-primary/20"
-                  : ""
+              className={`relative p-8 rounded-2xl flex flex-col border transition-all duration-300 ${plan.popular
+                  ? "border-primary bg-primary/[0.02]"
+                  : "border-border bg-transparent shadow-sm"
                 }`}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              {/* Precision Corners - Perfectly aligned with brand radius */}
-              <div className={`absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] rounded-tl-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
-              <div className={`absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] rounded-tr-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
-              <div className={`absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] rounded-bl-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
-              <div className={`absolute -bottom-px -right-px w-10 h-10 border-b-[1.5px] border-r-[1.5px] rounded-br-2xl ${plan.popular ? 'border-primary/50' : 'border-primary/30'} group-hover:border-primary transition-all duration-500`} />
-
-              {/* Tier Marker */}
-              <div className="inline-flex items-center gap-2 mb-8 relative z-10">
-                <div className={`px-2 py-0.5 rounded bg-foreground text-[8px] font-black uppercase tracking-widest ${plan.popular ? "text-background" : "text-background"}`}>
-                  Tier 0{index + 1}
-                </div>
-                {plan.popular && (
-                  <div className="px-2 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest animate-pulse">
-                    Gold Standard
-                  </div>
-                )}
-              </div>
-
               {/* Plan content */}
-              <div className="mb-8 relative z-10">
-                <h3 className="text-2xl font-bold mb-2 text-foreground tracking-tight">
-                  {plan.name}
-                </h3>
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold text-foreground">
+                    {plan.name}
+                  </h3>
+                  {plan.popular && (
+                    <span className="text-[9px] font-black uppercase tracking-widest text-primary px-2 py-0.5 rounded-full bg-primary/10">
+                      Popular
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground mb-10 h-10 font-medium leading-relaxed">{plan.description}</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-6xl font-black tracking-tighter text-foreground">
+                  <span className="text-5xl font-black tracking-tighter text-foreground">
                     {plan.price}
                   </span>
-                  <span className="text-muted-foreground font-bold text-sm tracking-widest uppercase">{plan.period}</span>
+                  <span className="text-muted-foreground font-bold text-xs tracking-widest uppercase">{plan.period}</span>
                 </div>
               </div>
 
@@ -208,42 +183,29 @@ const Pricing = () => {
               <button
                 onClick={() => handleSelectPlan(plan)}
                 disabled={loadingPlan === plan.name}
-                className={`w-full group/btn relative h-14 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 z-10 ${plan.popular
-                    ? "bg-foreground text-background shadow-xl shadow-black/20 hover:scale-[1.03]"
-                    : "bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10"}`}
+                className={`w-full h-12 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 mb-10 ${plan.popular
+                    ? "bg-primary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/20"
+                    : "bg-muted text-foreground border border-border hover:bg-muted/80"}`}
               >
                 {loadingPlan === plan.name ? (
                   <TbLoader className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
                     {plan.cta}
-                    <TbArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" />
+                    <TbArrowRight className="w-3.5 h-3.5" />
                   </>
-                )}
-                {/* Gloss Effect for Popular Card */}
-                {plan.popular && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]" />
                 )}
               </button>
 
-              {/* Features Architecture */}
-              <div className="mt-12 flex-1 relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-px flex-1 bg-primary/10" />
-                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/40">Specifications</p>
-                  <div className="h-px flex-1 bg-primary/10" />
-                </div>
-                <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary/20 mt-1.5 shrink-0 transition-all group-hover:bg-primary/60 shadow-[0_0_8px_rgba(var(--primary),0.3)]" />
-                      <span className="text-xs text-foreground/70 font-bold leading-snug tracking-tight">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Structural Label */}
+              {/* Features List */}
+              <ul className="space-y-4 flex-1">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <TbCheck className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-xs text-foreground/80 font-medium leading-tight">{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           ))}
         </div>

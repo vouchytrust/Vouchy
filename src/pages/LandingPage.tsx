@@ -299,31 +299,34 @@ export default function LandingPage() {
         <TestimonialDesigns />
 
         {/* Testimonials Embed */}
-        <div className="container mx-auto px-6 max-w-7xl relative z-10 mb-12 py-16">
-          <div className="flex flex-col items-center text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4"
-            >
-              <TbSparkles className="w-3 h-3 text-primary" />
-              <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Social Proof</span>
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-5xl font-bold tracking-tighter text-foreground mb-4"
-            >
-              Trusted by <span className="text-primary font-medium">builders</span> worldwide
-            </motion.h2>
+        <div className="container mx-auto px-6 max-w-7xl relative z-10 pb-4 pt-16">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-10 max-w-7xl mx-auto">
+            <div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4"
+              >
+                <TbSparkles className="w-3 h-3 text-primary" />
+                <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Social Proof</span>
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-foreground leading-[1.1]"
+              >
+                Trusted by <br className="hidden lg:block" />
+                <span className="text-primary font-medium">builders</span> worldwide
+              </motion.h2>
+            </div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-muted-foreground text-sm md:text-base max-w-2xl font-medium leading-relaxed"
+              className="text-base text-muted-foreground leading-relaxed max-w-sm font-light lg:text-right"
             >
               See why hundreds of companies choose Vouchy to collect, manage, and display their video testimonials.
             </motion.p>
@@ -331,12 +334,14 @@ export default function LandingPage() {
         </div>
         
         {/* WIDGET CONTAINER */}
-        <div 
-          key={`widget-${theme}`} 
-          id="landing-widget-container" 
-          className="bg-transparent" 
-          style={{ background: 'transparent' }}
-        ></div>
+        <div className="container mx-auto px-6 max-w-7xl mb-24">
+          <div 
+            key={`widget-${theme}`} 
+            id="landing-widget-container" 
+            className="bg-transparent" 
+            style={{ background: 'transparent' }}
+          ></div>
+        </div>
 
         <HowItWorks />
         <Pricing />

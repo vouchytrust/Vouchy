@@ -254,7 +254,7 @@ export default function TestimonialDesigns() {
                   >
                     <div className="flex-1 relative rounded-2xl p-8 flex items-center justify-center transition-all duration-500 group">
 
-                      {/* Precision Corners - Perfectly aligned with parent radius */}
+                      {/* Precision Corners Reverted */}
                       <div className="absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
                       <div className="absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
                       <div className="absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
@@ -300,7 +300,7 @@ export default function TestimonialDesigns() {
           className="mt-16 group relative"
         >
           <div className="relative rounded-2xl border border-white/5 bg-card/40 backdrop-blur-sm">
-            {/* Precise Branded Green Corners */}
+            {/* Branded Green Corners Reverted */}
             <div className="absolute -top-px -left-px w-14 h-14 border-t-[2px] border-l-[2px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
             <div className="absolute -top-px -right-px w-14 h-14 border-t-[2px] border-r-[2px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
             <div className="absolute -bottom-px -left-px w-14 h-14 border-b-[2px] border-l-[2px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />

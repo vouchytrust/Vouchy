@@ -10,15 +10,9 @@ const CardArchitecture = ({ id, light = false }: { id: string, light?: boolean }
     {/* Micro-grid lines inside the card */}
     <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{ backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
 
-    {/* Crosshair lines */}
+    {/* Centre axis lines */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-primary/[0.03] pointer-events-none" />
     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[1px] bg-primary/[0.03] pointer-events-none" />
-
-    {/* Precision Corners - Perfectly aligned with the parent's rounded-2xl (16px) radius */}
-    <div className={`absolute top-0 left-0 w-10 h-10 border-t-[1.5px] border-l-[1.5px] rounded-tl-2xl ${light ? 'border-background/40' : 'border-primary/40'} transition-all duration-500 group-hover:border-primary group-hover:w-12 group-hover:h-12 group-hover:rounded-tl-3xl pointer-events-none z-50`} />
-    <div className={`absolute top-0 right-0 w-10 h-10 border-t-[1.5px] border-r-[1.5px] rounded-tr-2xl ${light ? 'border-background/40' : 'border-primary/40'} transition-all duration-500 group-hover:border-primary group-hover:w-12 group-hover:h-12 group-hover:rounded-tr-3xl pointer-events-none z-50`} />
-    <div className={`absolute bottom-0 left-0 w-10 h-10 border-b-[1.5px] border-l-[1.5px] rounded-bl-2xl ${light ? 'border-background/40' : 'border-primary/40'} transition-all duration-500 group-hover:border-primary group-hover:w-12 group-hover:h-12 group-hover:rounded-bl-3xl pointer-events-none z-50`} />
-    <div className={`absolute bottom-0 right-0 w-10 h-10 border-b-[1.5px] border-r-[1.5px] rounded-br-2xl ${light ? 'border-background/40' : 'border-primary/40'} transition-all duration-500 group-hover:border-primary group-hover:w-12 group-hover:h-12 group-hover:rounded-br-3xl pointer-events-none z-50`} />
 
     {/* Unit Identifier */}
     <div className={`absolute top-3.5 left-4 text-[7px] font-mono ${light ? 'text-background/30' : 'text-primary/30'} uppercase tracking-[0.45em] pointer-events-none select-none group-hover:text-primary/60 transition-colors`}>
@@ -29,7 +23,7 @@ const CardArchitecture = ({ id, light = false }: { id: string, light?: boolean }
 
 const BentoGrid = () => {
   return (
-    <section id="features" className="py-12 lg:py-16 bg-background relative overflow-hidden min-h-screen flex flex-col justify-center">
+    <section id="features" className="py-8 lg:py-12 bg-background relative overflow-hidden flex flex-col justify-center">
       <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
         style={{
           backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,

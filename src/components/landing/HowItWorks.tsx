@@ -4,11 +4,6 @@ import { Layers2, ArrowUpRight, MessageSquare, PencilLine, Code2 } from "lucide-
 function IconFrame({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
   return (
     <div className="relative w-full aspect-[16/10] rounded-xl border border-border/60 bg-card overflow-hidden flex items-center justify-center">
-      {/* Corner marks */}
-      <span className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-primary/25 rounded-tl-sm" />
-      <span className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-primary/25 rounded-tr-sm" />
-      <span className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-primary/25 rounded-bl-sm" />
-      <span className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-primary/25 rounded-br-sm" />
       {/* Centre axis lines */}
       <span className="absolute inset-x-0 top-1/2 h-px bg-primary/[0.06]" />
       <span className="absolute inset-y-0 left-1/2 w-px bg-primary/[0.06]" />
@@ -95,15 +90,17 @@ const HowItWorks = () => {
       />
 
       <div className="container mx-auto px-6 relative z-10 max-w-7xl">
-        <div className="text-center mb-16 lg:mb-24">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-6">
-
-            <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Workflow</span>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-10 max-w-7xl mx-auto">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-4">
+              <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em]">Workflow</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-foreground leading-[1.1]">
+              From zero to <br className="hidden lg:block" />
+              <span className="text-primary font-medium">trust</span> in minutes.
+            </h2>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
-            From zero to <span className="text-primary">trust</span> in minutes.
-          </h2>
-          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+          <p className="text-base text-muted-foreground leading-relaxed max-w-sm font-light lg:text-right">
             Five simple steps to collect and display powerful social proof.
           </p>
         </div>

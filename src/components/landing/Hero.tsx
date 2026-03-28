@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Video, Code2, Users, CheckCircle2, MessageSquare, Mic, Quote } from "lucide-react";
 import { TbStarFilled, TbHeartFilled } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative bg-background pt-4 pb-20 lg:pt-8 lg:pb-32 overflow-hidden z-10">
+    <section className="relative bg-background pt-12 pb-10 lg:pt-28 lg:pb-12 overflow-hidden z-10">
       {/* Grid Background */}
       <div className="absolute inset-0 z-0 opacity-[0.03] [mask-image:linear-gradient(to_bottom,black_60%,transparent)]"
         style={{
@@ -51,8 +52,19 @@ export default function Hero() {
             {/* Headline */}
             <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl lg:text-[4rem] xl:text-[4.5rem] font-bold tracking-tighter text-foreground mb-6 leading-[1.05]">
               <span className="lg:block lg:whitespace-nowrap">Let your customers</span>
+              <span className="lg:flex lg:items-center lg:gap-4 lg:whitespace-nowrap mt-1">
+                <span className="inline-flex items-center -space-x-4 align-middle transform translate-y-[-2px]">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Avatar key={i} className="w-10 h-10 md:w-14 lg:w-16 border-4 border-background ring-1 ring-primary/20 overflow-hidden">
+                      <AvatarImage src={`https://i.pravatar.cc/150?u=${i + 10}`} alt={`User ${i}`} className="object-cover" loading="lazy" />
+                      <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-black uppercase">U{i}</AvatarFallback>
+                    </Avatar>
+                  ))}
+                </span>
+                sell
+              </span>
               <span className="lg:block lg:whitespace-nowrap mt-1">
-                sell for <span className="text-primary">you.</span>
+                <> </>for <span className="text-primary">you.</span>
               </span>
             </motion.h1>
 
@@ -91,11 +103,11 @@ export default function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-            className="relative lg:h-[600px] flex items-center justify-center lg:justify-end"
+            className="relative lg:h-[460px] flex items-center justify-center lg:justify-end"
           >
             <div className="relative w-full max-w-[460px]">
               <div className="relative p-8 md:p-10 flex flex-col gap-6 z-10">
-                {/* Precision Counters - Perfectly aligned with brand radius */}
+                {/* Precision Corners Reverted */}
                 <div className="absolute -top-px -left-px w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
                 <div className="absolute -top-px -right-px w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
                 <div className="absolute -bottom-px -left-px w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />

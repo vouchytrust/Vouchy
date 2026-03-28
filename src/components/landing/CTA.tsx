@@ -25,12 +25,6 @@ export default function CTA() {
 
       <div className="container mx-auto max-w-5xl relative z-10">
         <div className="group relative px-8 py-10 md:py-16 text-center bg-card/30 border border-border/50 backdrop-blur-md rounded-2xl">
-          {/* Precision Corners */}
-          <div className="absolute -top-px -left-px w-14 h-14 border-t-[2px] border-l-[2px] border-primary/40 rounded-tl-2xl group-hover:border-primary transition-all duration-500" />
-          <div className="absolute -top-px -right-px w-14 h-14 border-t-[2px] border-r-[2px] border-primary/40 rounded-tr-2xl group-hover:border-primary transition-all duration-500" />
-          <div className="absolute -bottom-px -left-px w-14 h-14 border-b-[2px] border-l-[2px] border-primary/40 rounded-bl-2xl group-hover:border-primary transition-all duration-500" />
-          <div className="absolute -bottom-px -right-px w-14 h-14 border-b-[2px] border-r-[2px] border-primary/40 rounded-br-2xl group-hover:border-primary transition-all duration-500" />
-
           {/* Floating Element */}
           <motion.div
             animate={{ y: [0, -10, 0] }}

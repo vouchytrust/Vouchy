@@ -136,14 +136,7 @@ const TrustPageFeature = () => {
                 transition={{ duration: 6, repeat: Infinity }}
               />
 
-              {/* Precision Corner Marks */}
-              <div className="absolute top-0 left-0 w-10 h-10 border-t-[1.5px] border-l-[1.5px] border-primary/40 rounded-tl-2xl z-50 pointer-events-none transition-colors duration-500 group-hover/card:border-primary" />
-              <div className="absolute top-0 right-0 w-10 h-10 border-t-[1.5px] border-r-[1.5px] border-primary/40 rounded-tr-2xl z-50 pointer-events-none transition-colors duration-500 group-hover/card:border-primary" />
-              <div className="absolute bottom-0 left-0 w-10 h-10 border-b-[1.5px] border-l-[1.5px] border-primary/40 rounded-bl-2xl z-50 pointer-events-none transition-colors duration-500 group-hover/card:border-primary" />
-              <div className="absolute bottom-0 right-0 w-10 h-10 border-b-[1.5px] border-r-[1.5px] border-primary/40 rounded-br-2xl z-50 pointer-events-none transition-colors duration-500 group-hover/card:border-primary" />
             </motion.div>
-
-
           </div>
         </div>
       </div>
