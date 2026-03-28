@@ -54,6 +54,7 @@ export async function createSpace(space: {
   is_active: boolean;
   form_config: any;
   user_id: string;
+  plan?: string;
 }) {
   const { data, error } = await supabase.from("spaces").insert(space).select().single();
   if (error) throw error;
